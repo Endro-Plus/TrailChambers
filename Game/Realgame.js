@@ -237,7 +237,7 @@ var charSelect = function(){
         timeplayed = 0;
         chars[selection].inst(0, 0);
         clearInterval(setup);
-        setup = setInterval(gametime, 1000 / 30);
+        setup = setInterval(gametime, 1000 / fps);
         selection = 0;
 
     }
