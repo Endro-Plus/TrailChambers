@@ -127,11 +127,11 @@ var settings = function(){
 
     //changing controls
     screen.fillStyle = (selection != 0)? "#999":"#333";
-    screen.fillRect(canvhalfx - 100, canvhalfy - 200, 150, 50);
+    screen.fillRect(canvhalfx - 100, canvhalfy - 250, 150, 50);
 
     //changing fps
     screen.fillStyle = (selection != 1)? "#999":"#333";
-    screen.fillRect(canvhalfx - 100, canvhalfy, 150, 50);
+    screen.fillRect(canvhalfx - 100, canvhalfy - 180, 150, 50);
     if(selection == 1){
         screen.fillStyle = "#555";
         screen.fillRect(canvhalfx - 165, canvhalfy, 40, 50);
@@ -150,13 +150,19 @@ var settings = function(){
         screen.stroke();
         screen.closePath();
     }
-    //changing back
+    //changing screen size
     screen.fillStyle = (selection != 2)? "#999":"#333";
-    screen.fillRect(canvhalfx - 100, canvhalfy + 200, 150, 50);
+    screen.fillRect(canvhalfx - 100, canvhalfy - 110, 150, 50);
+
+    //changing back
+    screen.fillStyle = (selection != 3)? "#999":"#333";
+    screen.fillRect(canvhalfx - 100, canvhalfy + 250, 150, 50);
+
     screen.font = "20px Times New Roman";
     screen.fillStyle = "#000";
-    screen.fillText("Change controls", canvhalfx - 95, canvhalfy - 180);
-    screen.fillText("FPS: " + fps, canvhalfx - 90, canvhalfy + 20);
+    screen.fillText("Change controls", canvhalfx - 95, canvhalfy - 230);
+    screen.fillText("FPS: " + fps, canvhalfx - 90, canvhalfy - 160);
+    screen.fillText("Screen Size: ", canvhalfx - 40, canvhalfy - 60);
     screen.fillText("back", canvhalfx - 95, canvhalfy + 220);
     if(input == 'arrowdown'){
         selection = (++selection == 3)? 0:selection;
@@ -729,5 +735,5 @@ document.body.onload = function(){
     //After everything is set up, stop loading and begin the game!
     clearInterval(load);
     document.title = "Trail Chambers";
-    setup = setInterval(prep, 1000 / fps);
+    setup = setInterval(settings, 1000 / fps);
 }
