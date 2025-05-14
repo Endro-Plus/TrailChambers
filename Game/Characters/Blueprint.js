@@ -245,6 +245,7 @@ Test.prototype.death = function(){
 projectiles = [];
 summons = [];
 enemies = [];
+bossbarmode = 0;
 //game over man! Game over!
 
 //draw the character, stationary
@@ -282,6 +283,7 @@ setup = setInterval(prep, 1000/fps);
 screen.textAlign = "left";
 level = 0;
 input = '';
+bossbar = [];
 }
 
 }

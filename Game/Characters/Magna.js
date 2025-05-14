@@ -7,7 +7,7 @@ this.size = size;
 //card info
 this.postColor = "#FF4C00";
 this.color = "#FF8B00";
-this.desc = ["SMALL AND CUUUUTTTEEEE!!!!! His size may leave him going under attacks that would normally hit! A little easier to knock around.", "1. Nunchuck: swing your nunchuck forwards! Can destroy some projectiles", "2. Shuriken: Standard issue projectile. Simple yet effective", "3. Dodge: Quickly dash ahead! Has invincibility, and can be used twice before cooldown!", "4. Parry: Defend yourself. Has about a third of a second worth of parry frames. It doesn't get any better than that!"];
+this.desc = ["SMALL AND CUUUUTTTEEEE!!!!! His size may leave him going under attacks that would normally hit! A little easier to knock around.", "Adrenaline: This passively makes him stronger overtime. With enough adrenaline, passive healing is possible!", "1. Nunchuck: swing your nunchuck forwards! Can destroy some projectiles", "2. Shuriken: Standard issue projectile. Simple yet effective", "3. Dodge: Quickly dash ahead! Has invincibility, and can be used twice before cooldown!", "4. Parry: Defend yourself. Has about a third of a second worth of parry frames. It doesn't get any better than that!"];
 //game stats
 this.cooldowns = [0, 0, 0, 0];
 this.damagetypemod = [];//POV: you're just a cute lil' guy.

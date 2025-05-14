@@ -484,7 +484,7 @@ if(arena.pleavedir().includes("u")){
 }
 
 }
-Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
+Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0,  special = []){
         //handle damage dealth
         if(this.truemiracle > 1){
         return;
@@ -590,6 +590,7 @@ this.parry = 99999;//a gift from the Demon Lord!
 projectiles = [];
 summons = [];
 enemies = [];
+bossbarmode = 0;
 this.truemiracle = -5;
 this.hp = null;
 }
@@ -642,6 +643,7 @@ setup = setInterval(prep, 1000/fps);
 screen.textAlign = "left";
 level = 0;
 input = '';
+bossbar = [];
 }
 
 }
@@ -662,14 +664,14 @@ Seraphim.prototype.exist = function(){
     //First existing projectile!
 
     //charge by holding attack
-    if(inputs.includes(controls[4]) && this.chargetime > 0){
+    if(inputs.includes(controls[4]) /*&& this.chargetime > 0*/){
         this.chargetime--;
         this.x = canvhalfx + player.playershift[0];
         this.y = canvhalfy + player.playershift[1];
         this.shift = [player.px, player.py];
         this.mx = player.facing[0] * 12;
         this.my = player.facing[1] * 12;
-        player.cooldowns[0]+=1.2;
+        player.cooldowns[0]+=1;
         player.speedcause.push(["seraphim charge", 1, 0.8]);
         if(this.chargetime % 10 == 0){
         projectiles.push(new Light_Spark(random(this.x - 30, this.x + 30), random(this.y - 30, this.y + 30), this.size / 2, 0, 0));

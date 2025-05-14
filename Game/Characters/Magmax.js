@@ -9,7 +9,7 @@ this.size = size;
 //I swear I'm not referencing evades.io with this character!
 this.postColor =  "rgb(71, 0, 0)";
 this.color = "rgb(255, 84, 84)";
-this.desc = ["The easy mode character! much more DI than normal, and takes less hitstun!", "1. Skate beam: Slash in an arc, and create a large shockwave to zone out your foe! Both the melee and ranged attack can hit!", "Successful attacks add extra damage to your next attacks! Zoning lowers this damage boost, so keep your enemies close!", "2. Roundhouse: Dash forwards and go for a quick slash with your skates! gain invincibility, heal, and gain a bonus speed on hit! On miss, you slow down.", "Deal A LOT of extra damage for every roundhouse in your combo! Missing resets the damage.", "3. Flow: Get bonus speed on toggle! Increases the effect of DI as well! Grants immunity for the first few frames", "4. Harden: Just get invincibilty, for as long as you want. Sure, you can't move, but does that really matter???"];
+this.desc = ["The easy mode character! much more DI than normal, and takes less hitstun!", "Second Phase!: This is a passive that permanently grants an omnibuff if you are ever killed! Only works once", "1. Skate beam: Slash in an arc, and create a large shockwave to zone out your foe! Both the melee and ranged attack can hit!", "Successful attacks add extra damage to your next attacks! Zoning lowers this damage boost, so keep your enemies close!", "2. Roundhouse: Dash forwards and go for a quick slash with your skates! gain invincibility, heal, and gain a bonus speed on hit! On miss, you slow down.", "Deal A LOT of extra damage for every roundhouse in your combo! Missing resets the damage.", "3. Flow: Get bonus speed on toggle! Increases the effect of DI as well! Grants immunity for the first few frames", "4. Harden: Just get invincibilty, for as long as you want. Sure, you can't move, but does that really matter???"];
 //game stats
 this.playershift = [0, 0];//shift the position of the player
 this.cooldowns = [0, 0, 0, 0];
@@ -26,6 +26,7 @@ this.facing = [1, 0]
 this.height = 8;
 this.iframe = false;
 //Unique!!!
+this.clutch = false;
 this.state = "normal";
 this.slashbox = new hitbox(this.px, this.py, this.pz, 3, this.size - 10);
 this.slashbox.disable();
@@ -54,22 +55,42 @@ this.slashbox.updateimmunity();
 if(this.repetitivebonus > 1){
 this.repetitivebonus-=0.02;
 }else{
+if(this.clutch){
+this.repetitivebonus = 10;//permanent damage AND healing buff
+}
 this.repetitivebonus = 1;
 }
+
+
+
 //HP check
 if(this.hp > 100){
     //I'm generous enough to give you a BIT of extra power for a set time
-    this.hp-=0.15;
+    if(!this.clutch){
+        //second phase = godhood
+        this.hp-=0.15;
+    }
     if(this.hp <= 100){
         this.hp = 100;
         //yes, I'm aware this is effectively a free defense
     }
 
 }else if(this.hp <=0 ){
+
+    //clutch up activation
+    if(!this.clutch){
+    //POV: second phase! (this will actually save you from death)
+    this.hp = 50;
+    this.nohit = 45;
+    this.hitstun = 0;
+    this.clutch = true;
+    }else{
     //play the death anmiation, then call off
     this.death();
     return "dead";
+    }
 }
+
 timeplayed++;
 if(this.state == "harden" || this.nohit > 0){
     console.log(true)
@@ -78,7 +99,12 @@ if(this.state == "harden" || this.nohit > 0){
     this.iframe = false;
 }
 //speedmod is ALWAYS 1 to begin with
+if(this.clutch){
+//permanent speed buff
+this.speedmod = 1.2;
+}else{
 this.speedmod = 1;
+}
 this.speedcause.sort();//sorting it makes it easier to check for duplicated
 for(let i = 0 ; i < this.speedcause.length ; i++){
     //for every non-stacking buff, delete any duplicates
@@ -147,6 +173,9 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 15, this.energy, 4);//current energy
 
             //energy regen
+            if(this.clutch){
+            this.energyregen = 0.17//approximately 5 energy regen. +1 bonus
+            }
             if(this.energy < 50){
                 this.energy+=this.energyregen;
             }else if(this.energy > 50){
@@ -157,7 +186,8 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             if(this.state == "flow"){
                 this.energy-=0.07;//2 energy a second
                 //cancel flow if out of energy
-                if(!charezmode() && this.energy < 1){
+                if(!this.clutch && !charezmode() && this.energy < 1){
+                    //flow cannot be cancelled if clutch up is active
                     this.state = "normal";
                     this.energydepleted = 10;
 
@@ -183,6 +213,10 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             //hitstun
             if(this.hitstun > 0){
                 this.hurt();
+                if(this.clutch){
+                //hitstun is not as effective against you on second phase!
+                this.hitstun--;
+                }
                 return;
             }
             //movement
@@ -310,11 +344,14 @@ let hi = this.slashbox.hitenemy();
 if(typeof hi == "number"){
 if(this.projstart <=0){
 enemies[hi].hit(8 * (this.repetitivebonus * 1.5), ["physical", "slashing"]);//devestating when in a combo!
-if(!charezmode() && this.hp < 99){
-this.hp+= 2 * (this.repetitivebonus * 1.5)//weak lifesteal
+if(!charezmode() && this.hp < 101){
+//you can overheal with this one!
+this.hp+= 2 * (this.repetitivebonus * 1.5)//lifesteal
 if(!charezmode() && this.hp >120){
 this.hp = 120;
 }
+}else if (charezmode()){
+this.hp+= 2 * (this.repetitivebonus * 1.5)//lifesteal, and overheal cheese!
 }
 this.repetitivebonus+=3;//MOAR DAMAGE!
 this.nohit=17;
@@ -324,10 +361,10 @@ this.speedcause.push(["Frenzy!", 17, 2]);
 }else{
 enemies[hi].hit(8 * this.repetitivebonus, ["physical", "slashing"], [8 * this.facing[0], 8 * this.facing[1]], 20);
 this.repetitivebonus+=1;
-if(!charezmode() && this.hp < 99){
+if(this.hp < 99){
 this.hp+= 2 * (this.repetitivebonus / 2)//weak lifesteal
-if(!charezmode() && this.hp > 100){
-this.hp = 100
+if(this.hp > 100){
+this.hp = 100//this move is no longer allowed to overheal... it was too OP
 }
 }
 this.nohit=6;
@@ -344,7 +381,12 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
     }
 }
 if(slow == true){
+if(!this.clutch){
 this.speedcause.push(["whiff", 17, 0.5]);
+//you are no longer slowed down on whiff with clutch up active
+}else{
+this.nohit=2;//you are given a small bit of Iframes instead!
+}
 this.repetitivebonus = 1;//only combos allowed!!!
 }
 }
@@ -357,8 +399,11 @@ this.slashtime--;
 }
 }
 if(this.projstart > 0 && --this.projstart <= 0){
+if(this.clutch){
+projectiles.push(new skatebeam(canvhalfx + (20 * this.facing[0]), canvhalfy + (20 * this.facing[1]), 60, this.facing));
+}else{
 projectiles.push(new skatebeam(canvhalfx + (20 * this.facing[0]), canvhalfy + (20 * this.facing[1]), 30, this.facing));
-
+}
 }
 
 if(this.state != "harden"){
@@ -477,7 +522,7 @@ if(arena.pleavedir().includes("u")){
 }
 
 }
-Magz.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
+Magz.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0, special = []){
         if(this.nohit > 0 || this.state == "harden"){
             return;//so complex!
         }
@@ -491,7 +536,12 @@ Magz.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         if(this.hp > 100 && this.hp - dmg < 100){
         this.hp = 100;
         }else{
+        if(this.clutch){
+        //takes 50% of the damage from ALL sources. no matter what
+        this.hp-=dmg*0.50;
+        }else{
         this.hp-=dmg;
+        }
         }
 
         //handle knockback and DI.
@@ -532,7 +582,7 @@ enemies = [];
 //draw the character, stationary
 screen.fillStyle = this.color;
 circle(canvhalfx, this.size + 40, this.size)
-
+bossbarmode = 0;
 //here is some statistics
 screen.fillStyle = "#FFF";
 screen.textAlign = "center";
@@ -564,7 +614,7 @@ setup = setInterval(prep, 1000/fps);
 screen.textAlign = "left";
 level = 0;
 selection = 0;
-
+bossbar = [];
 input = '';
 player = null;
 }

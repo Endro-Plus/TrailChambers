@@ -92,6 +92,12 @@ this.hitbox.updateimmunity();
         if(this.phase <= 0){
         if(this.phasetimer % 75 == 0){
             enemies.push(new Eye(this.x, this.y, this.z, this.lvl, this.lvl/20));
+            if(!enemyezmode()){
+                //defeat enemy commander for easy mode
+                bossbar.push(enemies[enemies.length - 1]);//ROUT THE ENEMY FOR HARD MODE!
+                boss_title = "The Orb of Duplication & Cohorts"
+
+            }
         }
         if(this.x + player.px < canvhalfx && this.mx < this.lvl){
             //it can go faster based on what it's level is!
@@ -172,10 +178,7 @@ this.hitbox.updateimmunity();
 //The character exists in my plane of existance!
 screen.fillStyle = this.color;
 circle(this.x + player.px, this.y + player.py, this.size);
-screen.fillStyle = "#FF0000";
-screen.fillRect(canvhalfx+ 100, 20, 250, 40);
-screen.fillStyle = "#559900";
-screen.fillRect(canvhalfx+ 100, 20, this.hp * 2.5, 40);
+
 
 
 
@@ -424,10 +427,10 @@ this.hitbox.updateimmunity();
 
             if(this.hitbox.hitplayer()){
                 if(charezmode()){
-                    player.hit(10, ["contact", "physical", this.enemyID], [this.mx * 3, this.my * 3], 10);
+                    player.hit(4, ["contact", "physical", this.enemyID], [this.mx * 8, this.my * 8], 20);
                 }else{
                     //MOAR DAMAGE!
-                    player.hit(10 + Math.ceil(((Math.abs(this.mx) + Math.abs(this.my)))), ["contact", "physical", this.enemyID], [this.mx * 8, this.my * 8], 15);
+                    player.hit(4 + Math.ceil(((Math.abs(this.mx) + Math.abs(this.my)))), ["contact", "physical", this.enemyID], [this.mx * 16, this.my * 16], 30);
                 }
 
                 this.hitbox.grantimmunity(player.listname());

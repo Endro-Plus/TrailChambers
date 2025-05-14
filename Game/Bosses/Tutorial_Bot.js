@@ -89,10 +89,7 @@ this.hitbox.move(this.x + player.px, this.y + player.py);
 //The character exists in my plane of existance!
 screen.fillStyle = this.color;
 circle(this.x + player.px, this.y + player.py, this.size);
-screen.fillStyle = "#FF0000";
-screen.fillRect(canvhalfx+ 100, 20, 250, 40);
-screen.fillStyle = "#559900";
-screen.fillRect(canvhalfx+ 100, 20, this.hp * 2.5, 40);
+
 
 
 //boss AI goes here
@@ -202,7 +199,7 @@ Tutorial_Bot.prototype.move = function(){
             this.y+=2*this.speed*this.speedmod*this.facing[1];
             }else{
                 //bro comboed too good using easy mode stats
-                player.hit(4.5, ["contact", "physical", 0], [(this.speed + 3)  * this.facing[0], (this.speed + 3) * this.facing[1]], 10);
+                player.hit(4, ["contact", "physical", 0], [(this.speed + 3)  * this.facing[0], (this.speed + 3) * this.facing[1]], 10);
                 this.x+=this.speed*this.speedmod*this.facing[0];
                 this.y+=this.speed*this.speedmod*this.facing[1];
             }

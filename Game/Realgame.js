@@ -63,6 +63,10 @@ var arena = {
                 return false;
                 }
 }
+var boss_title = ""
+var bossbar = []//enemies that are included in the boss hp bar goes here
+var bossbarmode = 1; //0 = not showing, 1 = standard, 2 = BIG BOSS
+var totalbosshp = 0;//for passives such as desperation
 var circle = function(x, y, size, noFill = false, noStroke = true){
     //because I'm not typing beginPath and closePath every damn time!
      screen.beginPath();
@@ -237,7 +241,7 @@ var charSelect = function(){
         timeplayed = 0;
         chars[selection].inst(0, 0);
         clearInterval(setup);
-        setup = setInterval(gametime, 1000 / fps);
+        setup = setInterval(gametime, 1000 / 30);
         selection = 0;
 
     }
@@ -524,12 +528,69 @@ var gametime = function(){
     screen.strokeStyle = "#000";
     screen.fillRect(0, 0, 999, 999);
     screen.strokeRect(canvhalfx - arena.w + player.px, canvhalfy - arena.h + player.py, arena.w*2, arena.h*2);
+    //bossbar
+    if(bossbarmode == 2){
+        //Large bossbar
+        screen.fillStyle = "#FF0000";
+        screen.strokeStyle = "orange";
+        //screen.lineWidth = 5
+        screen.fillRect(30, 10, canvas.width - 60, 40);
+        screen.strokeRect(30, 10, canvas.width - 60, 40);
+        //screen.lineWidth = 1
+
+        screen.fillStyle = "#559900";
+        {//calculating total boss hp
+            var currentbosshp = 0;
+
+            for(let i = 0 ; i < bossbar.length ; i++){
+
+
+                currentbosshp+=bossbar[i].hp;
+            }
+            screen.fillRect(30,  10, (canvas.width - 60) / (bossbar.length * 100 / currentbosshp), 40);
+            totalbosshp = (bossbar.length * 100 / currentbosshp);
+        }
+        //boss name
+        screen.fillStyle = "white";
+        screen.textAlign = "center"
+        screen.font = "35px Times New Roman";
+        screen.fillText(boss_title, canvhalfx, 40)
+    }else if(bossbarmode == 1){
+        //small bossbar
+        screen.fillStyle = "#FF0000";
+        screen.fillRect(canvhalfx+ 100, 20, 250, 40);
+        screen.fillStyle = "#559900";
+        {//calculating total boss hp
+                    var currentbosshp = 0;
+
+                    for(let i = 0 ; i < bossbar.length ; i++){
+
+
+                        currentbosshp+=bossbar[i].hp;
+                    }
+        screen.fillRect(canvhalfx+ 100, 20, 250 / (bossbar.length * 100 / currentbosshp), 40);
+        totalbosshp = (bossbar.length * 100 / currentbosshp);
+
+        }
+        //boss name
+        screen.fillStyle = "white";
+        screen.textAlign = "center"
+        screen.font = "20px Times New Roman";
+        screen.fillText(boss_title, (canvhalfx + 100) + (230/2), 40);//can't be bothered with the math
+    }
+    //console.log(totalbosshp)
     if(level == 0 && !enemyezmode()){
     //This boss gets significatly harder out of normal or player mode
+    boss_title = "Magna's Lorem Machinam"
+    bossbarmode = 2;
     bosses[0].inst(9);
+    bossbar.push(enemies[0]);
     level += 0.5;
     }else if (level == 0){
+    boss_title = "Tutorial Bot"
+    bossbarmode = 1;
     bosses[0].inst();
+    bossbar.push(enemies[0]);
     level += 0.5;
     }
 
@@ -544,7 +605,9 @@ var gametime = function(){
     try{
     for(let i = 0 ; enemies.length; i++){
     if (enemies[i].exist() == "delete"){
+    bossbar.splice(i, 1);
     enemies.splice(i--, 1);
+
 
     }
     enemies[i].enemyID = i;
@@ -552,7 +615,7 @@ var gametime = function(){
     }catch(e){}
 
     //timeplayed++;
-    if(enemies.length == 0){
+    if(bossbar.length == 0){
     resttimer++;//give the player a bit of a break!
     if(resttimer > rest){
     resttimer = 0;
@@ -565,12 +628,19 @@ var gametime = function(){
     if(!["SIMIA", "EGG", "boss rush"].includes(difficulty)){
     //regular progression
     if(level == 1){
+    projectiles = [];
+    enemies = [];
     player.inst(100, canvhalfy);
     if(enemyezmode()){
     bosses[1].inst(4);
+    bossbarmode = 1;
     }else{
+    bossbarmode = 2;
     bosses[1].inst(7);
     }
+
+    bossbar.push(enemies[0]);
+    boss_title = "The Orb of Duplication"
     arena.w = canvhalfx * 2;
     arena.h = canvhalfy * 2;
 

@@ -8,19 +8,19 @@ this.size = size;
 //poster details
 this.postColor = "#553300";
 this.color = "#B06300";
-this.desc = ["Frail... leaving him more vulnerable to damage and hitstun. Kind of a difficult character to play, be warned!", "lose momentum when damaged. If you have no momentum left, take more damage!", "1. FlYiNg SiDe KiCk: Get airborne and fly at your helpless victim, leg first!!! On hit, get launched upwards!", "    In the air, this move dives downward with malicious intent! Also bounces on hit.", "2. Momentum: reduce startup of your attacks, and move much faster! Limited by momentum bar. Get more momentum for moving and dishing pain!", "3. Tornado Kick: Do a small hop and do a tornado kick! Costs an air option to do if already airborne", "Lowers gravity slightly, allowing you to get even higher!", "4. Jump/airdodge: Why wait to hit your opponent when you can just jump yourself! Jumps over attacks and assail your opponent from above!", "    This can be done in the air, once, to swiftly dash, while also cutting down your upward momentum. This kills horizontal movement if you don't move and use it!"]
+this.desc = ["Frail... leaving him more vulnerable to damage and hitstun. Kind of a difficult character to play, be warned!", "lose momentum when damaged. If you have no momentum left, take more damage!", "Desperation: This is a passive boost to damage and DI, based on how much lower your hp is compared to the boss! Might allow for passive momentum gain, and less hitstun!", "1. FlYiNg SiDe KiCk: Get airborne and fly at your helpless victim, leg first!!! On hit, get launched upwards!", "    In the air, this move dives downward with malicious intent! Also bounces on hit.", "2. Momentum: reduce startup of your attacks, and move much faster! Limited by momentum bar. Get more momentum for dishing pain!", "   Can be used while in hitstun. Momentum increases your DI, moreso when using meter!","3. Tornado Kick: Do a small hop and do a tornado kick! Costs an air option to do if already airborne", "Lowers gravity slightly, allowing you to get even higher!", "4. Jump/airdodge: Why wait to hit your opponent when you can just jump yourself! Jumps over attacks and assail your opponent from above!", "    This can be done in the air, once, to swiftly dash, while also cutting down your upward momentum. This kills horizontal movement if you don't move and use it!", "   Using the neutral variant of this gives you extra momentum based on how much speed was killed"]
 
 //game stats
 this.playershift = [0, 0];//shift the position of the player
 this.cooldowns = [0, 0, 0, 0];
-this.damagetypemod = [["sexual", 4], ["seduction", 2], ["dark", 0.8], ["light", 2], ["pain", 5], ["headpat", 999], ["magic", 0.9], ["physical", 1.2]];//Read it and weep... I know I am.
+this.damagetypemod = [["sexual", 4], ["seduction", 2], ["dark", 0.8], ["light", 2], ["pain", 5], ["headpat", 999], ["magic", 0.9], ["physical", 1.2], ["psychic", 2]];//Read it and weep... I know I am.
 this.hp = 100;//I was genuinely considering giving me less hp... be no, multiplication and percent math is much better :)
-this.damagemod = 1.2; //And to think this character is my self insert... yep, fuck me.
+this.damagemod = 1.1; //And to think this character is my self insert... yep, fuck me.
 this.speed = 15; //+5 speed so I can run the fuck away.
 this.speedmax = 15//yeah, should've had this a while ago.
 this.speedmod = 1;
 this.speedcause = []
-this.DI = 1.5; //At least I paid extra to direct my influence!
+this.DI = 2; //At least I paid extra to direct my influence!
 this.hitstunmod = 1.2; //fuck me
 this.knockbackmod = 1;
 this.height = 8;
@@ -28,6 +28,7 @@ this.hitstun = 0;
 this.facing = [-1, 0];//because yeah, I have to be different
 this.iframe = false;//it would be a shame if I never used this!
 //at least I get SKILLS!!!
+this.desperation = 0;
 this.momentum = 100;
 this.speedtoggle = false;
 this.windup = 0;
@@ -42,7 +43,7 @@ this.sweepstartup = 0;
 this.savior_frames = 0;//because I literally need iframes
 this.sweepbox.disable();
 this.sweepbox.immunityframes(9);
-
+this.abilitylock = false;
 //hardmode!
 
 this.combo = 1;//imagine comboing being a bad thing!
@@ -61,6 +62,7 @@ Simia.prototype.greeting = function(){
 console.log("The forgotten one is ready to help!");
 }
 Simia.prototype.exist = function(){
+//savior frame i frames
 if(this.savior_frames > 0){
 this.savior_frames--;
 this.iframe = true;
@@ -94,15 +96,30 @@ if(this.hp > 100){
     return "dead";
 }
 timeplayed++;
-
+//update desperation
+try{
+this.desperation = enemies[0].hp - this.hp;
+if(this.desperation < 10){
+this.desperation = 0;
+}else{
+this.desperation*=1.2;
+if(this.desperation > 20 && this.momentum < this.desperation && this.speedtoggle == false){
+this.momentum+=0.3;//so I can actually make use of desperation without immediately dying, sometimes...
+this.hitstun-=this.desperation/100;//THE ABILITY TO ESCAPE COMBOS!!!!
+}
+console.log(this.desperation)
+}
+}catch(e){
+//the enemies are dead
+}
 //speedmod is sometimes 1
 if(this.speedtoggle == true){
 if(this.momentum < 0){
 this.speedtoggle = false;
 this.speedmod = 1;
 }else{
-this.speedmod = 2;//SPEED!
-this.momentum--;
+this.speedmod = 3;//SPEED!
+this.momentum-=0.2;
 }
 }else{
 this.speedmod = 1;
@@ -162,9 +179,9 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
              screen.strokeRect(canvhalfx - 25, canvhalfy - this.size - 15, 50, 4);//max momentum
              screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 15, this.momentum/2, 4);//current momentum
              if(inputs.includes(controls[0]) || inputs.includes(controls[1]) || inputs.includes(controls[2]) || inputs.includes(controls[3])){
-                if(this.hitstun < 1 && this.mvlock == false){
+                /*if(this.hitstun < 1 && this.mvlock == false){
                 this.momentum+=0.25;
-                }
+                }*///no longer able to regen momentum by standard movement
              }
              if(this.momentum > 100){
              this.momentum = 100;
@@ -212,7 +229,7 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
                 console.log(this.grounded)
                 if(this.grounded == true){
                     if(this.speedtoggle){
-                    this.pz+=4;
+                    this.pz+=2.5;
                     }else{
                     this.pz += 2;
                     }
@@ -313,10 +330,16 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
                 }
                 this.momentum+=10;
                 if(!charezmode()){
-                enemies[hi].hit(15 + (this.combo - 1) * 2, ["physical", "bludgeoning"], [(this.px < enemies[hi].x)? 5:-5 , (this.py < enemies[hi].y)? 5:-5], 15);
-                this.combo += 5;//a little reward for wasting anconsole.log(this.combo);
+                if(this.combo > 12){
+                    //this move is fucking cringe
+                    enemies[hi].hit((26 + this.desperation) + (this.combo) * 2, ["physical", "bludgeoning", "cringe"], [(this.px < enemies[hi].x)? 5:-5 , (this.py < enemies[hi].y)? 5:-5], 15);
                 }else{
-                enemies[hi].hit(20, ["physical", "bludgeoning"], [(this.px < enemies[hi].x)? 5:-5 , (this.py < enemies[hi].y)? 5:-5], 15);
+
+                enemies[hi].hit((21 + this.desperation) + (this.combo - 1) * 2, ["physical", "bludgeoning"], [(this.px < enemies[hi].x)? 5:-5 , (this.py < enemies[hi].y)? 5:-5], 15);
+                }
+                this.combo += 5;//I had to give this some use. This move is fucking ass
+                }else{
+                enemies[hi].hit((26 + this.desperation), ["physical", "bludgeoning"], [(this.px < enemies[hi].x)? 5:-5 , (this.py < enemies[hi].y)? 5:-5], 15);
                 }
                 this.savior_frames = 5;
                 this.sweepbox.grantimmunity(enemies[hi]);
@@ -330,8 +353,8 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             if(this.hitstun > 0){
                 this.hurt();
 
-                return;
-            }
+
+            }else{
             //movement
             if(this.mvlock == false){//can't move if your movement is locked!
             if(inputs.includes("shift")){
@@ -343,7 +366,7 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             if(this.pz > 2){
             if(this.speedtoggle){
                                 if(!charezmode()){
-                                    this.momentum-=2;
+                                    this.momentum-=0.5;
                                 }
                                 this.airmv[0] += (this.speed * this.speedmod) / 5;
                             }else{
@@ -367,7 +390,7 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             if(this.pz > 2){
                 if(this.speedtoggle){
                     if(!charezmode()){
-                        this.momentum-=2;
+                        this.momentum-=0.5;
                     }
                     this.airmv[0] -= (this.speed * this.speedmod) / 5;
                 }else{
@@ -392,7 +415,7 @@ if(inputs.includes(controls[2]) && !arena.pleavedir().includes('u')){
 if(this.pz > 2){
 if(this.speedtoggle){
                     if(!charezmode()){
-                        this.momentum-=2;
+                        this.momentum-=0.5;
                     }
                     this.airmv[1] += (this.speed * this.speedmod) / 5;
                 }else{
@@ -418,7 +441,7 @@ if(inputs.includes(controls[3]) && !arena.pleavedir().includes('d')){
 if(this.pz > 2){
 if(this.speedtoggle){
                     if(!charezmode()){
-                        this.momentum-=2;
+                        this.momentum-=0.5;
                     }
                     this.airmv[1] -= (this.speed * this.speedmod) / 5;
                 }else{
@@ -445,21 +468,26 @@ for(let i = 0; i < this.cooldowns.length ; i++){
     this.cooldowns[i]--;
 }
 //attacks
+}
 if(this.mvlock == false){
 //no abilities either!
-if(this.cooldowns[0] <= 0 && inputs.includes(controls[4])){
+if(this.cooldowns[0] <= 0 && inputs.includes(controls[4]) && this.hitstun <=0){
     this.spec1();
 
 }
-if(this.cooldowns[1] <= 0 && inputs.includes(controls[5])){
+if(inputs.includes(controls[5]) && !this.abilitylock){
     this.spec2();
+    this.abilitylock = true
 }
-if(this.cooldowns[2] <= 0 && inputs.includes(controls[6])){
+if(this.cooldowns[2] <= 0 && inputs.includes(controls[6])  && this.hitstun <=0){
     this.spec3();
 }
-if(this.cooldowns[3] <= 0 && inputs.includes(controls[7])){
+if(this.cooldowns[3] <= 0 && inputs.includes(controls[7]) && this.hitstun <=0){
     this.spec4();
 }
+}
+if(!inputs.includes(controls[5])){
+this.abilitylock = false;
 }
 
 
@@ -467,7 +495,9 @@ if(this.cooldowns[3] <= 0 && inputs.includes(controls[7])){
 
 }
 Simia.prototype.spec1 = function(){
-//abilities
+//abilities (dive kick)
+this.savior_frames = 0;
+this.iframe = false;
 this.jumpv = 0;
 if(this.speedtoggle == true){
 this.windup = 2;
@@ -488,7 +518,6 @@ this.speedtoggle = true;
 }else{
 this.speedtoggle = false;
 }
-this.cooldowns[1] = 8;
 }
 Simia.prototype.spec3 = function(){
 if(this.pz < 2){
@@ -557,8 +586,10 @@ this.jumpv = 1;
 this.jumpv = 0;
 }
 if(inputs.includes(controls[0])){
+this.savior_frames = 10;
 this.airmv[0] = (this.speed * 2) * this.speedmod;
 }else if(inputs.includes(controls[1])){
+this.savior_frames = 10;
 this.airmv[0] = -(this.speed * 2) * this.speedmod;
 }else{
 this.momentum+=Math.abs(this.airmv[0]) / 10;
@@ -566,8 +597,10 @@ this.airmv[0] = 0;
 }
 
 if(inputs.includes(controls[2])){
+this.savior_frames = 10;
 this.airmv[1] = this.speed * this.speedmod;
 }else if(inputs.includes(controls[3])){
+this.savior_frames = 10;
 this.airmv[1] = -this.speed * this.speedmod;
 }else{
 this.momentum+=Math.abs(this.airmv[1]) / 10;
@@ -615,10 +648,10 @@ if(arena.pleavedir().includes("u")){
 }
 
 }
-Simia.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
+Simia.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0, special = []){
         if(this.windup == -1 && damagetype.includes("contact") && typeof damagetype[damagetype.length - 1] == "number"){
             //dive kick connected!
-            this.savior_frames = 5;
+            this.savior_frames = 8;
             this.jumpv = 5;
             if(this.momentum < 95){
             this.momentum+=5;
@@ -635,15 +668,15 @@ Simia.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
 
             this.windup = 0;
             if(this.grounded == true){
-            enemies[damagetype[damagetype.length - 1]].hit(12, ["contact", "physical"], [this.airmv[0], this.airmv[1]], 30);
+            enemies[damagetype[damagetype.length - 1]].hit((18  + this.desperation), ["contact", "physical"], [this.airmv[0], this.airmv[1]], 30);
             }else{
             if(!charezmode()){
             //a blessing? Or a curse! Gotta use those air options for more damage!
             this.combo+=1;
-            enemies[damagetype[damagetype.length - 1]].hit(9 + this.combo, ["contact", "physical"], [(2 * this.combo + 2) * this.facing[0], (2 * this.combo + 2) * this.facing[1]]);
+            enemies[damagetype[damagetype.length - 1]].hit((15 + this.desperation) + this.combo, ["contact", "physical"], [(2 * this.combo + 2) * this.facing[0], (2 * this.combo + 2) * this.facing[1]]);
             }else{
 
-            enemies[damagetype[damagetype.length - 1]].hit(12, ["contact", "physical"], [2 * this.facing[0], 2 * this.facing[1]], 45);
+            enemies[damagetype[damagetype.length - 1]].hit((18 + this.desperation), ["contact", "physical"], [2 * this.facing[0], 2 * this.facing[1]], 45);
 
             }
             if(charezmode()){
@@ -665,6 +698,7 @@ Simia.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
         this.airmv = [0, 0];
         this.jumpv = 0;
         this.windup = 0;
+        this.cooldowns[0] = 8;
         var dmg = damage * this.damagemod;
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
             if(damagetype.includes(this.damagetypemod[i][0])){
@@ -685,16 +719,17 @@ Simia.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
             this.momentum = 0;
 
         }
-        this.hp-=dmg * 1.5;
+        this.hp-=dmg;
         }
 
         //handle knockback and DI.
         knockback[0] *= this.knockbackmod;
         knockback[1] *= this.knockbackmod;
         //get a little DI bonus for being an otherwise shitty character
-        var DIadd = this.momentum / 100;
+        var DIadd = this.momentum / 85;
         if(this.speedtoggle == true){
-        DIadd*=5;
+        //I really needed this
+        DIadd*=25 + (this.desperation / 1);
         }
         //console.log(this.DI + DIadd);
         if(inputs.includes(controls[0])){
@@ -732,7 +767,7 @@ enemies = [];
 //draw the character, stationary
 screen.fillStyle = this.color;
 circle(canvhalfx, this.size + 40, this.size)
-
+bossbarmode = 0;
 //here is some statistics
 screen.fillStyle = "#FFF";
 screen.textAlign = "center";
@@ -764,6 +799,7 @@ setup = setInterval(prep, 1000/fps);
 screen.textAlign = "left";
 level = 0;
 input = '';
+bossbar = [];
 }
 
 }
