@@ -113,7 +113,7 @@ var player;
 var projectiles = [];
 var enemies = [];
 var summons = [];
-var level = 0;
+var level = 2;
 var rest = 100;
 var resttimer = 0;
 
@@ -705,10 +705,29 @@ var gametime = function(){
 
     bossbar.push(enemies[0]);
     boss_title = "The Orb of Duplication"
-    arena.w = canvhalfx * 2;
-    arena.h = canvhalfy * 2;
+    arena.w = canvhalfx * 3;
+    arena.h = canvhalfy * 3;
 
     level +=0.5;
+    }else if(level == 2){
+        projectiles = [];
+        enemies = [];
+        player.inst(0, 0);
+        if(enemyezmode()){
+            bosses[2].inst(2, canvhalfx, canvhalfy - 100);
+            bossbarmode = 2;
+        }else{
+            bosses[2].inst(6, canvhalfx, canvhalfx - 100);
+            bossbarmode = 2;
+        }
+
+        bossbar.push(enemies[0]);
+        boss_title = "Magna Venandi"
+        arena.w = canvhalfx * 0.75;
+        arena.h = canvhalfy * 0.75;
+
+        level +=0.5;
+        
     }
     }
     }

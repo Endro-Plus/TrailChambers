@@ -1,4 +1,4 @@
-function Magna(startposx, startposy, size , lvl = 0, ID = -5){
+function MagnaE(startposx, startposy, size , lvl = 0, ID = -5){
 //first boss that's also a character!
 //startup
 this.enemyID = ID;
@@ -22,21 +22,21 @@ this.damagemod = 0.5;//weaker boss noises
 this.speed = 5; //base speed
 this.speedmod = 1;//modifies speed, multiplicately
 this.speedcause = [];
-this.hitstunmod = 1; //POV: weak ass boss who isn't immune to hitstun
-this.knockbackmod = 1; //POV: weak ass boss who isn't immune to knockback
+this.hitstunmod = 0; //POV: weak ass boss who isn't immune to hitstun
+this.knockbackmod = 1.5; //POV: weak ass boss who isn't immune to knockback
 this.knockback = [0, 0];//x and y position of knockback
 
 
 //extras
 this.tutorial = 0;
 this.turnRate = 0.05;
-Blueboss.prototype.listname = function(){
+MagnaE.prototype.listname = function(){
 //to help position the characters correctly
-return "Blueboss";
+return "MagnaE";
 }
 }
 
-Blueboss.prototype.exist = function(){
+MagnaE.prototype.exist = function(){
     if(this.hp < 0){
         return "delete";
     }
@@ -75,6 +75,7 @@ Blueboss.prototype.exist = function(){
         }
     }
 this.hitbox.enable();
+this.move();
 this.hitbox.move(this.x + player.px, this.y + player.py);
 //The character exists in my plane of existance!
 screen.fillStyle = this.color;
@@ -85,11 +86,16 @@ circle(this.x + player.px, this.y + player.py, this.size);
 //boss AI goes here
 
 }
-Blueboss.prototype.move = function(){
+MagnaE.prototype.move = function(){
         if(this.hitstun > 0){
         this.hurt();
         this.hitbox.reassign(this.x + player.px, this.y + player.px, this.z, 8, this.size);
         return;
+        }
+        if(Math.abs(this.knockback[0]) < 1 || Math.abs(this.knockback[1]) < 1){
+            this.hurt();
+            this.hitbox.reassign(this.x + player.px, this.y + player.px, this.z, 8, this.size);
+
         }
         // really basic following script (yes I just copied the tutorial boss)
         this.hitbox.updateimmunity();
@@ -127,12 +133,12 @@ Blueboss.prototype.move = function(){
 
 
 }
-Blueboss.prototype.hurt = function(){
+MagnaE.prototype.hurt = function(){
 this.hitstun--;
 this.x += this.knockback[0];
 this.y += this.knockback[1];
-this.knockback[0]*=0.9;
-this.knockback[1]*=0.9;
+this.knockback[0]*=1;
+this.knockback[1]*=1;
 if(this.x + player.px + this.size > canvas.width || this.x + player.px - this.size < 0){
 this.hitstun += 3;
 this.knockback[0]*=-0.5;
@@ -153,7 +159,7 @@ if(this.y +player.py < canvhalfy){
 }
 
 }
-BLueboss.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
+MagnaE.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
     var dmg = damage * this.damagemod;
     for(let i = 0 ; i < this.damagetypemod.length ; i++){
         if(damagetype.includes(this.damagetypemod[i][0])){
@@ -175,9 +181,9 @@ BLueboss.prototype.hit = function(damage, damagetype = ["true"], knockback = [0,
     }
     //console.log(this.hitstun);
 }
-Blueboss.prototype.inst = function(lvl = 0, startposx = this.x, startposy = this.y, size = this.size, ){
+MagnaE.prototype.inst = function(lvl = 0, startposx = this.x, startposy = this.y, size = this.size, ){
 //adds a boss to the game!
-enemies.push(new Blueboss(startposx, startposy, size, lvl, enemies.length));
+enemies.push(new MagnaE(startposx, startposy, size, lvl, enemies.length));
 }
 //center stage and 20 size is the default, feel free to change it up!
-bosses.push(new Blueboss(canvhalfx+200, canvhalfy, 20));
+bosses.push(new MagnaE(canvhalfx+200, canvhalfy, 20));
