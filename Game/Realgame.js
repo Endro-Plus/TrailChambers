@@ -121,10 +121,63 @@ var resttimer = 0;
 {
 var selection = 0;
 var Hidden = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'earrowleft', 'earrowright', 'earrowleft', 'earrowright', 0];
+var thicc = function(){//change the screen size
+    screen.fillStyle = "#522";
+    screen.fillRect(0, 0, 999, 999);
+    screen.fillStyle = "#744";
+    screen.fillRect(canvhalfx - 150, canvhalfy - 150, 300, 300);
+    screen.fillStyle = "#000"
+    screen.textAlign = "left";
+    screen.font = "20px Times New Roman";
+    screen.fillText("Use arrow keys to enlarge/reduce", canvhalfx - 130, canvhalfy - 130);
+    screen.fillText("screen size.", canvhalfx - 130, canvhalfy - 110);
+    screen.textAlign = "center";
+    screen.fillText("left and right to shrink/enlarge", canvhalfx, canvhalfy - 10);
+    screen.fillText("up and down to move the screen", canvhalfx, canvhalfy + 10);
+    screen.fillText("space to save and go back", canvhalfx, canvhalfy + 130);
+
+    if(input == "arrowright"){
+        input = '';
+        canvas.width += 15;
+        canvas.height += 15;
+        canvas.style.width = canvas.width + "px";
+        canvas.style.height = canvas.height + "px"
+        canvhalfx = canvas.width/2;
+        canvhalfy = canvas.height/2;
+    }
+    if(input == "arrowleft"){
+        input = '';
+        canvas.width -= 15;
+        canvas.height -= 15;
+        canvas.style.width = canvas.width + "px";
+        canvas.style.height = canvas.height + "px"
+        canvhalfx = canvas.width/2;
+        canvhalfy = canvas.height/2;
+    }
+    if(input == "arrowup"){
+        input = '';
+        topmargin-=15;
+        canvas.style.marginTop = topmargin + "px";
+    }
+    if(input == "arrowdown"){
+        input = '';
+        topmargin+=15;
+        canvas.style.marginTop = topmargin + "px";
+    }
+    if(input == " "){
+        
+        input = '';
+        clearInterval(setup);
+        selection = 2;
+        setup = setInterval(settings, 1000 / fps);
+    }
+    
+}
 var settings = function(){
     screen.fillStyle = "#522";
     screen.fillRect(0, 0, 999, 999);
-
+    screen.textAlign = "left";
+    screen.font = "20px Times New Roman";
     //changing controls
     screen.fillStyle = (selection != 0)? "#999":"#333";
     screen.fillRect(canvhalfx - 100, canvhalfy - 250, 150, 50);
@@ -134,19 +187,19 @@ var settings = function(){
     screen.fillRect(canvhalfx - 100, canvhalfy - 180, 150, 50);
     if(selection == 1){
         screen.fillStyle = "#555";
-        screen.fillRect(canvhalfx - 165, canvhalfy, 40, 50);
+        screen.fillRect(canvhalfx - 165, canvhalfy - 180, 40, 50);
         screen.beginPath();//left
-        screen.moveTo(canvhalfx - (165 - 40), canvhalfy);
-        screen.lineTo(canvhalfx - 165, canvhalfy + 25);
-        screen.lineTo(canvhalfx - (165 - 40), canvhalfy + 50);
+        screen.moveTo(canvhalfx - (165 - 40), canvhalfy - 180);
+        screen.lineTo(canvhalfx - 165, canvhalfy - 155);
+        screen.lineTo(canvhalfx - (165 - 40), canvhalfy - 130);
         screen.stroke();
         screen.closePath();
 
-        screen.fillRect(canvhalfx + 75, canvhalfy, 40, 50);
+        screen.fillRect(canvhalfx + 75, canvhalfy - 180, 40, 50);
         screen.beginPath();//right
-        screen.moveTo(canvhalfx + (75), canvhalfy);
-        screen.lineTo(canvhalfx + (75 + 40), canvhalfy + 25);
-        screen.lineTo(canvhalfx + (75), canvhalfy + 50);
+        screen.moveTo(canvhalfx + (75), canvhalfy - 180);
+        screen.lineTo(canvhalfx + (75 + 40), canvhalfy - 155);
+        screen.lineTo(canvhalfx + (75), canvhalfy - 130);
         screen.stroke();
         screen.closePath();
     }
@@ -162,10 +215,10 @@ var settings = function(){
     screen.fillStyle = "#000";
     screen.fillText("Change controls", canvhalfx - 95, canvhalfy - 230);
     screen.fillText("FPS: " + fps, canvhalfx - 90, canvhalfy - 160);
-    screen.fillText("Screen Size: ", canvhalfx - 40, canvhalfy - 60);
-    screen.fillText("back", canvhalfx - 95, canvhalfy + 220);
+    screen.fillText("Screen Size", canvhalfx - 90, canvhalfy - 90);
+    screen.fillText("Back", canvhalfx - 50, canvhalfy + 270);
     if(input == 'arrowdown'){
-        selection = (++selection == 3)? 0:selection;
+        selection = (++selection == 4)? 0:selection;
 
         input = '';
     }
@@ -188,6 +241,11 @@ var settings = function(){
          input = '';
     }
     if(input == ' ' && selection == 2){
+            clearInterval(setup);
+            input = '';
+            setup = setInterval(thicc, 1000 / fps);
+        }
+    if(input == ' ' && selection == 3){
             clearInterval(setup);
             selection = 1;
             input = '';
@@ -735,5 +793,5 @@ document.body.onload = function(){
     //After everything is set up, stop loading and begin the game!
     clearInterval(load);
     document.title = "Trail Chambers";
-    setup = setInterval(settings, 1000 / fps);
+    setup = setInterval(prep, 1000 / fps);
 }

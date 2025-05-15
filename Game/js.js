@@ -7,6 +7,7 @@ var screen = canvas.getContext("2d");
 //set the canvas size
 canvas.width = 750 //half is 375
 canvas.height = 600 // half is 300
+var topmargin = 0; //the top margin of the canvas is 0
 var canvhalfx = canvas.width / 2;
 var canvhalfy = canvas.height / 2;
 
@@ -22,7 +23,7 @@ var charlist = ["Jade", "Magmax", "Simia", "Magna", "Shojo", "Dorn", "Nino", "Ez
 charlist.push("Realgame");
 
 //list of every boss. Once again, this is ordered based on how you put them in.
-var bosslist = ["Tutorial_Bot", 'The_Eye']
+var bosslist = ["Tutorial_Bot", 'The_Eye', "Magna"]
 
 //another list of characters a for loop will make use of
 var chars = [];
