@@ -4,7 +4,7 @@ function Tutorial_Bot(startposx, startposy, size , lvl = 0, ID = -5){
 this.enemyID = ID;
 this.x = startposx;
 this.y = startposy;
-this.shift = [this.x, this.y];
+this.shift = ["", ""];
 this.z = 0; //distance up.
 this.size = size;
 this.height = 8;//How tall they are, if small enough, higher hitting attacks may miss! However, if too tall, that's just a hitbox extension.
@@ -22,8 +22,8 @@ this.damagemod = (this.lvl > 5)? (10 - this.lvl) / 10:1; //Naturally, a lesser d
 this.speed = (this.lvl > 5)? this.lvl:3; //base speed
 this.speedmod = 1;//modifies speed, multiplicately
 this.speedcause = [];
-this.hitstunmod = (this.lvl > 5)? 0.1:0.2; //POV: weak ass boss who isn't immune to hitstun
-this.knockbackmod = (this.lvl > 5)? 0.1:0.2; //POV: weak ass boss who isn't immune to knockback
+this.hitstunmod = (this.lvl > 5)? 10.1:0.2; //POV: weak ass boss who isn't immune to hitstun
+this.knockbackmod = (this.lvl > 5)? 10.1:0.2; //POV: weak ass boss who isn't immune to knockback
 this.knockback = [0, 0];//x and y position of knockback
 
 
@@ -43,6 +43,7 @@ return "Tutorial_Bot";
 }
 
 Tutorial_Bot.prototype.exist = function(){
+    //console.log(arena.leavedir(this.x + player.px, this.y + player.py, this.size))
     if(this.hp < 0){
         return "delete";
     }
@@ -51,7 +52,7 @@ Tutorial_Bot.prototype.exist = function(){
         this.hitstun = 30;
     }
     //speedmod is ALWAYS 1 to begin with
-    this.speedmod = 1;
+    this.speedmod = 0;
     this.speedcause.sort();//sorting it makes it easier to check for duplicated
     for(let i = 0 ; i < this.speedcause.length ; i++){
         //for every non-stacking buff, delete any duplicates
@@ -215,22 +216,22 @@ this.x += this.knockback[0];
 this.y += this.knockback[1];
 this.knockback[0]*=0.9;
 this.knockback[1]*=0.9;
-if(this.x + player.px + this.size > canvas.width || this.x + player.px - this.size < 0){
-this.hitstun += 3;
+if(arena.leavedir(this.x - this.shift[0], 0, this.size).includes("l") || arena.leavedir(this.x - this.shift[0], 0, this.size).includes('r')){
 this.knockback[0]*=-0.5;
-if(this.x + player.px < canvhalfx){
-    this.x = this.size + 3;
+if(arena.leavedir(this.x - this.shift[0], 0, this.size).includes("r")){
+    this.x = canvhalfx - arena.w + this.size;
 }else{
-    this.x = canvas.width - this.size - 3;
+    this.x = (canvhalfx - arena.w) + arena.w*2 - this.size*3
 }
 }
-if(this.y +player.py + this.size> canvas.height || this.y + player.py- this.size < 0){
-this.hitstun += 3;
+if(arena.leavedir(canvhalfx, this.y - this.shift[1], this.size).includes('u') || arena.leavedir(canvhalfx, this.y - this.shift[1], this.size).includes('d')){
 this.knockback[1]*=-0.5;
-if(this.y +player.py < canvhalfy){
-    this.y = this.size + 3;
+if(arena.leavedir(0, this.y - this.shift[1], this.size).includes('u')){
+    this.y = (canvhalfy - arena.h) + arena.h*2 - this.size*3;
 }else{
-    this.y = canvas.height - this.size - 3;
+    
+    this.y = canvhalfy - arena.h + this.size;
+    
 }
 }
 
@@ -260,6 +261,8 @@ Tutorial_Bot.prototype.hit = function(damage, damagetype = ["true"], knockback =
 Tutorial_Bot.prototype.inst = function(lvl = 0, startposx = this.x, startposy = this.y, size = this.size, ){
 //adds a boss to the game!
 enemies.push(new Tutorial_Bot(startposx, startposy, size, lvl, enemies.length));
+enemies[enemies.length - 1].shift[0] = player.px;
+enemies[enemies.length - 1].shift[1] = player.py;
 }
 //center stage and 20 size is the default, feel free to change it up!
 bosses.push(new Tutorial_Bot(canvhalfx+200, canvhalfy, 20));

@@ -132,22 +132,22 @@ this.x += this.knockback[0];
 this.y += this.knockback[1];
 this.knockback[0]*=0.9;
 this.knockback[1]*=0.9;
-if(this.x + player.px + this.size > canvas.width || this.x + player.px - this.size < 0){
-this.hitstun += 3;
+if(arena.leavedir(this.x - this.shift[0], 0, this.size).includes("l") || arena.leavedir(this.x - this.shift[0], 0, this.size).includes('r')){
 this.knockback[0]*=-0.5;
-if(this.x + player.px < canvhalfx){
-    this.x = this.size + 3;
+if(arena.leavedir(this.x - this.shift[0], 0, this.size).includes("r")){
+    this.x = canvhalfx - arena.w + this.size;
 }else{
-    this.x = canvas.width - this.size - 3;
+    this.x = (canvhalfx - arena.w) + arena.w*2 - this.size*3
 }
 }
-if(this.y +player.py + this.size> canvas.height || this.y + player.py- this.size < 0){
-this.hitstun += 3;
+if(arena.leavedir(canvhalfx, this.y - this.shift[1], this.size).includes('u') || arena.leavedir(canvhalfx, this.y - this.shift[1], this.size).includes('d')){
 this.knockback[1]*=-0.5;
-if(this.y +player.py < canvhalfy){
-    this.y = this.size + 3;
+if(arena.leavedir(0, this.y - this.shift[1], this.size).includes('u')){
+    this.y = (canvhalfy - arena.h) + arena.h*2 - this.size*3;
 }else{
-    this.y = canvas.height - this.size - 3;
+    
+    this.y = canvhalfy - arena.h + this.size;
+    
 }
 }
 

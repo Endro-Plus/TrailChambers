@@ -205,22 +205,23 @@ this.x += this.knockback[0];
 this.y += this.knockback[1];
 this.knockback[0]*=0.9;
 this.knockback[1]*=0.9;
-if(this.x + this.size > canvas.width || this.x - this.size < 0){
+if(arena.leavedir(this.x - this.shift[0], 0, this.size).includes("l") || arena.leavedir(this.x - this.shift[0], 0, this.size).includes('r')){
 this.hitstun += 3;
 this.knockback[0]*=-0.5;
-if(this.x < canvhalfx){
-    this.x = this.size + 3;
+if(arena.leavedir(this.x - this.shift[0], 0, this.size).includes("r")){
+    this.x = canvhalfx - arena.w + this.size;
 }else{
-    this.x = canvas.width - this.size - 3;
+    this.x = arena.w*2 - this.size*3
 }
 }
-if(this.y + this.size> canvas.height || this.y- this.size < 0){
+if(arena.leavedir(canvhalfx, this.y - this.shift[1], this.size).includes('u') || arena.leavedir(canvhalfx, this.y - this.shift[1], this.size).includes('d')){
 this.hitstun += 3;
 this.knockback[1]*=-0.5;
-if(this.y < canvhalfy){
-    this.y = this.size + 3;
+if(arena.leavedir(0, this.y - this.shift[1], this.size).includes('u')){
+    this.y = arena.h*2 - this.size*3;
 }else{
-    this.y = canvas.height - this.size - 3;
+    
+    this.y = canvhalfy - arena.h + this.size;
 }
 }
 
@@ -250,6 +251,8 @@ The_Eye.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 
 The_Eye.prototype.inst = function(lvl = 0, startposx = this.x, startposy = this.y, size = this.size, ){
 //adds a boss to the game!
 enemies.push(new The_Eye(startposx, startposy, size, lvl, enemies.length));
+enemies[enemies.length - 1].shift[0] = player.px;
+enemies[enemies.length - 1].shift[1] = player.py;
 }
 
 function Eye(x, y, z, speed, acc, ID = 99){
@@ -257,6 +260,7 @@ function Eye(x, y, z, speed, acc, ID = 99){
     this.enemyID = ID;
     this.x = x;
     this.y = y;
+    this.shift = [player.px, player.py];
     this.mx = 0;
     this.my = 0;
     this.mz = 0;
@@ -307,22 +311,23 @@ this.x += this.knockback[0];
 this.y += this.knockback[1];
 this.knockback[0]*=0.9;
 this.knockback[1]*=0.9;
-if(this.x + this.size > canvas.width || this.x - this.size < 0){
+if(arena.leavedir(this.x - this.shift[0], 0, this.size).includes("l") || arena.leavedir(this.x - this.shift[0], 0, this.size).includes('r')){
 this.hitstun += 3;
 this.knockback[0]*=-0.5;
-if(this.x < canvhalfx){
-    this.x = this.size + 3;
+if(arena.leavedir(this.x - this.shift[0], 0, this.size).includes("r")){
+    this.x = canvhalfx - arena.w + this.size;
 }else{
-    this.x = canvas.width - this.size - 3;
+    this.x = arena.w*2 - this.size*3
 }
 }
-if(this.y + this.size> canvas.height || this.y- this.size < 0){
+if(arena.leavedir(canvhalfx, this.y - this.shift[1], this.size).includes('u') || arena.leavedir(canvhalfx, this.y - this.shift[1], this.size).includes('d')){
 this.hitstun += 3;
 this.knockback[1]*=-0.5;
-if(this.y < canvhalfy){
-    this.y = this.size + 3;
+if(arena.leavedir(0, this.y - this.shift[1], this.size).includes('u')){
+    this.y = arena.h*2 - this.size*3;
 }else{
-    this.y = canvas.height - this.size - 3;
+    
+    this.y = canvhalfy - arena.h + this.size;
 }
 }
 

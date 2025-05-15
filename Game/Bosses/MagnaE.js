@@ -22,7 +22,7 @@ this.damagemod = 0.5;//weaker boss noises
 this.speed = 5; //base speed
 this.speedmod = 1;//modifies speed, multiplicately
 this.speedcause = [];
-this.hitstunmod = 0; //POV: weak ass boss who isn't immune to hitstun
+this.hitstunmod = 1; //POV: weak ass boss who isn't immune to hitstun
 this.knockbackmod = 1.5; //POV: weak ass boss who isn't immune to knockback
 this.knockback = [0, 0];//x and y position of knockback
 
@@ -93,8 +93,8 @@ MagnaE.prototype.move = function(){
         return;
         }
         if(Math.abs(this.knockback[0]) < 1 || Math.abs(this.knockback[1]) < 1){
-            this.hurt();
-            this.hitbox.reassign(this.x + player.px, this.y + player.px, this.z, 8, this.size);
+            //this.hurt();
+            //this.hitbox.reassign(this.x + player.px, this.y + player.px, this.z, 8, this.size);
 
         }
         // really basic following script (yes I just copied the tutorial boss)
@@ -117,16 +117,10 @@ MagnaE.prototype.move = function(){
 
         if(this.hitbox.hitplayer()){
         console.log("hit")
-            if(this.lvl < 5){
-            player.hit(5, ["contact", "physical", 0], [6 * this.facing[0], 6 * this.facing[1]], 10);
+            player.hit(5, ["contact", "physical", 0], [9 * this.facing[0], 9 * this.facing[1]], 10);
             this.x+=2*this.speed*this.speedmod*this.facing[0];
             this.y+=2*this.speed*this.speedmod*this.facing[1];
-            }else{
-                //bro comboed too good using easy mode stats
-                player.hit(4, ["contact", "physical", 0], [(this.speed + 3)  * this.facing[0], (this.speed + 3) * this.facing[1]], 10);
-                this.x+=this.speed*this.speedmod*this.facing[0];
-                this.y+=this.speed*this.speedmod*this.facing[1];
-            }
+            
             this.hitbox.grantimmunity(player.listname());
         }
 
@@ -137,24 +131,24 @@ MagnaE.prototype.hurt = function(){
 this.hitstun--;
 this.x += this.knockback[0];
 this.y += this.knockback[1];
-this.knockback[0]*=1;
-this.knockback[1]*=1;
-if(this.x + player.px + this.size > canvas.width || this.x + player.px - this.size < 0){
-this.hitstun += 3;
+this.knockback[0]*=0.98;
+this.knockback[1]*=0.98;
+if(arena.leavedir(this.x - this.shift[0], 0, this.size).includes("l") || arena.leavedir(this.x - this.shift[0], 0, this.size).includes('r')){
 this.knockback[0]*=-0.5;
-if(this.x + player.px < canvhalfx){
-    this.x = this.size + 3;
+if(arena.leavedir(this.x - this.shift[0], 0, this.size).includes("r")){
+    this.x = canvhalfx - arena.w + this.size;
 }else{
-    this.x = canvas.width - this.size - 3;
+    this.x = (canvhalfx - arena.w) + arena.w*2 - this.size*3
 }
 }
-if(this.y +player.py + this.size> canvas.height || this.y + player.py- this.size < 0){
-this.hitstun += 3;
+if(arena.leavedir(canvhalfx, this.y - this.shift[1], this.size).includes('u') || arena.leavedir(canvhalfx, this.y - this.shift[1], this.size).includes('d')){
 this.knockback[1]*=-0.5;
-if(this.y +player.py < canvhalfy){
-    this.y = this.size + 3;
+if(arena.leavedir(0, this.y - this.shift[1], this.size).includes('u')){
+    this.y = (canvhalfy - arena.h) + arena.h*2 - this.size*3;
 }else{
-    this.y = canvas.height - this.size - 3;
+    
+    this.y = canvhalfy - arena.h + this.size;
+    
 }
 }
 
@@ -180,10 +174,14 @@ MagnaE.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0
     this.hitstun = hitstun * this.hitstunmod;
     }
     //console.log(this.hitstun);
+   //this.hitstun = 1
+    
 }
 MagnaE.prototype.inst = function(lvl = 0, startposx = this.x, startposy = this.y, size = this.size, ){
 //adds a boss to the game!
 enemies.push(new MagnaE(startposx, startposy, size, lvl, enemies.length));
+enemies[enemies.length - 1].shift[0] = player.px;
+enemies[enemies.length - 1].shift[1] = player.py;
 }
 //center stage and 20 size is the default, feel free to change it up!
 bosses.push(new MagnaE(canvhalfx+200, canvhalfy, 20));

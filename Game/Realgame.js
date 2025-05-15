@@ -723,8 +723,8 @@ var gametime = function(){
 
         bossbar.push(enemies[0]);
         boss_title = "Magna Venandi"
-        arena.w = canvhalfx * 0.75;
-        arena.h = canvhalfy * 0.75;
+        arena.w = canvhalfx * .75;
+        arena.h = canvhalfy * .75;
 
         level +=0.5;
         

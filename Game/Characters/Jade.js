@@ -174,7 +174,7 @@ if(this.slashtime > 0 && this.spin == false){
                 this.hp+=1;
 
             }
-        this.powerup = this.slashtime;
+        this.powerup -= 30;
     }
 
 
@@ -369,7 +369,7 @@ if(this.powerup > 0){
     for(let i = 0 ; i < 4 ; i++){
         projectiles.push(new Light_Spark(canvhalfx + random(-40, 40), canvhalfy + random(-40, 40), 15 / 2, 0, 0));
     }
-    this.powerup = 0;
+    this.powerup -= 300;
 }else{
 projectiles.push(new Seraphim(canvhalfx, canvhalfy, 10, this.facing[0] * 12, this.facing[1] * 12, 30));
 }
@@ -470,6 +470,7 @@ if(arena.pleavedir().includes("l")){
     this.px = -arena.w + this.size + 3;
 }
 }
+
 if(arena.pleavedir().includes("u") || arena.pleavedir().includes('d')){
 this.hitstun += 3;
 if(!charezmode()){
@@ -492,10 +493,15 @@ Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         if(this.cooldowns[2] < 15){
             this.cooldowns[2] = 15;//no parry cheesing!
         }
+        console.log(this.parry)
         if(this.parry >= 0){
-            if(this.powerup < 300){
-                this.powerup = 300;
+            if(this.powerup < 1){
+                this.powerup = 0;
             }
+            if(this.powerup < 1000){
+                this.powerup += 300 ;
+            }
+        
             for(let i = 0 ; i < damage+1 / 2; i++){
                 if(charezmode() || i % 2 == 1){
                 projectiles.push(new Light_Spark(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size / 2, random(-2, 2) + knockback[0], random(-2, 2) + knockback[1]));
@@ -566,6 +572,7 @@ Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         }
         //console.log(this.hp);
     }
+
 Jade.prototype.death = function(){
 //NOT YET!
 while(this.miracle > 0 && this.hp < 1){
@@ -923,19 +930,19 @@ Abraxas.prototype.exist = function(){
             }
         }
         if(arena.leavedir(this.x - this.shift[0], this.y - this.shift[1], this.size).includes('l')){
-                    this.x -= this.size + 5 + this.mx;
+                    this.x = (canvhalfx - arena.w) + arena.w*2 - this.size*3
                     this.mx*=-1;
                 }
         else if(arena.leavedir(this.x - this.shift[0], this.y - this.shift[1], this.size).includes('r')){
-                    this.x +=this.size + 5 + this.mx;
+                    this.x = canvhalfx - arena.w + this.size;
                     this.mx*=-1;
                 }
         if(arena.leavedir(this.x - this.shift[0], this.y - this.shift[1], this.size).includes('u')){
-                            this.y -= this.size + 5 + this.my;
+                            this.y = (canvhalfy - arena.h) + arena.h*2 - this.size*3;
                             this.my*=-1;
                         }
         else if(arena.leavedir(this.x - this.shift[0], this.y - this.shift[1], this.size).includes('d')){
-                            this.y += this.size + 5 + this.my;
+                            this.y = canvhalfy - arena.h + this.size;
                             this.my*=-1;
                         }
         this.autofire++;
@@ -954,7 +961,7 @@ Abraxas.prototype.exist = function(){
         this.hitbox.enable();
         this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 0, 999, this.size);
        if(this.hitbox.hitplayer()){
-            player.powerup = 999;
+            player.powerup = 750;
             if(charezmode() || player.hp < 105){
             player.hp+=1;
             }
