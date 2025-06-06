@@ -126,6 +126,33 @@ for(let i = 0 ; this.localimmune.length ; i++){
         return false;
     }
 }
+hitbox.prototype.scanplayer = function(){
+    if(this.type == "circle"){
+            //just using chatGPT's solution here
+            let dx = this.x - canvhalfx
+            let dy = this.y - canvhalfy;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Check if the distance is less than the sum of their radii
+            return distance <= (player.size + this.size) && player.pz + player.height >= this.z && player.pz <= this.z + this.height;
+    }else if (this.type == "rect"){
+        let closestX = Math.max(this.x, Math.min(player.px, this.x + this.w));
+        let closestY = Math.max(this.y, Math.min(player.py, this.y + this.h));
+
+        // Calculate the distance from this point to the circle's center
+        let dx = player.px - closestX;
+        let dy = player.py - closestY;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Collision occurs if the distance is less than or equal to the circle's radius
+        return distance <= player.size && player.pz + player.height >= this.z && player.pz <= this.z + this.height;
+
+
+    }else{
+        return false;
+    }
+
+}
 hitbox.prototype.hitproj = function(name = "any projectile"){
 for(let i = 0 ; i < projectiles.length ; i++){
 //console.log("test1")
@@ -394,4 +421,114 @@ if(this.type == "circle" && enemies[i].hitbox.type == "circle"){
 
 }
 return false;
+}
+hitbox.prototype.checkenemy = function(index){
+try{
+if(enemies[index].hitbox.enabled == false){
+throw new Error("That enemy's hitbox is disabled! Don't use that!!!");
+}
+
+}catch(e){
+//if there's no hitbox on a enemy, it's just a waste to run this code
+return false;
+}
+//console.log(enemies[i].listname())
+if(enemies[index].hitbox.id == this.id){
+    //this is the same enemy...
+    return;
+}
+try{
+for(let i = 0 ; this.localimmune.length ; i++){
+    if(this.localimmune[i][0] == index){
+        //this enemy has local immunity
+        throw new Error("EEEEEEEEE!!!!!!!!!!! LOCAL IMMUNITY FRAMES")
+    }
+}
+}catch(e){
+return;
+}
+    if(this.type == "circle" && enemies[index].hitbox.type == "circle"){
+            //just using chatGPT's solution here
+            let dx = this.x - enemies[index].hitbox.x;
+            let dy = this.y - enemies[index].hitbox.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Check if the distance is less than the sum of their radii
+            //console.log(1)
+            if((distance <= (enemies[index].hitbox.size + this.size) && enemies[index].hitbox.z + enemies[index].hitbox.height >= this.z && enemies[index].hitbox.z <= this.z + this.height) ==false){
+                return false;
+            }
+            return (distance <= (enemies[index].hitbox.size + this.size) && enemies[index].hitbox.z + enemies[index].hitbox.height >= this.z && enemies[index].hitbox.z <= this.z + this.height)? true:false;
+    }else if (this.type == "rect" && enemies[i].hitbox.type == "circle"){
+        let closestX = Math.max(this.x, Math.min(enemies[index].hitbox.x, this.x + this.w));
+        let closestY = Math.max(this.y, Math.min(enemies[index].hitbox.y, this.y + this.h));
+
+        // Calculate the distance from this point to the circle's center
+        let dx = enemies[index].hitbox.x - closestX;
+        let dy = enemies[index].hitbox.y - closestY;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Collision occurs if the distance is less than or equal to the circle's radius
+        console.log(2)
+        if((distance <= enemies[index].hitbox.size && enemies[i].hitbox.z + enemies[index].hitbox.height >= this.z && enemies[index].hitbox.z <= this.z + this.height) == false)
+        return (distance <= enemies[index].hitbox.size && enemies[index].hitbox.z + enemies[index].hitbox.height >= this.z && enemies[index].hitbox.z <= this.z + this.height)? true:false;
+    }
+}
+hitbox.prototype.enemyhalf = function(index, facing){
+    if(facing[0] == -1 && this.x - player.px > enemies[index].x - enemies[index].size){
+        //left
+        return true;
+    }
+    if(facing[0] == 1 && this.x - player.px < enemies[index].x + enemies[index].size){
+        //right
+        return true;
+    }
+    if(facing[1] == -1 && this.y - player.py > enemies[index].y - enemies[index].size){
+        //up
+        return true;
+
+    }
+    if(facing[1] == 1 && this.y - player.py < enemies[index].y + enemies[index].size){
+        //down
+        return true;
+
+    }
+
+
+    return false;
+}
+hitbox.prototype.playerhalf = function(facing){
+    if(facing[0] == -1 && this.x - player.px > canvhalfx - player.size){
+        //left
+        return true;
+    }
+    if(facing[0] == 1 && this.x - player.px < canvhalfx + player.size){
+        //right
+        return true;
+    }
+    if(facing[1] == -1 && this.y - player.py > canvhalfy - player.size){
+        //up
+        return true;
+
+    }
+    if(facing[1] == 1 && this.y - player.py < canvhalfy + player.size){
+        //down
+        return true;
+
+    }
+
+
+    return false;
+}
+hitbox.prototype.showbox = function(color = "#fff"){
+     screen.fillStyle = color;
+    if(this.type == "circle"){
+       
+        circle(this.x, this.y, this.size)
+
+    }else{
+        screen.fillRect(this.x, this.y, this.w, this.h)
+
+    }
+
 }

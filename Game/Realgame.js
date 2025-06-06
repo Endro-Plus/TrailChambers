@@ -694,7 +694,7 @@ var gametime = function(){
     if(level == 1){
     projectiles = [];
     enemies = [];
-    player.inst(100, canvhalfy);
+    player.inst(100, 0);
     if(enemyezmode()){
     bosses[1].inst(4);
     bossbarmode = 1;

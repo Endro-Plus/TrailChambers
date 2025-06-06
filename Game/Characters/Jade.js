@@ -159,22 +159,25 @@ if(this.slashtime > 0 && this.spin == false){
     screen.fill();
     screen.closePath();
     this.swordbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.size * 4);
-    let hi = this.swordbox.hitenemyhalf(this.facing);
-    if(typeof hi == "number"){
-        enemies[hi].hit(15, ['physical', 'slashing'], [5 * this.facing[0], 5 * this.facing[1]], 20);
-        this.swordbox.grantimmunity(hi);
+    for(let i = 0 ; i < enemies.length ; i++){
+    if(this.swordbox.checkenemy(i) && this.swordbox.enemyhalf(i, this.facing)){
+        enemies[i].hit(15, ['physical', 'slashing'], [5 * this.facing[0], 5 * this.facing[1]], 20);
+        this.swordbox.grantimmunity(i);
+    }
     }
     if(this.powerup > 0){
         this.swordbox.refreshimmune();
         this.swordbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.size * 8);
-        let hi = this.swordbox.hitenemyhalf(this.facing);
-            if(typeof hi == "number"){
-                enemies[hi].hit(5, ['light']);
-                this.swordbox.grantimmunity(hi);
+        for(let i = 0 ; i < enemies.length ; i++){
+            if(this.swordbox.checkenemy(i) && this.swordbox.enemyhalf(i, this.facing)){
+                enemies[i].hit(7, ['light']);
+                this.swordbox.grantimmunity(i);
                 this.hp+=1;
 
-            }
-        this.powerup -= 30;
+            
+        }
+    }
+        this.powerup -= 10;
     }
 
 
@@ -200,16 +203,19 @@ projectiles.push(new Nosferatu_blast(canvhalfx + this.playershift[0], canvhalfy 
 }else{
 this.swordbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.size * 4);
 }
-    let hi = this.swordbox.hitenemy();
-    if(typeof hi == "number"){
-        enemies[hi].hit(7.5, ['light', 'physical', 'slashing'], [(canvhalfx + this.playershift[0] < enemies[hi].x)? -2:2 , (canvhalfy + this.playershift[1] < enemies[hi].y)? -2:2], 20);
-        this.swordbox.grantimmunity(hi);
+    
+    for(let i = 0 ; i < enemies.length ; i++){
+    if(this.swordbox.checkenemy(i)){
+        enemies[i].hit(7.5, ['light', 'physical', 'slashing'], [(canvhalfx + this.playershift[0] < enemies[i].x)? -2:2 , (canvhalfy + this.playershift[1] < enemies[i].y)? -2:2], 20);
+        this.swordbox.grantimmunity(i);
         if(this.hp > 95){
             //grant more hp at max hp for more armor frames
             this.hp+= 5;
         }else if(charezmode()){
             this.hp+=0.25;
             }
+
+        }
 
 
 }

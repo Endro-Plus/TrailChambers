@@ -5,6 +5,7 @@ this.enemyID = ID;
 this.x = startposx;
 this.y = startposy;
 this.z = 2; //distance up.
+this.shift = [this.x, this.y];//how their position may shift
 this.size = size;
 this.height = 20;//How tall they are, if small enough, higher hitting attacks may miss! However, if too tall, that's just a hitbox extension.
 this.hitbox = new hitbox(this.x, this.y, this.z, this.height, this.size);

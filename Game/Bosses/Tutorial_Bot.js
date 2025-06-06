@@ -22,8 +22,8 @@ this.damagemod = (this.lvl > 5)? (10 - this.lvl) / 10:1; //Naturally, a lesser d
 this.speed = (this.lvl > 5)? this.lvl:3; //base speed
 this.speedmod = 1;//modifies speed, multiplicately
 this.speedcause = [];
-this.hitstunmod = (this.lvl > 5)? 10.1:0.2; //POV: weak ass boss who isn't immune to hitstun
-this.knockbackmod = (this.lvl > 5)? 10.1:0.2; //POV: weak ass boss who isn't immune to knockback
+this.hitstunmod = (this.lvl > 5)? 0.1:0.2; //POV: weak ass boss who isn't immune to hitstun
+this.knockbackmod = (this.lvl > 5)? 0.1:0.2; //POV: weak ass boss who isn't immune to knockback
 this.knockback = [0, 0];//x and y position of knockback
 
 
@@ -52,7 +52,7 @@ Tutorial_Bot.prototype.exist = function(){
         this.hitstun = 30;
     }
     //speedmod is ALWAYS 1 to begin with
-    this.speedmod = 0;
+    this.speedmod = 1;
     this.speedcause.sort();//sorting it makes it easier to check for duplicated
     for(let i = 0 ; i < this.speedcause.length ; i++){
         //for every non-stacking buff, delete any duplicates
