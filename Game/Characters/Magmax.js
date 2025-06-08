@@ -401,6 +401,7 @@ this.slashtime--;
 if(this.projstart > 0 && --this.projstart <= 0){
 if(this.clutch){
 projectiles.push(new skatebeam(canvhalfx + (20 * this.facing[0]), canvhalfy + (20 * this.facing[1]), 60, this.facing));
+projectiles[projectiles.length - 1].lifetime = null;//make the projectiles unparriable
 }else{
 projectiles.push(new skatebeam(canvhalfx + (20 * this.facing[0]), canvhalfy + (20 * this.facing[1]), 30, this.facing));
 }
@@ -639,8 +640,13 @@ function skatebeam(x, y, size, face){
     this.hitbox = new hitbox(x, y, player.pz, 2, size);
     this.hitbox.disable();
     this.hitbox.immunityframes(10);
+    this.lifetime = 700;
 }
 skatebeam.prototype.exist = function(){
+    if(typeof this.lifetime == "number"){
+        //yep... these are unparriable on second phase
+        this.lifetime--;
+    }
     screen.strokeStyle = "#999"
     this.hitbox.updateimmunity();
     //circle(this.x, this.y, this.size)
@@ -690,7 +696,7 @@ skatebeam.prototype.exist = function(){
     this.x+= 12 * this.facing[0];
     this.y+= 12 * this.facing[1];
     this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
-    if(arena.leave(this.x - this.shift[0], this.y - this.shift[1], this.size)){
+    if(arena.leave(this.x - this.shift[0], this.y - this.shift[1], this.size) || this.lifetime < 1){
         return "delete";
     }
     //hitting the enemy

@@ -672,6 +672,7 @@ function Seraphim(x, y, size, mx, my, charge){
     this.chargetime = charge;
     this.hitbox = new hitbox(x, y, 2, size/2, size);
     this.hitbox.disable();
+    this.lifetime = 700;//this is universal to all projectiles!
 }
 Seraphim.prototype.exist = function(){
     //First existing projectile!
@@ -694,6 +695,7 @@ Seraphim.prototype.exist = function(){
         //ensures it doesn't teleport back to the player
         this.chargetime = -1;
         this.hitbox.enable();
+        this.lifetime--;
 
     }
     screen.fillStyle = "#FF8";
@@ -704,7 +706,7 @@ Seraphim.prototype.exist = function(){
     this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
     console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
     //console.log(arena.leavedir(this.x, this.y, this.size))
-    if(arena.leave(this.x - this.shift[0], this.y - this.shift[1], this.size)){
+    if(arena.leave(this.x - this.shift[0], this.y - this.shift[1], this.size) || this.lifetime < 1){
         return "delete";
     }
     //hitting the enemy
@@ -733,6 +735,7 @@ function Nosferatu(x, y, size, mx, my, charge, speed){
     this.charge = charge; //+5 startup
     this.hitbox = new hitbox(x, y, 0, size, size);
     this.hitbox.disable();
+    this.lifetime = 99999;//this isn't required to go down though
 }
 Nosferatu.prototype.exist = function(){
 
@@ -791,6 +794,9 @@ Nosferatu.prototype.exist = function(){
     if(arena.leave(this.x - this.shift[0], this.y - this.shift[1], this.size)){
         this.detin = 0;
     }
+    if(this.lifetime < 1){
+        return "delete"
+    }
     //hitting the enemy
         let en = this.hitbox.hitenemy();
         //console.log(en);
@@ -822,6 +828,7 @@ function Nosferatu_blast(x, y, size, mx, my){
     this.hitbox = new hitbox(this.x, this.y, 0, 4, this.size);
     this.hitbox.disable();
     this.hitbox.immunityframes(15);
+    this.lifetime = null;//for unparriable projectiles
 
 }
 Nosferatu_blast.prototype.exist = function(){
@@ -874,6 +881,7 @@ function Abraxas(x, y, size){
     this.hitbox = new hitbox(x, y, 0, 99, size); //for owning a hitbox
     this.hitbox.disable();
     this.hitbox.immunityframes(60);
+    this.lifetime = null;
 }
 Abraxas.prototype.exist = function(){
 
@@ -922,6 +930,7 @@ Abraxas.prototype.exist = function(){
 
 
     }else{
+    
        screen.fillStyle = "#FFF";
        circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size);
        if(player.powerup > 0){
@@ -952,7 +961,7 @@ Abraxas.prototype.exist = function(){
                             this.my*=-1;
                         }
         this.autofire++;
-        if(this.size < 5){
+        if(this.size < 5 || this.lifetime < 1){
             return "delete";
         }
         //hitting the enemy
@@ -979,6 +988,7 @@ Abraxas.prototype.exist = function(){
     }
     this.x += this.mx;
     this.y += this.my;
+    this.lifetime = 1;//make a previously unparriable projectile parriable
 
 }
 
@@ -990,25 +1000,26 @@ function Light_Spark(x, y, size, mx, my){
     this.size = size
     this.mx = mx;
     this.my = my;
-    this.last = random(345, 360);
+    this.lifetime = random(345, 360);
     this.hitbox = new hitbox(this.x, this.y, 3, 1, this.size);
     this.hitbox.disable();
+
 }
 Light_Spark.prototype.exist = function(){
     this.hitbox.enable();
     var track;
     screen.fillStyle = "#883";
     circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size);
-    if(this.last > 0){
+    if(this.lifetime > 0){
         this.x+=this.mx;
         this.y+=this.my;
         this.mx*= 0.98;
         this.my*= 0.98;
-        this.last--;
+        this.lifetime--;
     }
     this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
      if(arena.leave(this.x - this.shift[0], this.y - this.shift[1], this.size)){
-        this.last-=35;
+        this.lifetime-=35;
 
      if(arena.leavedir(this.x - this.shift[0], this.y - this.shift[1], this.size).includes('l')){
                         this.x -= this.size + 5 + this.mx;
@@ -1055,7 +1066,7 @@ Light_Spark.prototype.exist = function(){
         }
     }
 
-    if(this.last <=0){
+    if(this.lifetime <=0){
         return "delete";
     }
     //hitting the enemy

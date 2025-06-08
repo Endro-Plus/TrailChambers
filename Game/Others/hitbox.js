@@ -153,6 +153,55 @@ hitbox.prototype.scanplayer = function(){
     }
 
 }
+hitbox.prototype.scanproj = function(i){
+//console.log("test1")
+try{
+if(projectiles[i].hitbox.enabled == false){
+throw new Error("That hitbox is disabled! Don't use that!!!");
+}
+
+}catch(e){
+//if there's no hitbox on a projectile, it's just a waste to run this code
+return false;
+}
+//console.log(projectiles[i].name)
+if(projectiles[i].hitbox.id == this.id){
+    //this is the same projectile...
+    return false;
+}
+//console.log(projectiles[i].hitbox.id + ": ID");
+
+if(this.type == "circle" && projectiles[i].hitbox.type == "circle"){
+            //just using chatGPT's solution here
+            let dx = this.x - projectiles[i].hitbox.x;
+            let dy = this.y - projectiles[i].hitbox.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Check if the distance is less than the sum of their radii
+            console.log(1)
+            return distance <= (projectiles[i].hitbox.size + this.size) && projectiles[i].hitbox.z + projectiles[i].hitbox.height >= this.z && projectiles[i].hitbox.z <= this.z + this.height;
+    }else if (this.type == "rect" && projectiles[i].hitbox.type == "circle"){
+        let closestX = Math.max(this.x, Math.min(projectiles[i].hitbox.x, this.x + this.w));
+        let closestY = Math.max(this.y, Math.min(projectiles[i].hitbox.y, this.y + this.h));
+
+        // Calculate the distance from this point to the circle's center
+        let dx = projectiles[i].hitbox.x - closestX;
+        let dy = projectiles[i].hitbox.y - closestY;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Collision occurs if the distance is less than or equal to the circle's radius
+        console.log(2)
+        return distance <= projectiles[i].hitbox.size && projectiles[i].hitbox.z + projectiles[i].hitbox.height >= this.z && projectiles[i].hitbox.z <= this.z + this.height;
+    }else if (this.type == "circle" && projectiles[i].hitbox.type == "rect"){
+        //Just make THEIR hitbox do the calculations
+        if(projectiles[i].hitbox.hitproj(this.hitboxID) == true){
+            return true;
+        }
+
+    }
+
+return false;
+}
 hitbox.prototype.hitproj = function(name = "any projectile"){
 for(let i = 0 ; i < projectiles.length ; i++){
 //console.log("test1")

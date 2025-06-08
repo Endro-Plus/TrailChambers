@@ -29,7 +29,7 @@ this.knockback = [0, 0];//x and y position of knockback
 
 
 //extras
-this.phase = [0, 99999]; // zoning, attacking, hyperspeed
+this.phase = [1, 99999]; // zoning, attacking, hyperspeed
 this.mercyframes = 60; //a couple seconds to get your barrings before death
 this.chuckbox = new hitbox(this.x, this.y, this.z+1, this.height - 1, 40);
 this.chuckbox.disable();
@@ -225,6 +225,28 @@ MagnaE.prototype.move = function(){
             this.chuckbox.grantimmunity(player.listname());
             
         }
+        //for parrying projectiles
+        for(let i = 0 ; i < projectiles.length ; i++){
+            if(this.chuckbox.scanproj(i) && typeof projectiles[i].lifetime == "number"){
+                //PARRY THAT SHIT!
+                projectiles[i].lifetime = 0;
+                this.showchuck = 4;
+                if(enemyezmode()){
+            this.chuckdown = 9;
+            }else{
+                this.chuckdown = 7
+            }
+
+            }
+            let dx = canvhalfx - (this.x + player.px);
+            let dy = canvhalfy - (this.y + player.py);
+            let magnitude = Math.sqrt(dx * dx + dy * dy);
+            velocityX = (dx / magnitude) * this.shurikenspeed;
+            velocityY = (dy / magnitude) * this.shurikenspeed;
+            
+            projectiles.push(new Shuriken(this.x + player.px, this.y + player.py, 12, velocityX,velocityY, (this.lvl < 9)? 10 - this.lvl:0));
+
+        }
 
         //show chuck hitbox
         if(this.showchuck > 0){
@@ -272,7 +294,11 @@ MagnaE.prototype.zone = function(){
         }
         
         if(this.chuckdown < 1){
+            if(enemyezmode()){
             this.chuckdown = 30;
+            }else{
+                this.chuckdown = 15;
+            }
             // Calculate direction to throw shuriken
         let dx = canvhalfx - (this.x + player.px);
         let dy = canvhalfy - (this.y + player.py);
@@ -425,7 +451,7 @@ Shuriken.prototype.exist = function(){
     }
 }
 
-function ParryProj(x, y, size, mx, my){
+function ParryProj(x, y, size, mx, my, delay = 0){
     this.name = "PARRIED";
     this.x = x;
     this.y = y;
@@ -437,7 +463,8 @@ function ParryProj(x, y, size, mx, my){
     this.hitbox = new hitbox(x, y, 2, size/2, size);
     this.hitbox.disable();
     this.range = 400
-    this.lifetime = 1;
+    this.delay = delay;
+    this.lifetime = 1;//yes, this is supposed to be parriable, good luck
 }
 ParryProj.prototype.exist = function(){
     
@@ -445,6 +472,9 @@ ParryProj.prototype.exist = function(){
     screen.fillStyle = "rgb(213, 217, 221, " + this.lifetime + ")";
     this.x = this.origin[0];
     this.y = this.origin[1];
+    if(this.delay > 0){
+        this.delay--;
+    }else{
     for(let i = 0 ; i < this.range ; i++){
         this.x+=this.mx;
         this.y+=this.my;
@@ -465,6 +495,7 @@ ParryProj.prototype.exist = function(){
     if(this.lifetime <= 0){
         return "delete";
     }
+}
     //hitting the player
     //console.log(en);
     
