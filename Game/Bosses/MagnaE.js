@@ -29,7 +29,7 @@ this.knockback = [0, 0];//x and y position of knockback
 
 
 //extras
-this.phase = [1, 99999]; // zoning, attacking, hyperspeed
+this.phase = (this.lvl > 5)? [0, 1]:[1, 30]; // zoning, attacking, hyperspeed
 this.mercyframes = 60; //a couple seconds to get your barrings before death
 this.chuckbox = new hitbox(this.x, this.y, this.z+1, this.height - 1, 40);
 this.chuckbox.disable();
@@ -38,6 +38,7 @@ this.runaura = new hitbox(this.x, this.y, this.z+1, this.height - 1, 75);
 this.showchuck = 0;
 this.chuckdown = 0;
 this.shurikenspeed = this.lvl*2;
+this.dashlocale = []
 }
 MagnaE.prototype.listname = function(){
 //to help position the characters correctly
@@ -103,7 +104,17 @@ this.zone();
     this.move()
 
 }else{
-    this.VROOOM()
+    //go to the player, but be a little off on purpose
+    if(this.dashlocale.length == 0){
+    let dx = canvhalfx - (this.x + player.px + random(-40, 40));
+    let dy = canvhalfy - (this.y + player.py + random(-40, 40));
+    let magnitude = Math.sqrt(dx * dx + dy * dy);
+    this.dashlocale[0] = (dx / magnitude) * (this.speed + this.lvl);
+    this.dashlocale[1] = (dy / magnitude) * (this.speed + this.lvl);
+    this.dashlocale[2] = -1
+    //console.log(this.dashlocale)
+    }
+    this.VROOOM(this.dashlocale[0], this.dashlocale[1]);
 
 }
 this.chuckdown--;
@@ -111,14 +122,18 @@ this.phase[1]--;
 if(this.phase[1] < 0){
     if(this.lvl > 5 && this.phase[0] == 0){
         //instant shuriken parry
-        this.chuckdown = 0;
+        this.chuckdown = -5;
         this.zone();
-        this.phase = [2, 20]
+        this.chuckdown = -5;
+        this.phase = [1, 20]
     }else{
-    this.phase[0] = random(0, 2)
-    this.phase[1] = random(30, 250)
+    this.phase[0] = random(0, 2, false)
+    this.phase[1] = random(60, 120, false)
+    this.dashlocale = [];
     }
-    this.chuckdown = 0;
+    if(this.lvl < 5){
+    this.chuckdown = 10;
+    }
     
 }
 }
@@ -129,7 +144,7 @@ circle(this.x + player.px, this.y + player.py, this.size);
 
 
 
-//boss AI goes here
+
 
 }
 MagnaE.prototype.move = function(){
@@ -142,7 +157,7 @@ MagnaE.prototype.move = function(){
             //this.hitbox.reassign(this.x + player.px, this.y + player.px, this.z, 8, this.size);
 
         }
-        // stay in his range, which happens to fuck up particular bad character mains... simia
+        // stay in his range, which happens to fuck up particular bad characters... simia
         this.hitbox.updateimmunity();
         this.chuckbox.updateimmunity();
         if(this.x + player.px > canvhalfx + 45){
@@ -213,13 +228,13 @@ MagnaE.prototype.move = function(){
             //maximum carnage!
             this.showchuck = 4;
             if(enemyezmode()){
-            this.chuckdown = 9;
+            this.chuckdown = 12;
             }else{
-                this.chuckdown = 7
+                this.chuckdown = 9
             }
             
             if(!enemyezmode() || this.chuckbox.hitplayer()){
-                player.hit(8, ["contact", "physical", 0], [12 * this.facing[0], 12 * this.facing[1]], 9);
+                player.hit(8, ["contact", "physical", 0], [12 * this.facing[0], 12 * this.facing[1]], 7);
             }
             
             this.chuckbox.grantimmunity(player.listname());
@@ -227,24 +242,27 @@ MagnaE.prototype.move = function(){
         }
         //for parrying projectiles
         for(let i = 0 ; i < projectiles.length ; i++){
-            if(this.chuckbox.scanproj(i) && typeof projectiles[i].lifetime == "number"){
+            if(this.chuckbox.scanproj(i) && typeof projectiles[i].lifetime == "number" && this.chuckdown < 0){
                 //PARRY THAT SHIT!
                 projectiles[i].lifetime = 0;
+                
                 this.showchuck = 4;
                 if(enemyezmode()){
-            this.chuckdown = 9;
+            this.chuckdown = 12;
             }else{
-                this.chuckdown = 7
+                this.chuckdown = 9
             }
 
-            }
+            
+            
             let dx = canvhalfx - (this.x + player.px);
             let dy = canvhalfy - (this.y + player.py);
             let magnitude = Math.sqrt(dx * dx + dy * dy);
             velocityX = (dx / magnitude) * this.shurikenspeed;
             velocityY = (dy / magnitude) * this.shurikenspeed;
             
-            projectiles.push(new Shuriken(this.x + player.px, this.y + player.py, 12, velocityX,velocityY, (this.lvl < 9)? 10 - this.lvl:0));
+            projectiles.push(new ParryProj(this.x + player.px, this.y + player.py, 12, velocityX,velocityY, (this.lvl < 9)? 10 - this.lvl:0));
+        }
 
         }
 
@@ -266,7 +284,10 @@ MagnaE.prototype.zone = function(){
         this.hurt();
         return;
         }
-    
+        if(arena.leave(this.x - this.shift[0], this.y - this.shift[1], this.size)){
+        this.phase[0] = 1;//if already out of bounds, just go back to trying to attack;
+
+    }
         this.hitbox.updateimmunity();
         //literally run away
         this.runaura.move(this.x + player.px, this.y + player.py);
@@ -311,44 +332,84 @@ MagnaE.prototype.zone = function(){
         }
     }
 
-
-
-MagnaE.prototype.VROOOM = function(){
-        if(this.hitstun > 0){
+MagnaE.prototype.VROOOM = function(speedx, speedy){
+    if(this.hitstun > 0){
         this.hurt();
+        this.phase[0] = random(0, 1, false);//stop sliding when knocked back
         return;
-        }
-        if(Math.abs(this.knockback[0]) < 1 || Math.abs(this.knockback[1]) < 1){
-            //this.hurt();
-            //this.hitbox.reassign(this.x + player.px, this.y + player.px, this.z, 8, this.size);
+    }
+    this.hitbox.updateimmunity();
+    this.chuckbox.updateimmunity();
+    
+    this.knockback = [0, 0]//negate all knockback when sliding
+    if(arena.leave(this.x - this.shift[0], this.y - this.shift[1], this.size)){
+        this.phase[0] = 1;//if already out of bounds, just go back to trying to attack;
 
-        }
-        // really basic following script (yes I just copied the tutorial boss)
-        this.hitbox.updateimmunity();
-        if(this.x + player.px > canvhalfx + 10){
-            this.x-=this.speed * this.speedmod;
-            this.facing = [-1, 0];
-        }else if(this.x + player.px < canvhalfx - 10){
-            this.x+=this.speed * this.speedmod;
-            this.facing = [1, 0];
-        }else if(this.y + player.py < canvhalfy){
-            this.y+=this.speed * this.speedmod;
-            this.facing = [0, 1];
+    }
+        //SPEED SLIDE
+        this.x+=speedx * this.dashlocale[2];
+        this.y+=speedy * this.dashlocale[2];
+        if(this.dashlocale[2] < 2){
+            this.dashlocale[2]+=0.2;
+
         }else{
-            this.y-=this.speed * this.speedmod;
-            this.facing = [0, -1];
+            this.dashlocale[2] = 2;
         }
-
         this.hitbox.reassign(this.x + player.px, this.y + player.py, this.z, 8, this.size);
-
+        
+        //contact damage
         if(this.hitbox.hitplayer()){
         console.log("hit")
-            player.hit(5, ["contact", "physical", 0], [9 * this.facing[0], 9 * this.facing[1]], 10);
-            this.x+=2*this.speed*this.speedmod*this.facing[0];
-            this.y+=2*this.speed*this.speedmod*this.facing[1];
+        //the love tap
+            player.hit(69, ["contact", "physical", 0], [speedx * 10, 40 * speedy * 10], 45);
+            this.hitstun = 45;
+            this.phase[1] = 0;
             
             this.hitbox.grantimmunity(player.listname());
         }
+
+        //for parrying projectiles (hard mode only this time)
+        if(!enemyezmode()){
+            this.chuckbox.move(this.x + player.px, this.y + player.py);
+        
+        for(let i = 0 ; i < projectiles.length ; i++){
+            if(this.chuckbox.scanproj(i) && typeof projectiles[i].lifetime == "number"){
+                //PARRY THAT SHIT!
+                projectiles[i].lifetime = 0;
+                this.showchuck = 4;
+                if(enemyezmode()){
+            this.chuckdown = 9;
+            }else{
+                this.chuckdown = 7
+            }
+
+            
+            
+            let dx = canvhalfx - (this.x + player.px);
+            let dy = canvhalfy - (this.y + player.py);
+            let magnitude = Math.sqrt(dx * dx + dy * dy);
+            velocityX = (dx / magnitude) * this.shurikenspeed;
+            velocityY = (dy / magnitude) * this.shurikenspeed;
+            //as a bonus, parried projectiles make Magna beeline towards you!
+            this.dashlocale[0] = (dx / magnitude) * (this.speed + this.lvl);
+            this.dashlocale[1] = (dy / magnitude) * (this.speed + this.lvl);
+
+            projectiles.push(new ParryProj(this.x + player.px, this.y + player.py, 12, velocityX,velocityY, (this.lvl < 9)? 10 - this.lvl:0));
+        }
+
+        }
+    
+
+        //show chuck hitbox
+        if(this.showchuck > 0){
+            this.showchuck--;
+            screen.beginPath();
+            screen.fillStyle = "#4d1a00";
+            screen.arc(this.x + player.px, this.y + player.py, this.chuckbox.size, this.facing[2], this.facing[2] + Math.PI);
+            screen.fill();
+            screen.closePath();
+        }
+    }
 
 
 
@@ -431,6 +492,7 @@ function Shuriken(x, y, size, mx, my){
 }
 Shuriken.prototype.exist = function(){
     this.lifetime--;
+    this.hitbox.enable();
    
     screen.fillStyle = "#AAA";
     circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
@@ -468,13 +530,18 @@ function ParryProj(x, y, size, mx, my, delay = 0){
 }
 ParryProj.prototype.exist = function(){
     
+    
    
-    screen.fillStyle = "rgb(213, 217, 221, " + this.lifetime + ")";
+    
     this.x = this.origin[0];
     this.y = this.origin[1];
     if(this.delay > 0){
+        screen.fillStyle = "rgb(213, 217, 221, 0.5)";
         this.delay--;
+        circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size * 5)
     }else{
+        screen.fillStyle = "rgb(213, 217, 221, " + this.lifetime + ")";
+        this.hitbox.enable();
     for(let i = 0 ; i < this.range ; i++){
         this.x+=this.mx;
         this.y+=this.my;

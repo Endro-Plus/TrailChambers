@@ -335,6 +335,10 @@ if(arena.leavedir(0, this.y - this.shift[1], this.size).includes('u')){
 }
 Eye.prototype.exist = function(){
 this.hitbox.updateimmunity();
+if(arena.leave(this.x - this.shift[0], this.y - this.shift[1], this.size)){
+        this.hp--;;//if out of bounds, start dying
+
+    }
     if(this.hp < 0){
         return "delete";
     }

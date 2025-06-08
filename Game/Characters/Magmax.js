@@ -649,6 +649,7 @@ skatebeam.prototype.exist = function(){
     }
     screen.strokeStyle = "#999"
     this.hitbox.updateimmunity();
+    this.hitbox.enable();
     //circle(this.x, this.y, this.size)
     //moving
     screen.beginPath();
@@ -696,7 +697,7 @@ skatebeam.prototype.exist = function(){
     this.x+= 12 * this.facing[0];
     this.y+= 12 * this.facing[1];
     this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
-    if(arena.leave(this.x - this.shift[0], this.y - this.shift[1], this.size) || this.lifetime < 1){
+    if(arena.leave(this.x - this.shift[0], this.y - this.shift[1], this.size) || typeof this.lifetime == "number" && this.lifetime < 1){
         return "delete";
     }
     //hitting the enemy

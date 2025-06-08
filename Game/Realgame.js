@@ -113,7 +113,7 @@ var player;
 var projectiles = [];
 var enemies = [];
 var summons = [];
-var level = 2;
+var level = 0;
 var rest = 100;
 var resttimer = 0;
 
@@ -644,6 +644,8 @@ var gametime = function(){
     }
     //console.log(totalbosshp)
     if(level == 0 && !enemyezmode()){
+    arena.w = canvhalfx + 40;
+    arena.h = canvhalfy + 40;
     //This boss gets significatly harder out of normal or player mode
     boss_title = "Magna's Lorem Machinam"
     bossbarmode = 2;

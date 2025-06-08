@@ -678,8 +678,8 @@ Seraphim.prototype.exist = function(){
     //First existing projectile!
 
     //charge by holding attack
-    if(inputs.includes(controls[4]) /*&& this.chargetime > 0*/){
-        this.chargetime--;
+    if(inputs.includes(controls[4]) && this.chargetime > 0){
+        this.chargetime++;
         this.x = canvhalfx + player.playershift[0];
         this.y = canvhalfy + player.playershift[1];
         this.shift = [player.px, player.py];
