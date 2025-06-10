@@ -216,16 +216,16 @@ Test.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         knockback[0] *= this.knockbackmod;
         knockback[1] *= this.knockbackmod;
         if(inputs.includes(controls[0])){
-            knockback[0] -= this.DI;
-        }
-        if(inputs.includes(controls[1])){
             knockback[0] += this.DI;
         }
+        if(inputs.includes(controls[1])){
+            knockback[0] -= this.DI;
+        }
         if(inputs.includes(controls[2])){
-            knockback[1] -= this.DI;
+            knockback[1] += this.DI;
         }
         if(inputs.includes(controls[3])){
-            knockback[1] += this.DI;
+            knockback[1] -= this.DI;
         }
         if(this.hp < 100){
         if(this.hitstun > 0){

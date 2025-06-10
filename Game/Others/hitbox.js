@@ -546,21 +546,21 @@ hitbox.prototype.enemyhalf = function(index, facing){
 
     return false;
 }
-hitbox.prototype.playerhalf = function(facing){
-    if(facing[0] == -1 && this.x - player.px > canvhalfx - player.size){
+hitbox.prototype.projhalf = function(index, facing){
+    if(facing[0] == -1 && this.x - player.px > projectiles[index].x - projectiles[index].size){
         //left
         return true;
     }
-    if(facing[0] == 1 && this.x - player.px < canvhalfx + player.size){
+    if(facing[0] == 1 && this.x - player.px < projectiles[index].x + projectiles[index].size){
         //right
         return true;
     }
-    if(facing[1] == -1 && this.y - player.py > canvhalfy - player.size){
+    if(facing[1] == -1 && this.y - player.py > projectiles[index].y - projectiles[index].size){
         //up
         return true;
 
     }
-    if(facing[1] == 1 && this.y - player.py < canvhalfy + player.size){
+    if(facing[1] == 1 && this.y - player.py < projectiles[index].y + projectiles[index].size){
         //down
         return true;
 

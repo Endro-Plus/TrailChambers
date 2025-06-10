@@ -152,7 +152,7 @@ if(arena.leavedir(0, this.y - this.shift[1], this.size).includes('u')){
 }
 
 }
-BLueboss.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
+Blueboss.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
     var dmg = damage * this.damagemod;
     for(let i = 0 ; i < this.damagetypemod.length ; i++){
         if(damagetype.includes(this.damagetypemod[i][0])){

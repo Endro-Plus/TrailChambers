@@ -94,7 +94,13 @@ this.mercyframes--;
 screen.fillStyle = this.color;
   screen.textAlign = "center";
   screen.font = "15px Times New Roman";
-  screen.fillText("*Bows*", this.x + player.px, this.y-+ 50 + player.py)
+  if(player.listname() == "Magna"){
+screen.fillText("*glares*", this.x + player.px, this.y-+ 50 + player.py)
+  }else if (player.listname() == "Magmax"){
+screen.fillText("*Stares cutely*", this.x + player.px, this.y-+ 50 + player.py)
+  }else{
+  screen.fillText("*Bows*", this.x + player.px, this.y-+ 50 + player.py);
+  }
 }else{
 //this.chuckbox.showbox();
 if(this.phase[0] == 0){
@@ -234,7 +240,7 @@ MagnaE.prototype.move = function(){
             }
             
             if(!enemyezmode() || this.chuckbox.hitplayer()){
-                player.hit(8, ["contact", "physical", 0], [12 * this.facing[0], 12 * this.facing[1]], 7);
+                player.hit(8, ["bludgeoning", "physical", 0], [-12 * this.facing[0], -12 * this.facing[1]], 7);
             }
             
             this.chuckbox.grantimmunity(player.listname());
@@ -261,7 +267,7 @@ MagnaE.prototype.move = function(){
             velocityX = (dx / magnitude) * this.shurikenspeed;
             velocityY = (dy / magnitude) * this.shurikenspeed;
             
-            projectiles.push(new ParryProj(this.x + player.px, this.y + player.py, 12, velocityX,velocityY, (this.lvl < 9)? 10 - this.lvl:0));
+            projectiles.push(new ParryProjE(this.x + player.px, this.y + player.py, 12, velocityX,velocityY, (this.lvl < 9)? 10 - this.lvl:0));
         }
 
         }
@@ -327,7 +333,7 @@ MagnaE.prototype.zone = function(){
         velocityX = (dx / magnitude) * this.shurikenspeed;
         velocityY = (dy / magnitude) * this.shurikenspeed;
 
-            projectiles.push(new Shuriken(this.x + player.px, this.y + player.py, 12, velocityX,velocityY));
+            projectiles.push(new ShurikenE(this.x + player.px, this.y + player.py, 12, velocityX,velocityY));
 
         }
     }
@@ -394,7 +400,7 @@ MagnaE.prototype.VROOOM = function(speedx, speedy){
             this.dashlocale[0] = (dx / magnitude) * (this.speed + this.lvl);
             this.dashlocale[1] = (dy / magnitude) * (this.speed + this.lvl);
 
-            projectiles.push(new ParryProj(this.x + player.px, this.y + player.py, 12, velocityX,velocityY, (this.lvl < 9)? 10 - this.lvl:0));
+            projectiles.push(new ParryProjE(this.x + player.px, this.y + player.py, 12, velocityX,velocityY, (this.lvl < 9)? 10 - this.lvl:0));
         }
 
         }
@@ -478,8 +484,8 @@ enemies[enemies.length - 1].shift[1] = player.py;
 //center stage and 20 size is the default, feel free to change it up!
 bosses.push(new MagnaE(canvhalfx+200, canvhalfy, 13));
 
-function Shuriken(x, y, size, mx, my){
-    this.name = "Shuriken";
+function ShurikenE(x, y, size, mx, my){
+    this.name = "ShurikenE";
     this.x = x;
     this.y = y;
     this.shift = [player.px, player.py];
@@ -490,7 +496,7 @@ function Shuriken(x, y, size, mx, my){
     this.hitbox.disable();
     this.lifetime = 750
 }
-Shuriken.prototype.exist = function(){
+ShurikenE.prototype.exist = function(){
     this.lifetime--;
     this.hitbox.enable();
    
@@ -513,7 +519,7 @@ Shuriken.prototype.exist = function(){
     }
 }
 
-function ParryProj(x, y, size, mx, my, delay = 0){
+function ParryProjE(x, y, size, mx, my, delay = 0){
     this.name = "PARRIED";
     this.x = x;
     this.y = y;
@@ -528,7 +534,7 @@ function ParryProj(x, y, size, mx, my, delay = 0){
     this.delay = delay;
     this.lifetime = 1;//yes, this is supposed to be parriable, good luck
 }
-ParryProj.prototype.exist = function(){
+ParryProjE.prototype.exist = function(){
     
     
    
@@ -550,7 +556,7 @@ ParryProj.prototype.exist = function(){
         if(this.lifetime == 1){
             this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
             if(this.hitbox.hitplayer()){
-                player.hit(24, ["physical", "slashing"], [this.mx * 2, this.my * 2], 15);
+                player.hit(24, ["magic"], [this.mx * 2, this.my * 2], 15);
                 this.range = i;
                 break;
     }
