@@ -35,6 +35,7 @@ this.chuckbox = new hitbox(this.x, this.y, this.z+1, this.height - 1, 40);
 this.chuckbox.disable();
 this.chuckbox.immunityframes(5);
 this.runaura = new hitbox(this.x, this.y, this.z+1, this.height - 1, 75);
+this.runaura.disable();
 this.showchuck = 0;
 this.chuckdown = 0;
 this.shurikenspeed = this.lvl*2;
@@ -367,7 +368,7 @@ MagnaE.prototype.VROOOM = function(speedx, speedy){
         if(this.hitbox.hitplayer()){
         console.log("hit")
         //the love tap
-            player.hit(69, ["contact", "physical", 0], [speedx * 10, 40 * speedy * 10], 45);
+            player.hit(69, ["contact", "physical", 0], [speedx * 10, 40 * speedy * 10], 30);
             this.hitstun = 45;
             this.phase[1] = 0;
             

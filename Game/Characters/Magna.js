@@ -7,7 +7,7 @@ this.size = size;
 //card info
 this.postColor = "#FF4C00";
 this.color = "#FF8B00";
-this.desc = ["SMALL AND CUUUUTTTEEEE!!!!! His size may leave him going under attacks that would normally hit! A little easier to knock around.", "Adrenaline: This passively makes him stronger overtime. With enough adrenaline, passive healing is possible!", "1. Nunchuck: swing your nunchuck forwards! Can destroy some projectiles", "2. Shuriken: Standard issue projectile. Simple yet effective", "3. Dodge: Quickly dash ahead! Has invincibility, and can be used twice before cooldown!", "4. Parry: Defend yourself. Has about a third of a second worth of parry frames. It doesn't get any better than that!"];
+this.desc = ["SMALL AND CUUUUTTTEEEE!!!!! His size may leave him going under attacks that would normally hit! A little easier to knock around.", "Adrenaline: This passively makes him stronger overtime. With enough adrenaline, passive healing is possible!", "1. Nunchuck: swing your nunchuck forwards! Can parry most projectiles.", "    parried projectiles are reflected as a high damage beam!","    While sliding, this becomes a contact damage move with extremely high damage, but a lot of recovry on miss! This ends slide stance, hit or miss.", "2. Shuriken: Standard issue projectile. Simple yet effective","    Shurikens thrown while sliding are faster, and auto-aim towards nearby shurikens or the boss.", "3. Slide: Move incredibly fast in a single direction, and enter sliding stance! Exit sliding stance if already in it.", "     While sliding, you're lower to the ground, and your moves are replaced with higher damage ones!", "This is at the cost of parrying and mobility, as you cannot turn while sliding", "4. Block: Defend yourself. Has 4 frames worth of parry frames, and blocks for as long as you hold it", "  If you're in blockstun or sliding, this instead has you dash back and forth once, quickly. This variant has immunity frames, but may leave you vulnerable near the end."];
 //game stats
 this.cooldowns = [0, 0, 0, 0];
 this.playershift = [0, 0];//shift the position of the player
@@ -24,18 +24,28 @@ this.knockbackmod = 1.4; //Both a blessing, and a curse!
 this.height = 5;//Smol boi
 this.facing = [1, 0, -Math.PI/2];//facing x, facing right, facing orientation.
 this.iframe = false;
+this.hitstun = 0;
+this.knockback = [];
 //special abilities!
 this.adrenaline = 0;
 this.dmgboost = 0;
 this.regen = 0;
 this.speedbonus = 0;
 this.defensebonus = 0;
+this.sliding = false;
+this.sway = 0;
+this.defense = 0;
+this.showchuck = 0;//this variable applies for both using nunchuck, and palm strike\
+this.canslide = true;//holding the slide button does nothing
+this.immunityframes = 0;
 
 //hitboxes
-this.chuckbox = new hitbox(this.x, this.y, this.z+1, this.height - 1, 40);
+this.chuckbox = new hitbox(0, 0, this.pz+1, this.height - 1, 40);
 this.chuckbox.disable();
 this.chuckbox.immunityframes(5);
-this.showchuck = 0;
+this.autoaim = new hitbox(0, 0, this.pz+1, this.height - 1, 125);
+this.autoaim.disable();
+
 }
 Magna.prototype.listname = function(){
 
@@ -47,6 +57,7 @@ console.log("Magna, cute lil' child, is ready to fight a deity!")
 }
 Magna.prototype.exist = function(){
 //HP check
+//this.autoaim.showbox();
 if(this.hp > 100){
     //I'm generous enough to give you a BIT of extra power for a set time
     this.hp-=0.15;
@@ -85,6 +96,15 @@ for(;this.adrenaline > 9000;this.adrenaline-=1800){
 
 }
 timeplayed++;
+
+//iframes
+if(this.immunityframes > 0){
+    this.immunityframes--;
+    this.iframe = true;
+    if(this.immunityframes == 0){
+        this.iframe = false;
+    }
+}
 
 //adrenaline shenanigins
 this.adrenaline++
@@ -150,7 +170,7 @@ if(this.hp <= 100){
 //under max
 screen.fillStyle = "#F00";
 screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
-if(this.parry > 0){
+if(this.immunityframes > 0){
 screen.fillStyle = "#00F";
 }else{
 screen.fillStyle = "#0F0";
@@ -158,7 +178,7 @@ screen.fillStyle = "#0F0";
 screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, this.hp / 2, 4);//current hp
 }else{
 //over max
-if(this.parry > 0){
+if(this.immunityframes > 0){
 screen.fillStyle = "#00F";
 }else{
 screen.fillStyle = "#0F0";
@@ -219,7 +239,7 @@ this.chuckbox.updateimmunity();
         }
     }
 
-    if(this.showchuck > 0){
+    if(this.showchuck > 0 && this.sliding == false){
 
             this.showchuck--;
             screen.beginPath();
@@ -232,22 +252,38 @@ this.chuckbox.updateimmunity();
             this.chuckbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.chuckbox.size);
     for(let i = 0 ; i < enemies.length ; i++){
     if(this.chuckbox.checkenemy(i) && this.chuckbox.enemyhalf(i, this.facing)){
-        enemies[i].hit(9, ['physical', 'bludgeoning'], [5 * this.facing[0], 5 * this.facing[1]], 20);
+        enemies[i].hit(9 + this.dmgboost, ['physical', 'bludgeoning'], [5 * this.facing[0], 5 * this.facing[1]], 20);
         this.chuckbox.grantimmunity(i);
         this.cooldowns[0]-=3;
     }
     }
     //for parrying projectiles
         for(let i = 0 ; i < projectiles.length ; i++){
-            if(this.chuckbox.scanproj(i) && this.chuckbox.projhalf(i, this.facing) && typeof projectiles[i].lifetime == "number"){
+            if(this.chuckbox.scanproj(i) && typeof projectiles[i].lifetime == "number"){
                 //PARRY THAT SHIT!
                 projectiles[i].lifetime = 0;
                 
                 this.cooldowns[0] = 0;//parry chain?
+                this.cooldowns[2] = 0;//instantly start sliding again!
                 
             projectiles.push(new ParryProj(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 18, (6 * this.facing[0]),6 * this.facing[1], 2));
         }
     }
+}else if(this.showchuck > 0){
+    this.showchuck--;
+    //da love tap... but recovery only
+    this.cooldowns[3] = this.showchuck;
+    this.cooldowns[2] = this.showchuck;
+    this.cooldowns[1] = this.showchuck;
+    if(this.showchuck == 0){
+//whiff
+this.hitstun = 30;
+this.knockback = [-(this.speedmax + this.speedbonus) * this.facing[0] * 2, -(this.speedmax + this.speedbonus) * this.facing[1] * 2];
+this.sliding = false;
+this.showchuck = -5;
+
+    }
+
 }
             //hitstun
             if(this.hitstun > 0){
@@ -255,6 +291,8 @@ this.chuckbox.updateimmunity();
                 return;
             }
             //movement
+            if(this.sliding == false){
+                //standard movement
             if(inputs.includes("shift")){
                 this.speed = (this.speedmax + this.speedbonus)/2;
             }else{
@@ -288,6 +326,12 @@ this.chuckbox.updateimmunity();
                 this.facing[0] = 0;
             }
             }
+        }else{
+            //when sliding
+            this.px -= (this.speedmax + this.speedbonus) * this.facing[0] * 2;
+            this.py -= (this.speedmax + this.speedbonus) * this.facing[1] * 2;
+
+        }
 //lower all cooldowns
 for(let i = 0; i < this.cooldowns.length ; i++){
     this.cooldowns[i]--;
@@ -300,19 +344,29 @@ if(this.cooldowns[0] <= 0 && inputs.includes(controls[4])){
 if(this.cooldowns[1] <= 0 && inputs.includes(controls[5])){
     this.spec2();
 }
-if(this.cooldowns[2] <= 0 && inputs.includes(controls[6])){
+if(this.cooldowns[2] <= 0 && inputs.includes(controls[6]) && this.canslide){
     this.spec3();
+    this.canslide = false;
 }
 if(this.cooldowns[3] <= 0 && inputs.includes(controls[7])){
     this.spec4();
 }
+if(this.canslide == false && !inputs.includes(controls[6])){
+    //so holding the slide button doesn't immediately cancel slide
+    this.canslide = true;
 
+}
 }
 
 
 
 Magna.prototype.hurt = function(){
 this.hitstun--;
+if(this.sliding == true){
+    //cancel sliding
+    this.sliding = false;
+    this.cooldowns[2] = 30;
+}
 console.log(this.hitstun);
 this.px += this.knockback[0];
 this.py += this.knockback[1];
@@ -345,7 +399,18 @@ if(arena.pleavedir().includes("u")){
 
 }
 Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
-        //handle damage dealth
+        //handle damage dealt
+
+        //palmstrike cheese
+        if(this.sliding && this.showchuck > 0 && damagetype[0] == "contact"){
+            enemies[damagetype[damagetype.length - 1]].hit(69 + this.dmgboost*2, ["contact"], [30*this.facing[0], 30*this.facing[1]], 45);
+            this.showchuck = -9;//no need for giving the player hitstun now!
+            this.sliding = false;
+            this.immunityframes = 15;
+            return;
+
+        }
+
         //apply defense bonus
         if(damage > 1){
             //don't negate damage if it's under 1 already
@@ -361,7 +426,7 @@ Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
             }
         }
         //adrenaline increased based on damage taken
-        this.adrenaline+=dmg*10;
+        this.adrenaline+=dmg*2;
         if(this.hp > 100 && this.hp - dmg < 100){
         this.hp = 100;
         }else{
@@ -448,14 +513,64 @@ bossbar = [];
 Magna.prototype.spec1 = function(){
 //abilities
 this.showchuck = 4;
+this.cooldowns[2] = this.showchuck;
 this.cooldowns[0] = 9;
 }
 Magna.prototype.spec2 = function(){
-projectiles.push(new Shuriken(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, (15 * this.facing[0]),15* this.facing[1], 2));
-this.cooldowns[1] = 15;
+    if(this.sliding == true){
+        let thrown = false;
+        this.autoaim.move(canvhalfx, canvhalfy);
+        for(let i = 0 ; i < projectiles.length ; i++){
+            //aim at shurikens
+        if(this.autoaim.scanproj(i)){
+
+        
+            let dx = (projectiles[i].x + player.px - projectiles[i].shift[0] + projectiles[i].mx * 2) - (canvhalfx);
+            let dy = (projectiles[i].y + player.py - projectiles[i].shift[1] + projectiles[i].my * 2) - (canvhalfy);
+            let magnitude = Math.sqrt(dx * dx + dy * dy);
+            velocityX = (dx / magnitude) * 37;
+            velocityY = (dy / magnitude) * 37;
+            projectiles.push(new Shuriken(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, velocityX, velocityY));
+            thrown = true;
+            break;
+        }
+        }
+        if(thrown == false){
+            //aim at bosses
+            for(let i = 0 ; i < enemies.length ; i++){
+            
+        if(this.autoaim.checkenemy(i)){
+
+        
+            let dx = (enemies[i].x + player.px - enemies[i].shift[0]) - (canvhalfx);
+            let dy = (enemies[i].y + player.py - enemies[i].shift[1]) - (canvhalfy);
+            let magnitude = Math.sqrt(dx * dx + dy * dy);
+            velocityX = (dx / magnitude) * 37;
+            velocityY = (dy / magnitude) * 37;
+            projectiles.push(new Shuriken(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, velocityX, velocityY));
+            thrown = true;
+            break;
+        }
+        }
+    
+        }
+        if(thrown == false){
+            //just throw it the way you're facing
+            projectiles.push(new Shuriken(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, (37 * this.facing[0]),37* this.facing[1]));
+        }
+        projectiles[projectiles.length - 1].bounces = 1;//enable the ability for the shurikens to bounce
+    }else{
+projectiles.push(new Shuriken(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, (15 * this.facing[0]),15* this.facing[1]));
+    }
+this.cooldowns[1] = 10;
 }
 Magna.prototype.spec3 = function(){
-
+if(this.sliding == false){
+    this.sliding = true;
+}else{
+    this.sliding = false;
+    this.cooldowns[2] = 15;
+}
 }
 Magna.prototype.spec4 = function(){
 
@@ -479,10 +594,28 @@ function Shuriken(x, y, size, mx, my){
     this.my = my;
     this.hitbox = new hitbox(x, y, 2, size/2, size);
     this.hitbox.disable();
-    this.lifetime = 750
+    this.lifetime = 150;
+    this.bounces = 0;
+    this.delay = 0;
+    this.origin = [];
+    this.endpoint = 0;
+    this.destoy = false;
+}
+Shuriken.prototype.dealdamage = function(){
+    for(let i = 0 ; i < enemies.length ; i++){
+    if(this.hitbox.checkenemy(i)){
+        enemies[i].hit(7 + player.dmgboost + (this.bounces), ["physical", "slashing"]);
+        if(this.bounces < 2){
+        return "delete";//go through enemeis if bouncing!
+        }
+    }
+}
 }
 Shuriken.prototype.exist = function(){
+    
+    if(this.lifetime != null){
     this.lifetime--;
+    }
     this.hitbox.enable();
    
     screen.fillStyle = "#AAA";
@@ -493,15 +626,145 @@ Shuriken.prototype.exist = function(){
     this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
     //console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
     //console.log(arena.leavedir(this.x, this.y, this.size))
-    if(this.lifetime < 0){
+    if(this.lifetime != null && this.lifetime < 0){
+        console.log(this.lifetime)
         return "delete";
     }
     //hitting the player
     //console.log(en);
-    for(let i = 0 ; i < enemies.length ; i++){
-    if(this.hitbox.checkenemy(i)){
-        enemies[i].hit(9, ["physical", "slashing"]);
+    if(this.dealdamage() == "delete"){
         return "delete";
+    };
+    
+    for(let i = 0 ; i < projectiles.length && this.bounces == 1; i++){
+        //this will not run if the shuriken cannot bounce
+        if(projectiles[i].name == "Shuriken" && projectiles[i].hitbox.id != this.hitbox.id && this.hitbox.scanproj(i)){
+            /*This can only ricochet off of other shurikens, it cannot be itself, and it has to actually hit something*/
+            //I swear this isn't V1!
+            this.name = "Beam2";
+            console.log(this.hitbox.id + " " + projectiles[i].hitbox.id);
+            this.lifetime = null;//now this is unparriable
+            this.bounces +=1;
+            projectiles[i].lifetime = 0;
+            this.origin = [this.x, this.y];
+            this.destroy = false;
+            break;
+
+
+        }
+    }
+
+    for(let i = 0 ; i < projectiles.length && this.bounces > 1 && this.bounces % 1 == 0; i++){
+        if(this.delay > 0){
+            //just bounce back and forth
+            this.x = this.origin[0];
+            this.y = this.origin[1];
+                for(let x = 0 ; x < this.endpoint ; x++){
+                    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
+                    this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+                    this.x += this.mx;
+                    this.y += this.my;
+                    this.dealdamage();
+
+                }
+                this.delay--;
+                break;//no need to loop this
+        }
+        
+        this.destroy = true;
+        if(projectiles[i].name != "Shuriken"){
+            //don't even bother with this
+            continue;
+        }
+        this.destroy = false;
+        if(this.delay < 1){
+            this.endpoint = 0;
+            this.origin = [this.x, this.y];
+            let dx = (projectiles[i].x + player.px - projectiles[i].shift[0]) - (this.x + player.px - this.shift[0]);
+            let dy = (projectiles[i].y + player.py - projectiles[i].shift[1]) - (this.y + player.py - this.shift[1]);
+            let magnitude = Math.sqrt(dx * dx + dy * dy);
+            this.mx = (dx / magnitude) * 3;
+            this.my = (dy / magnitude) * 3;
+            let e = 0;
+            console.log(this.name)
+            while(!this.hitbox.scanproj(i) && e < 400){
+                circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
+                this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+                this.hitbox.z = -5;
+                this.hitbox.height = 999;
+                this.x+=this.mx;
+                this.y+=this.my;
+                this.endpoint++;
+                this.dealdamage();
+                e++;
+            }
+            if(e == 400){
+                this.destoy = true;
+                this.x = this.origin[0];
+                this.y = this.origin[1];
+                this.delay = 0;
+            }else{
+            this.bounces+=1;
+            projectiles[i].lifetime = 0;
+            
+            this.delay = 3;
+            }
+        }
+    }
+    if(this.destroy){
+        
+        if(this.delay > 0){
+            //just bounce back and forth
+            this.x = this.origin[0];
+            this.y = this.origin[1];
+                for(let x = 0 ; x < this.endpoint ; x++){
+                    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
+                    //this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+                    this.hitbox.disable();
+                    this.hitbox.move(9999, 9999);
+                    this.hitbox.z = 999;
+                    this.x += this.mx;
+                    this.y += this.my;
+                    //this.dealdamage();
+
+                }
+                this.delay--;
+                if(this.delay < 1){
+                    return "delete";//finally done!
+                }
+                return;
+        }else{
+        //go to the first enemy, usually the main boss, and fucking destroy them!
+        if(enemies.length == 0){
+            return "delete";//there is no enemies
+        }
+        this.origin = [this.x, this.y];
+        this.endpoint = 0;
+        this.bounces*=1.5;//bonus damage!
+            let dx = (enemies[0].x + player.px - enemies[0].shift[0]) - (this.x + player.px - this.shift[0]);
+            let dy = (enemies[0].y + player.py - enemies[0].shift[1]) - (this.y + player.py - this.shift[1]);
+            let magnitude = Math.sqrt(dx * dx + dy * dy);
+            this.mx = (dx / magnitude) * 12;
+            this.my = (dy / magnitude) * 12;
+            let e = 0
+            console.log("second hit")
+            while(!this.hitbox.checkenemy(0) && e < 400){
+                this.dealdamage();
+                circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
+                this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+                this.x+=this.mx;
+                this.y+=this.my;
+                this.endpoint++;
+                
+                e++
+            }
+            if(e != 400){
+            enemies[0].hit(9 + player.dmgboost + (this.bounces), ["magic"]);
+            }
+            this.delay = 5;
+            if(this.bounces % 1 != 0){
+            this.bounces+=0.1;
+            }
     }
 }
 }
@@ -546,7 +809,7 @@ ParryProj.prototype.exist = function(){
             this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
             for(let sti = 0; sti < enemies.length ; sti++){
             if(this.hitbox.checkenemy(sti)){
-                enemies[sti].hit(24, ["magic"], [this.mx * 2, this.my * 2], 15);
+                enemies[sti].hit(24+player.dmgboost, ["magic"], [this.mx * 2, this.my * 2], 15);
                 this.range = sti;
                 breakout = true
                 break;
