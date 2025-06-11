@@ -330,6 +330,10 @@ this.showchuck = -5;
             //when sliding
             this.px -= (this.speedmax + this.speedbonus) * this.facing[0] * 2;
             this.py -= (this.speedmax + this.speedbonus) * this.facing[1] * 2;
+            this.adrenaline+=1;//essentially double adrenaline gain
+            if(timeplayed%7 == 0){
+                projectiles.push(new Slidedust(canvhalfx + this.playershift[0] + random(-this.size, this.size), canvhalfy + this.playershift[1] + random(-this.size, this.size)))
+            }
 
         }
 //lower all cooldowns
@@ -403,10 +407,12 @@ Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
 
         //palmstrike cheese
         if(this.sliding && this.showchuck > 0 && damagetype[0] == "contact"){
-            enemies[damagetype[damagetype.length - 1]].hit(69 + this.dmgboost*2, ["contact"], [30*this.facing[0], 30*this.facing[1]], 45);
+            //da love tap
+            enemies[damagetype[damagetype.length - 1]].hit(69 + this.dmgboost*2, ["contact"], [30*this.facing[0], 30*this.facing[1]], 75);
             this.showchuck = -9;//no need for giving the player hitstun now!
             this.sliding = false;
             this.immunityframes = 15;
+            this.adrenaline+=450;//adds 15 seconds worth of adrenaline
             return;
 
         }
@@ -688,14 +694,14 @@ Shuriken.prototype.exist = function(){
             let e = 0;
             console.log(this.name)
             while(!this.hitbox.scanproj(i) && e < 400){
-                circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
+                //circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
                 this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
                 this.hitbox.z = -5;
                 this.hitbox.height = 999;
                 this.x+=this.mx;
                 this.y+=this.my;
                 this.endpoint++;
-                this.dealdamage();
+                //this.dealdamage();
                 e++;
             }
             if(e == 400){
@@ -758,9 +764,9 @@ Shuriken.prototype.exist = function(){
                 
                 e++
             }
-            if(e != 400){
+            //if(e != 400){
             enemies[0].hit(9 + player.dmgboost + (this.bounces), ["magic"]);
-            }
+            //}
             this.delay = 5;
             if(this.bounces % 1 != 0){
             this.bounces+=0.1;
@@ -810,15 +816,16 @@ ParryProj.prototype.exist = function(){
             for(let sti = 0; sti < enemies.length ; sti++){
             if(this.hitbox.checkenemy(sti)){
                 enemies[sti].hit(24+player.dmgboost, ["magic"], [this.mx * 2, this.my * 2], 15);
-                this.range = sti;
+                this.range = i;
                 breakout = true
                 break;
     }
 }
+        }
 if(breakout == true){
     break;
 }
-        }
+        
 
     }
     //console.log(arena.leavedir(this.x, this.y, this.size))
@@ -830,4 +837,24 @@ if(breakout == true){
     //hitting the player
     //console.log(en);
     
+}
+
+//partical (counts as projectile)
+function Slidedust(x, y){
+    this.name = "Slidedust";
+    this.x = x;
+    this.y = y;
+    this.shift = [player.px, player.py];
+    this.size = 4
+    this.lifetime = null;
+    this.life = 1
+}
+Slidedust.prototype.exist = function(){
+    //all this does is disappear
+    screen.fillStyle = `rgb(255, 255, 255, ${this.life})`
+    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size);
+    this.life-=0.05;
+    if(this.life < 0){
+        return "delete";
+    }
 }

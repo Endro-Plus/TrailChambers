@@ -261,7 +261,7 @@ function Eye(x, y, z, speed, acc, ID = 99){
     this.enemyID = ID;
     this.x = x;
     this.y = y;
-    this.shift = [player.px, player.py];
+    this.shift = [this.x, this.y];
     this.mx = 0;
     this.my = 0;
     this.mz = 0;
@@ -335,7 +335,7 @@ if(arena.leavedir(0, this.y - this.shift[1], this.size).includes('u')){
 }
 Eye.prototype.exist = function(){
 this.hitbox.updateimmunity();
-if(arena.leave(this.x - this.shift[0], this.y - this.shift[1], this.size)){
+if(arena.leave(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)){
         this.hp--;;//if out of bounds, start dying
 
     }
