@@ -1,13 +1,14 @@
 function Magna(startposx, startposy, size){
 this.px = startposx;
 this.py = startposy;
-this.pz = 0;
-this.size = size;
+    this.pz = 0;
+    this.size = size;
+
 
 //card info
 this.postColor = "#FF4C00";
 this.color = "#FF8B00";
-this.desc = ["SMALL AND CUUUUTTTEEEE!!!!! His size may leave him going under attacks that would normally hit! A little easier to knock around.", "Adrenaline: This passively makes him stronger overtime. With enough adrenaline, passive healing is possible!", "1. Nunchuck: swing your nunchuck forwards! Can parry most projectiles.", "    parried projectiles are reflected as a high damage beam!","    While sliding, this becomes a contact damage move with extremely high damage, but a lot of recovry on miss! This ends slide stance, hit or miss.", "2. Shuriken: Standard issue projectile. Simple yet effective","    Shurikens thrown while sliding are faster, and auto-aim towards nearby shurikens or the boss.", "3. Slide: Move incredibly fast in a single direction, and enter sliding stance! Exit sliding stance if already in it.", "     While sliding, you're lower to the ground, and your moves are replaced with higher damage ones!", "This is at the cost of parrying and mobility, as you cannot turn while sliding", "4. Block: Defend yourself. Has 4 frames worth of parry frames, and blocks for as long as you hold it", "  If you're in blockstun or sliding, this instead has you dash back and forth once, quickly. This variant has immunity frames, but may leave you vulnerable near the end."];
+this.desc = ["SMALL AND CUUUUTTTEEEE!!!!! His size may leave him going under attacks that would normally hit! A little easier to knock around.", "Adrenaline: This passively makes him stronger overtime. With enough adrenaline, passive healing is possible!", "1. Nunchuck: swing your nunchuck forwards! Can parry most projectiles.", "    parried projectiles are reflected as a high damage beam!","    While sliding, this becomes a contact damage move with extremely high damage, but a lot of recovry on miss! This ends slide stance, hit or miss.", "2. Shuriken: Standard issue projectile. Simple yet effective","    Shurikens thrown while sliding are faster, and auto-aim towards nearby shurikens or the boss.", "3. Slide: Move incredibly fast in a single direction, and enter sliding stance! Exit sliding stance if already in it.", "     While sliding, you're lower to the ground, and your moves are replaced with higher damage ones!", "This is at the cost of parrying and mobility, as you cannot turn while sliding", "4. Block: Defend yourself. Has 8 frames worth of parry frames, and blocks for as long as you hold it", "  If you're sliding, this instead has you dash back and forth once, quickly. This variant has immunity frames, but may leave you vulnerable near the end."];
 //game stats
 this.cooldowns = [0, 0, 0, 0];
 this.playershift = [0, 0];//shift the position of the player
@@ -34,7 +35,7 @@ this.speedbonus = 0;
 this.defensebonus = 0;
 this.sliding = false;
 this.sway = 0;
-this.defense = 0;
+this.blocking = -1;
 this.showchuck = 0;//this variable applies for both using nunchuck, and palm strike\
 this.canslide = true;//holding the slide button does nothing
 this.immunityframes = 0;
@@ -291,51 +292,58 @@ this.showchuck = -5;
                 return;
             }
             //movement
-            if(this.sliding == false){
-                //standard movement
-            if(inputs.includes("shift")){
-                this.speed = (this.speedmax + this.speedbonus)/2;
-            }else{
-                this.speed = this.speedmax + this.speedbonus;
-            }
-            if(inputs.includes(controls[0]) && !arena.pleavedir().includes('l')){
-            this.px+=this.speed * this.speedmod;
-            this.facing[0] = -1;
-            if(!inputs.includes(controls[2]) && !inputs.includes(controls[3])){
-                this.facing[1] = 0;
-            }
-            }
-            if(inputs.includes(controls[1]) && !arena.pleavedir().includes('r')){
-            this.px-=this.speed * this.speedmod;
-            this.facing[0] = 1;
-            if(!inputs.includes(controls[2]) && !inputs.includes(controls[3])){
-                this.facing[1] = 0;
-            }
-            }
-            if(inputs.includes(controls[2]) && !arena.pleavedir().includes('u')){
-            this.py+=this.speed * this.speedmod;
-            this.facing[1] = -1;
-            if(!inputs.includes(controls[0]) && !inputs.includes(controls[1])){
-                this.facing[0] = 0;
-            }
-            }
-            if(inputs.includes(controls[3]) && !arena.pleavedir().includes('d')){
-            this.py-=this.speed * this.speedmod;
-            this.facing[1] = 1;
-            if(!inputs.includes(controls[0]) && !inputs.includes(controls[1])){
-                this.facing[0] = 0;
-            }
-            }
-        }else{
-            //when sliding
-            this.px -= (this.speedmax + this.speedbonus) * this.facing[0] * 2;
-            this.py -= (this.speedmax + this.speedbonus) * this.facing[1] * 2;
-            this.adrenaline+=1;//essentially double adrenaline gain
-            if(timeplayed%7 == 0){
-                projectiles.push(new Slidedust(canvhalfx + this.playershift[0] + random(-this.size, this.size), canvhalfy + this.playershift[1] + random(-this.size, this.size)))
-            }
-
+    if (this.sliding == false && this.sway == 0) {
+        //standard movement
+        this.height = 5;
+        if (inputs.includes("shift")) {
+            this.speed = (this.speedmax + this.speedbonus) / 2;
+        } else {
+            this.speed = this.speedmax + this.speedbonus;
         }
+        if (inputs.includes(controls[0]) && !arena.pleavedir().includes('l')) {
+            this.px += this.speed * this.speedmod;
+            this.facing[0] = -1;
+            if (!inputs.includes(controls[2]) && !inputs.includes(controls[3])) {
+                this.facing[1] = 0;
+            }
+        }
+        if (inputs.includes(controls[1]) && !arena.pleavedir().includes('r')) {
+            this.px -= this.speed * this.speedmod;
+            this.facing[0] = 1;
+            if (!inputs.includes(controls[2]) && !inputs.includes(controls[3])) {
+                this.facing[1] = 0;
+            }
+        }
+        if (inputs.includes(controls[2]) && !arena.pleavedir().includes('u')) {
+            this.py += this.speed * this.speedmod;
+            this.facing[1] = -1;
+            if (!inputs.includes(controls[0]) && !inputs.includes(controls[1])) {
+                this.facing[0] = 0;
+            }
+        }
+        if (inputs.includes(controls[3]) && !arena.pleavedir().includes('d')) {
+            this.py -= this.speed * this.speedmod;
+            this.facing[1] = 1;
+            if (!inputs.includes(controls[0]) && !inputs.includes(controls[1])) {
+                this.facing[0] = 0;
+            }
+        }
+    } else if (this.sway == 0) {
+        //when sliding
+        this.px -= (this.speedmax + this.speedbonus) * this.facing[0] * 2;
+        this.py -= (this.speedmax + this.speedbonus) * this.facing[1] * 2;
+        this.adrenaline += 1;//essentially double adrenaline gain
+        if (timeplayed % 7 == 0) {
+            projectiles.push(new Slidedust(canvhalfx + this.playershift[0] + random(-this.size, this.size), canvhalfy + this.playershift[1] + random(-this.size, this.size)))
+        }
+        this.height = 2;
+
+    } else {
+        //backsway movement
+        this.px -= (this.speedmax + this.speedbonus) * this.facing[0] * (this.sway + 2);
+        this.py -= (this.speedmax + this.speedbonus) * this.facing[1] * (this.sway + 2);
+
+    }
 //lower all cooldowns
 for(let i = 0; i < this.cooldowns.length ; i++){
     this.cooldowns[i]--;
@@ -354,12 +362,44 @@ if(this.cooldowns[2] <= 0 && inputs.includes(controls[6]) && this.canslide){
 }
 if(this.cooldowns[3] <= 0 && inputs.includes(controls[7])){
     this.spec4();
-}
+    }
+    if (!inputs.includes(controls[7]) && this.blocking > 4) {
+        this.blocking = -1;//blocking is -1 for as long as you aren't holding the button
+        //no backing out of punishments!
+    }
 if(this.canslide == false && !inputs.includes(controls[6])){
     //so holding the slide button doesn't immediately cancel slide
     this.canslide = true;
 
-}
+    }
+    //blocking
+    if (this.blocking != -1 && this.blocking < 5) {
+        this.blocking++;
+        //console.log(this.blocking)
+    } else if (this.blocking > 5) {
+        this.blocking--;
+    }
+    
+    if (this.blocking > 4) {
+        //only slow down if it makes it this far
+        
+        this.speedcause.push(["blocking", 1, 0.5]);
+    }
+    //backsway
+    if (this.sway < 0) {
+        this.sway += 0.2;
+        this.cooldowns[3] = 10;
+        this.cooldowns[0] = 2;
+        this.cooldowns[1] = 2;
+        this.cooldowns[2] = 2;
+        if (this.sway < -2) {
+            this.immunityframes = 2;
+        }
+            
+        
+    } else {
+        this.sway = 0;
+    }
 }
 
 
@@ -579,7 +619,13 @@ if(this.sliding == false){
 }
 }
 Magna.prototype.spec4 = function(){
-
+    if (this.sliding == false && this.blocking < 0) {
+        this.blocking = 0;//activate blocking
+    
+    }
+    if (this.sliding == true) {
+        this.sway = -4;//activate backsway
+    }
 }
 
 Magna.prototype.inst = function(x = this.px, y = this.py, size = this.size){
@@ -855,6 +901,28 @@ Slidedust.prototype.exist = function(){
     circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size);
     this.life-=0.05;
     if(this.life < 0){
+        return "delete";
+    }
+}
+function Parrypart(x, y) {
+    this.name = "particle";
+    this.x = x;
+    this.y = y;
+    this.mx = random(-5, 5);
+    this.my = random(-5, 5);
+    this.shift = [player.px, player.py];
+    this.size = 4
+    this.lifetime = null;
+    this.life = 1
+}
+Parrypart.prototype.exist = function () {
+    //all this does is disappear, and move!
+    screen.fillStyle = `rgb(255, 255, 255, ${this.life})`
+    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size);
+    this.x += this.mx;
+    this.y += this.my;
+    this.life -= 0.2;
+    if (this.life < 0) {
         return "delete";
     }
 }
