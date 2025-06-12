@@ -20,7 +20,8 @@ this.damagetypemod = [];//some people may take more or less damage from certain 
 this.hp = 100; //EVEN THE FUCKING BOSSES GET 100!!!!!!
 this.facing = [0, 0, 0];
 this.damagemod = 0.5;//weaker boss noises
-this.speed = 12; //base speed
+
+this.speed = (this.lvl < 4)? this.lvl*3:12; //base speed
 this.speedmod = 1;//modifies speed, multiplicately
 this.speedcause = [];
 this.hitstunmod = 0.1; //POV: weak ass boss who isn't immune to hitstun
@@ -387,7 +388,7 @@ MagnaE.prototype.VROOOM = function(speedx, speedy){
                 if(enemyezmode()){
             this.chuckdown = 9;
             }else{
-                this.chuckdown = 7
+                this.chuckdown = 7;//bro's damn near immune to projectiles
             }
 
             
@@ -452,6 +453,9 @@ MagnaE.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0
         this.mercyframes = 0;
         this.phase = [2, 30];
 
+    }
+    if(this.dashlocale[2] < 0){
+        return;//first boss with Iframes!
     }
     var dmg = damage * this.damagemod;
     for(let i = 0 ; i < this.damagetypemod.length ; i++){

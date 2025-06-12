@@ -108,22 +108,29 @@ if(this.immunityframes > 0){
 }
 
 //adrenaline shenanigins
+if(!charezmode()){
 this.adrenaline++
+//no free adrenaline for hard mode!
+}
 //damage is always being increased
 this.dmgboost = this.adrenaline/900 //roughly +1 damage every 30 seconds (there is no cap for this)
 //defense is always being incerased
 this.defensebonus = this.adrenaline/450//roughly 1 damage negated every 15 seconds (damage negated by defense can only go to a minimum of 1 damage. other than that, no limits)
 
 //defense is applied before damagemod
-
+if(this.defensebonus > 10 && !charezmode()){
+    this.defensebonus = 10;//there's a defense cap on hard mode only!
+}
 if(this.adrenaline > 2700){
     //passive healing and speed bonus!
     this.regen = (this.adrenaline - 2700)/900 // +1 health regen every 30 seconds
     this.speedbonus = (this.adrenaline - 2700)/450 //+1 speed every 15 seconds
-
-    if(this.regen > 3){
+    if(this.regen > 0.5 && !charezmode()){
+        this.regen = 0.5;//cap at 0.5 on hard mode
+    }else if(this.regen > 3){
         this.regen = 3;//cap at 3 hp regen
     }
+    
     if(this.speedbonus > this.speedmax){
         this.speedbonus = this.speedmax;//cap at speedmax (about double the base max speed)
     }
@@ -267,7 +274,7 @@ this.chuckbox.updateimmunity();
                 this.cooldowns[0] = 0;//parry chain?
                 this.cooldowns[2] = 0;//instantly start sliding again!
                 
-            projectiles.push(new ParryProj(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 18, (6 * this.facing[0]),6 * this.facing[1], 2));
+            projectiles.push(new ParryProj(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], (charezmode())? 18:12, (6 * this.facing[0]),6 * this.facing[1], 2));
         }
     }
 }else if(this.showchuck > 0){
@@ -337,6 +344,10 @@ this.showchuck = -5;
             projectiles.push(new Slidedust(canvhalfx + this.playershift[0] + random(-this.size, this.size), canvhalfy + this.playershift[1] + random(-this.size, this.size)))
         }
         this.height = 2;
+        if(arena.pleave()){
+            this.sliding = false;
+            //no sliding through the border!
+        }
 
     } else {
         //backsway movement
@@ -363,7 +374,7 @@ if(this.cooldowns[2] <= 0 && inputs.includes(controls[6]) && this.canslide){
 if(this.cooldowns[3] <= 0 && inputs.includes(controls[7])){
     this.spec4();
     }
-    if (!inputs.includes(controls[7]) && this.blocking > 4) {
+    if (!inputs.includes(controls[7]) && this.blocking == 8 || this.blocking == -1) {
         this.blocking = -1;//blocking is -1 for as long as you aren't holding the button
         //no backing out of punishments!
     }
@@ -373,16 +384,25 @@ if(this.canslide == false && !inputs.includes(controls[6])){
 
     }
     //blocking
-    if (this.blocking != -1 && this.blocking < 5) {
+    if (this.blocking != -1 && this.blocking < 8) {
         this.blocking++;
+        this.knockback = [0 , 0];
         //console.log(this.blocking)
-    } else if (this.blocking > 5) {
+    } else if (this.blocking > 8) {
         this.blocking--;
+        this.px+=this.knockback[0];
+        this.py+=this.knockback[1];
+        if(arena.pleave()){
+            this.knockback = [0, 0];
+        }
+        screen.fillStyle = "grey";
+        circle(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size+3, true, false);
     }
     
-    if (this.blocking > 4) {
+    if (this.blocking > 7) {
         //only slow down if it makes it this far
-        
+        screen.strokeStyle = "#eee";
+        circle(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size+3, true, false);
         this.speedcause.push(["blocking", 1, 0.5]);
     }
     //backsway
@@ -444,7 +464,33 @@ if(arena.pleavedir().includes("u")){
 }
 Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
         //handle damage dealt
+        //on parry
+        if(this.blocking < 8 && this.blocking != -1){
+            //PARRIED!
+            this.adrenaline+=150;//5 seconds of adrenaline
+            this.immunityframes = 45;//OP PARRY IK
+            this.blocking = -1;
+            for(let i = 0 ; i < 5 ; i++){
+                projectiles.push(new Parrypart(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1]));
+            }
+            return;
 
+
+        }else if(this.blocking > 7){
+            //only a defense...
+            this.blocking+=hitstun/2;
+            if(this.blocking > 60){
+                this.blocking = 60;
+            }
+            this.hitstun = 0;
+            hitstun = 0;
+            //knockback[0]*=2;
+            //knockback[1]*=2;
+            damage/=2;
+            this.adrenaline+=damage;//give a small boost
+
+
+        }
         //palmstrike cheese
         if(this.sliding && this.showchuck > 0 && damagetype[0] == "contact"){
             //da love tap
@@ -453,6 +499,7 @@ Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
             this.sliding = false;
             this.immunityframes = 15;
             this.adrenaline+=450;//adds 15 seconds worth of adrenaline
+
             return;
 
         }
@@ -497,6 +544,10 @@ Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
         }
         if(this.hp < 100){
         if(this.hitstun > 0){
+            if(charezmode() && inputs.includes(controls[7]) && this.hitstun < 10){
+                //easy mode only! Block early!
+                this.blocking = 10;
+            }
             knockback[0] += this.knockback[0];
             knockback[1] += this.knockback[1];
             //hitstun+=this.hitstun;
@@ -561,6 +612,10 @@ Magna.prototype.spec1 = function(){
 this.showchuck = 4;
 this.cooldowns[2] = this.showchuck;
 this.cooldowns[0] = 9;
+if(this.sliding){
+    this.immunityframes = 0;
+    //can't be immune while going for that palm!
+}
 }
 Magna.prototype.spec2 = function(){
     if(this.sliding == true){
@@ -621,6 +676,8 @@ if(this.sliding == false){
 Magna.prototype.spec4 = function(){
     if (this.sliding == false && this.blocking < 0) {
         this.blocking = 0;//activate blocking
+        this.immunityframes = 0;
+        this.iframe = false;
     
     }
     if (this.sliding == true) {
@@ -908,8 +965,8 @@ function Parrypart(x, y) {
     this.name = "particle";
     this.x = x;
     this.y = y;
-    this.mx = random(-5, 5);
-    this.my = random(-5, 5);
+    this.mx = random(-12, 12);
+    this.my = random(-12, 12);
     this.shift = [player.px, player.py];
     this.size = 4
     this.lifetime = null;
@@ -917,7 +974,7 @@ function Parrypart(x, y) {
 }
 Parrypart.prototype.exist = function () {
     //all this does is disappear, and move!
-    screen.fillStyle = `rgb(255, 255, 255, ${this.life})`
+    screen.fillStyle = `rgb(255, 80, 80, ${this.life})`
     circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size);
     this.x += this.mx;
     this.y += this.my;

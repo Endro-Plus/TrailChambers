@@ -200,7 +200,7 @@ Tutorial_Bot.prototype.move = function(){
             this.y+=2*this.speed*this.speedmod*this.facing[1];
             }else{
                 //bro comboed too good using easy mode stats
-                player.hit(4, ["contact", "physical", 0], [(this.speed + 3)  * this.facing[0], (this.speed + 3) * this.facing[1]], 10);
+                player.hit(4, ["contact", "physical", 0], [-(this.speed + 3)  * this.facing[0], -(this.speed + 3) * this.facing[1]], 10);
                 this.x+=this.speed*this.speedmod*this.facing[0];
                 this.y+=this.speed*this.speedmod*this.facing[1];
             }
