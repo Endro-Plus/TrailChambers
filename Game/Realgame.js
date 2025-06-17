@@ -1,3 +1,116 @@
+//universal classes
+function movingpart(x, y, mx, my, size, color, life) {
+    this.name = "particle";
+    this.x = x;
+    this.y = y;
+    this.mx = mx;
+    this.my = my;
+    this.shift = [player.px, player.py];
+    this.size = size;
+    this.color = color;
+    this.lifetime = null;
+    this.life = life;
+}
+movingpart.prototype.exist = function () {
+    //all this does is disappear, and move!
+    screen.fillStyle = this.color;
+    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size);
+    this.x += this.mx;
+    this.y += this.my;
+    this.life -= 1;
+    if (this.life < 0) {
+        return "delete";
+    }
+}
+function enemyproj(name, x, y, size, mx, my, color, dmg, lifetime, dmgtype = ["true"], knockback = [0, 0], hitstun = 0){
+    this.name = name;
+    this.x = x;
+    this.y = y;
+    this.shift = [player.px, player.py];
+    this.size = size
+    this.mx = mx;
+    this.my = my;
+    this.color = color;
+    this.hitbox = new hitbox(x, y, 2, size/2, size);
+    this.hitbox.disable();
+    this.lifetime = lifetime;
+    this.dmg = dmg
+    this.dmgtype = dmgtype;
+    this.knockback = knockback;
+    this.hitstun = hitstun;
+}
+enemyproj.prototype.exist = function(){
+    if(typeof this.lifetime == "number"){
+    //no subtracting null!
+    this.lifetime--;
+    }
+    this.hitbox.enable();
+
+    screen.fillStyle = this.color;
+    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
+    this.x+=this.mx;
+    this.y+=this.my;
+
+    this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
+    //console.log(arena.leavedir(this.x, this.y, this.size))
+    if(this.lifetime < 0){
+        return "delete";
+    }
+    //hitting the player
+    //console.log(en);
+    if(this.hitbox.hitplayer()){
+        player.hit(this.dmg, this.dmgtype, this.knockback, this.hitstun);
+        return "delete";
+    }
+}
+function playerproj(name, x, y, size, mx, my, color, dmg, lifetime, dmgtype = ["true"], knockback = [0, 0], hitstun = 0){
+    this.name = name;
+    this.x = x;
+    this.y = y;
+    this.shift = [player.px, player.py];
+    this.size = size
+    this.mx = mx;
+    this.my = my;
+    this.color = color;
+    this.hitbox = new hitbox(x, y, 2, size/2, size);
+    this.hitbox.disable();
+    this.lifetime = lifetime;
+    this.dmg = dmg;
+    this.dmgtype = dmgtype;
+    this.knockback = knockback;
+    this.hitstun = hitstun;
+}
+playerproj.prototype.exist = function(){
+    if(typeof this.lifetime == "number"){
+    //no subtracting null!
+    this.lifetime--;
+    }
+    this.hitbox.enable();
+
+    screen.fillStyle = this.color;
+    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
+    this.x+=this.mx;
+    this.y+=this.my;
+
+    this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
+    //console.log(arena.leavedir(this.x, this.y, this.size))
+    if(this.lifetime < 0){
+        return "delete";
+    }
+    //hitting the enemy
+    //console.log(en);
+    for(let i = 0 ; i < enemies.length ; i++){
+    if(this.hitbox.checkenemy(i)){
+        enemies[i].hit(this.dmg, this.dmgtype, this.knockback, this.hitstun);
+        return "delete";
+        }
+        }
+    }
+
+//vars
+
 var arena = {
     //arena size and stats
     "w": canvhalfx + 40,

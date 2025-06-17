@@ -44,7 +44,7 @@ this.immunityframes = 0;
 this.chuckbox = new hitbox(0, 0, this.pz+1, this.height - 1, 40);
 this.chuckbox.disable();
 this.chuckbox.immunityframes(5);
-this.autoaim = new hitbox(0, 0, this.pz+1, this.height - 1, 125);
+this.autoaim = new hitbox(0, 0, this.pz+1, this.height - 1, 175);
 this.autoaim.disable();
 
 }
@@ -105,6 +105,9 @@ if(this.immunityframes > 0){
     if(this.immunityframes == 0){
         this.iframe = false;
     }
+}
+if(this.iframe == true && this.cooldowns[2] < 1){
+this.cooldowns[2] = 1;//no defensive options while immune!
 }
 
 //adrenaline shenanigins
@@ -629,8 +632,8 @@ Magna.prototype.spec2 = function(){
             let dx = (projectiles[i].x + player.px - projectiles[i].shift[0] + projectiles[i].mx * 2) - (canvhalfx);
             let dy = (projectiles[i].y + player.py - projectiles[i].shift[1] + projectiles[i].my * 2) - (canvhalfy);
             let magnitude = Math.sqrt(dx * dx + dy * dy);
-            velocityX = (dx / magnitude) * 37;
-            velocityY = (dy / magnitude) * 37;
+            velocityX = (dx / magnitude) * 50;
+            velocityY = (dy / magnitude) * 50;
             projectiles.push(new Shuriken(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, velocityX, velocityY));
             thrown = true;
             break;
@@ -646,8 +649,8 @@ Magna.prototype.spec2 = function(){
             let dx = (enemies[i].x + player.px - enemies[i].shift[0]) - (canvhalfx);
             let dy = (enemies[i].y + player.py - enemies[i].shift[1]) - (canvhalfy);
             let magnitude = Math.sqrt(dx * dx + dy * dy);
-            velocityX = (dx / magnitude) * 37;
-            velocityY = (dy / magnitude) * 37;
+            velocityX = (dx / magnitude) * 50;
+            velocityY = (dy / magnitude) * 50;
             projectiles.push(new Shuriken(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, velocityX, velocityY));
             thrown = true;
             break;
@@ -657,7 +660,7 @@ Magna.prototype.spec2 = function(){
         }
         if(thrown == false){
             //just throw it the way you're facing
-            projectiles.push(new Shuriken(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, (37 * this.facing[0]),37* this.facing[1]));
+            projectiles.push(new Shuriken(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, (50 * this.facing[0]),50 * this.facing[1]));
         }
         projectiles[projectiles.length - 1].bounces = 1;//enable the ability for the shurikens to bounce
     }else{

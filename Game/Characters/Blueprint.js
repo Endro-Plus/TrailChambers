@@ -36,19 +36,27 @@ console.log("Um... w-wait I'm not supposed to be loaded! U-um... well... Test ch
 
 Test.prototype.exist = function(){
 //HP check
-if(this.hp > 100){
-    //I'm generous enough to give you a BIT of extra power for a set time
-    this.hp-=0.15;
-    if(this.hp <= 100){
-        this.hp = 100;
-        //yes, I'm aware this is effectively a free defense
-    }
+if(this.hp <= 100){
+//under max
+screen.fillStyle = "#F00";
+screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
+screen.fillStyle = "#0F0";
+screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, this.hp / 2, 4);//current hp
 
 }else if(this.hp <=0 ){
     //play the death anmiation, then call off
     this.death();
     return;
+}else{
+//over max
+
+screen.fillStyle = "#0F0";
+screen.fillRect(canvhalfx - 25 - (this.hp - 100) * 0.25, canvhalfy - this.size - 10, this.hp / 2, 4);//current hp
+screen.fillStyle = "#00F";
+screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
 }
+
+
 timeplayed++;
 
 //speedmod is ALWAYS 1 to begin with

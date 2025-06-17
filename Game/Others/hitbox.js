@@ -156,7 +156,7 @@ hitbox.prototype.scanplayer = function(){
 hitbox.prototype.scanproj = function(i){
 //console.log("test1")
 try{
-if(projectiles[i].hitbox.enabled == false){
+if(projectiles[i].name == "particle" || projectiles[i].hitbox.enabled == false ){
 throw new Error("That hitbox is disabled! Don't use that!!!");
 }
 

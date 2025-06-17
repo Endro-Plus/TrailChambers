@@ -18,7 +18,7 @@ as the listname in the listname function for each character.
 
 This is not only a list of character names, but the order that they appear
 */
-var charlist = ["Jade", "Magmax", "Simia", "Magna", "Shojo", "Dorn", "Nino", "Ezekiel"];
+var charlist = ["Jade", "Magmax", "Simia", "Magna", "Ezekiel", "Nino", "Shojo", "Dorn"];
 //this will always be the last
 charlist.push("Realgame");
 

@@ -37,6 +37,7 @@ this.spin = false;
 this.parry = 0;
 this.truemiracle = 0;
 this.parryiframes = 0;
+this.abraxusind = -1;//abraxus and parry now has an indicator if they are ready
 }
 Jade.prototype.listname = function(){
 //to help position the characters correctly
@@ -332,6 +333,22 @@ if(!inputs.includes(controls[0]) && !inputs.includes(controls[1])){
 //lower all cooldowns
 for(let i = 0; i < this.cooldowns.length ; i++){
     this.cooldowns[i]--;
+    if(this.cooldowns[2] == 0){
+    //determine if abraxus is ready
+    if(this.stance == "magic"){
+        //make it known!
+        this.abraxusind = 9;
+    }else{
+        //parry is less known
+        this.abraxusind = 5;
+    }
+    this.cooldowns[2] = -1;
+    }
+
+}
+//release particles if abraxus is ready
+for(let i = 0 ; i < this.abraxusind ; this.abraxusind--){
+projectiles.push(new movingpart(canvhalfx, canvhalfy, random(-12, 12), random(-12, 12), 4, "#999", 5));
 }
 //attacks
 
