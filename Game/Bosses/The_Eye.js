@@ -188,10 +188,10 @@ circle(this.x + player.px, this.y + player.py, this.size);
 
         if(this.hitbox.hitplayer()){
             if(charezmode()){
-                player.hit(1 + ((Math.abs(this.mx) + Math.abs(this.my))/2), ["contact", "physical", this.enemyID], [this.mx * 15, this.my * 15], 20);
+                player.hit(1 + ((Math.abs(this.mx) + Math.abs(this.my))/2), ["contact", "physical", this.enemyID], [this.mx * -15, this.my * -15], 20);
             }else{
                 //hey, ever heard of pong?
-                player.hit(Math.ceil(((Math.abs(this.mx) + Math.abs(this.my)))), ["contact", "physical", this.enemyID], [this.mx * 100, this.my * 100], 15);
+                player.hit(Math.ceil(((Math.abs(this.mx) + Math.abs(this.my)))), ["contact", "physical", this.enemyID], [this.mx * -100, this.my * -100], 15);
             }
 
             this.hitbox.grantimmunity(player.listname());
@@ -437,10 +437,10 @@ if(arena.leave(this.x + player.px - this.shift[0], this.y + player.py - this.shi
 
             if(this.hitbox.hitplayer()){
                 if(charezmode()){
-                    player.hit(4, ["contact", "physical", this.enemyID], [this.mx * 8, this.my * 8], 20);
+                    player.hit(4, ["contact", "physical", this.enemyID], [this.mx * -6, this.my * -6], 20);
                 }else{
                     //MOAR DAMAGE!
-                    player.hit(4 + Math.ceil(((Math.abs(this.mx) + Math.abs(this.my)))), ["contact", "physical", this.enemyID], [this.mx * 16, this.my * 16], 30);
+                    player.hit(4 + Math.ceil(((Math.abs(this.mx) + Math.abs(this.my)))), ["contact", "physical", this.enemyID], [this.mx * -16, this.my * -16], 30);
                 }
 
                 this.hitbox.grantimmunity(player.listname());

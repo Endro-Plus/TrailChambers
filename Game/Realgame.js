@@ -94,7 +94,7 @@ playerproj.prototype.exist = function(){
     this.y+=this.my;
 
     this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
-    console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
+    //console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
     //console.log(arena.leavedir(this.x, this.y, this.size))
     if(this.lifetime < 0){
         return "delete";

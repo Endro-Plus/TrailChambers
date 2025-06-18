@@ -29,10 +29,20 @@ this.iframe = false;
 
 //special
 this.marked = null;
+this.extendedbox = new hitbox(0, 0, 0, 99, 100)
+this.stance = "ATTACK"
+
+this.whipdefaultsize = 50;
+this.whip = new hitbox(canvhalfx, canvhalfy, 1, 7, this.whipdefaultsize)
+this.whip.disable();
+this.whip.immunityframes(12);
+this.whipframe = -6;
+this.whipattack = false;
 //for Tim
 this.Timstats = [canvhalfx + 200, canvhalfy + 200, this.size];
 this.Timshots = 175;
 this.Timbox = new hitbox(this.Timstats[0], this.Timstats[1], 0, 8, this.Timstats[2]);
+
 
 
 }
@@ -45,8 +55,54 @@ Ezekiel.prototype.greeting = function(){
 console.log("Ezekiel, the summoner, has an army ready!")
 }
 Ezekiel.prototype.exist = function(){
-//TIM LIVES!!!!!
-this.tim();
+
+
+
+this.whip.updateimmunity();
+
+//revealing the marked enemies
+if(typeof this.marked == "number" && enemies.length > 0){
+    try{
+        if(enemies[this.marked].markedfordeathdebuff == true){
+            //the current enemy is marked for death
+            this.extendedbox.reassign(enemies[this.marked].x + this.px, enemies[this.marked].y + this.py, 0, 999, enemies[this.marked].size * 5);
+            this.extendedbox.showbox("rgb(100, 100, 255, 0.1)");
+            for(let i = 0 ; i < projectiles.length ; i++){
+                if(["chaos sphere", "death orb", "boosted!"].includes(projectiles[i].name) && this.extendedbox.scanproj(i)){
+                    
+                    //boost the projectile!
+                    if(projectiles[i].name != "boosted!"){
+                    projectiles[i].dmg+=10;
+                    projectiles[i].name = "boosted!"
+                    }
+                    
+            
+             let dx = this.extendedbox.x - (projectiles[i].x + player.px - projectiles[i].shift[0]);
+            let dy = this.extendedbox.y - (projectiles[i].y + player.py - projectiles[i].shift[1]);
+            let magnitude = Math.sqrt(dx * dx + dy * dy);
+            velocityX = (dx / magnitude) * 40;
+            velocityY = (dy / magnitude) * 40;
+            projectiles[i].mx = velocityX;
+            projectiles[i].my = velocityY;
+
+                }
+            }
+            
+
+        }else{
+            //remove the mark
+            this.marked = null;
+
+        }
+    }catch(e){
+         //remove the mark
+            this.marked = null;
+    }
+    
+    
+    
+
+    }
 //HP check
 if(this.hp > 100){
     //I'm generous enough to give you a BIT of extra power for a set time
@@ -62,7 +118,8 @@ if(this.hp > 100){
     return;
 }
 timeplayed++;
-
+//TIM LIVES!!!!!
+this.tim();
 //speedmod is ALWAYS 1 to begin with
 this.speedmod = 1;
 this.speedcause.sort();//sorting it makes it easier to check for duplicated
@@ -120,6 +177,68 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             screen.fillStyle = "#00F";
             screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
             }
+
+            //attacking
+            //whip (you WILL finish that whipping animation, even in hitstun)
+            if(this.whipattack == true || typeof this.whipattack == "object"){
+                if(typeof this.whipattack == "boolean"){
+                    this.whipattack = [this.facing[0], this.facing[1]];
+                }
+                this.whip.enable();
+                this.whip.move(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1]);
+                this.whip.resize(this.whipdefaultsize)
+                for(let i = Math.abs(this.whipframe) ;  i < 6 ; i++){
+                    
+                    this.whip.move(this.whip.x + this.whip.size * this.whipattack[0] * 1.2, this.whip.y + this.whip.size * this.whipattack[1] * 1.2);
+                    if(i == 5 && this.whipframe == 0){
+                        this.whip.showbox("#00ccff");//tip hitbox (crit)
+
+                        //damage
+                        for(let x = 0 ; x < enemies.length ; x++){
+                            if(this.whip.checkenemy(x)){
+                                enemies[x].hit(52, ["pain", "physical", "CRITICAL"], [9 * this.whipattack[0], 9 * this.whipattack[1]], 60);
+                                //That shit hurts!
+                                for(let part = 0 ; part < 10 ; part++){
+                                    projectiles.push(new movingpart(enemies[x].x + this.px + random(-13, 13), enemies[x].y + this.py + random(-13,13), random(-1, 1), random(-1, 1), 6, "hsla(197, 100.00%, 50.00%, 0.56)", random(25, 35)))
+                                }
+                                this.whip.grantimmunity(x);
+                                if(this.marked != null){
+                                    enemies[this.marked].markedfordeathdebuff = false;
+                                }
+                                this.marked = x;
+                                enemies[this.marked].markedfordeathdebuff = true;
+                            }
+
+                        }
+
+                    }else{
+                    this.whip.showbox("#00fff6");
+
+                    //damage
+                    for(let x = 0 ; x < enemies.length ; x++){
+                            if(this.whip.checkenemy(x)){
+                                enemies[x].hit(16, ["pain", "physical"], [9 * this.whipattack[0], 9 * this.whipattack[1]], 24);
+                                //OOWWWW!
+                                this.whip.grantimmunity(x);
+                                if(this.marked != null){
+                                    enemies[this.marked].markedfordeathdebuff = false;
+                                }
+                                this.marked = x;
+                                enemies[this.marked].markedfordeathdebuff = true;
+                            }
+
+                        }
+                    }
+                    
+                    this.whip.resize(this.whip.size*.90);
+                }
+                this.whipframe++;
+                if(this.whipframe == 6){
+                    this.whipframe = -6;
+                    this.whipattack = false;
+                    this.cooldowns[0] = 10;
+                }
+            }
             //hitstun
             if(this.hitstun > 0){
                 this.hurt();
@@ -167,7 +286,7 @@ for(let i = 0; i < this.cooldowns.length ; i++){
 
 if(this.cooldowns[0] <= 0 && inputs.includes(controls[4])){
     this.spec1();
-    this.cooldowns[0] = fps;//keep in mind the user can change the FPS freely.
+    this.cooldowns[0] = 30;
 }
 if(this.cooldowns[1] <= 0 && inputs.includes(controls[5])){
     this.spec2();
@@ -183,12 +302,25 @@ if(this.cooldowns[3] <= 0 && inputs.includes(controls[7])){
 Ezekiel.prototype.tim = function(){
 //TIM LIVES!!!
 screen.fillStyle = "#444";
-circle(this.Timstats[0] + this.px, this.Timstats[1] + this.py, this.Timstats[2])
+if(this.Timshots < 174 && this.Timshots > 1){
+    //basically don't show mid teleport
+circle(this.Timstats[0] + this.px, this.Timstats[1] + this.py, this.Timstats[2]);
+}
+if(this.Timshots == 174){
+
+    //STAND READY FOR MY ARRIVAL, WORMS! (particles)
+    for(let i = 0 ; i < 15 ; i++){
+        projectiles.push(new movingpart(this.Timstats[0] + this.px, this.Timstats[1] + this.py, random(-17, 17), random(-17, 17), 8, "rgb(102, 0, 150)", 4))
+
+    }
+}
 this.Timbox.move(this.Timstats[0] + this.px, this.Timstats[1] + this.py);
 this.Timshots--;
-if(this.Timshots != 0 && this.Timshots % 50 == 0){
+let damage = 15;
+if(this.Timshots != 0 && this.Timshots % 50 == 0 && enemies.length > 0){
     //aim
     if(typeof this.marked != "number"){
+
     let dx = (this.Timstats[0] + player.px) - (enemies[0].x + this.px);
     let dy = (this.Timstats[1] + player.py) - (enemies[0].y + this.py);
     let magnitude = Math.sqrt(dx * dx + dy * dy);
@@ -202,17 +334,44 @@ if(this.Timshots != 0 && this.Timshots % 50 == 0){
         velocityY = (dy / magnitude) * 18;
     }
 
-    projectiles.push(new playerproj("chaos sphere", this.Timstats[0] + this.px, this.Timstats[1] + this.py, 15, velocityX * -1, velocityY * -1, "purple", 15, 200, ["magic"]));
+    projectiles.push(new playerproj("chaos sphere", this.Timstats[0] + this.px, this.Timstats[1] + this.py, 15, velocityX * -1, velocityY * -1, "purple", damage, 200, ["magic"]));
 }else if(this.Timshots <= 0){
     //teleport somewhere else
-    this.Timstats[0] = random(canvhalfx - 300, canvhalfx + 300)
-    this.Timstats[1] = random(canvhalfy - 300, canvhalfy + 300)
+    try{
+    if(typeof this.marked == "number"){
+    this.Timstats[0] = random(enemies[this.marked].x - 300, enemies[this.marked].x + 300)
+    this.Timstats[1] = random(enemies[this.marked].y - 300, enemies[this.marked].y + 300)
+    }else{
+    this.Timstats[0] = random(enemies[0].x - 300, enemies[0].x + 300)
+    this.Timstats[1] = random(enemies[0].y - 300, enemies[0].y + 300) 
+    }
+    this.cooldowns[1] = 15;
     this.Timshots = 175;
+    }catch(e){
+        this.Timstats[0] = random(canvhalfx - 50, canvhalfx + 50)
+        this.Timstats[1] = random(canvhalfy - 50, canvhalfy + 50) 
+        this.Timshots = 175;
+    }
 }
 
 for(let i = 0 ; i < projectiles.length ; i++){
-if(projectiles[i].name != "chaos sphere" && this.Timbox.scanproj(i)){
+if(!["chaos sphere", "death orb", "boosted!"].includes(projectiles[i].name) && this.Timbox.scanproj(i)){
 //He was hit...
+this.Timshots = 0;
+}
+}
+for(let i = 0 ; i < enemies.length ; i++){
+if(this.Timbox.checkenemy(i)){
+//don't touch Tim!
+if(this.Timshots < 170){
+    //teleporting into the enemy doesn't deal contact damage!
+enemies[i].hit(20, ["magic", "contact"]);
+//STAND READY FOR MY ARRIVAL, WORMS! (particles)
+    for(let i = 0 ; i < 8 ; i++){
+        projectiles.push(new movingpart(this.Timstats[0] + this.px + random(-30, 30), this.Timstats[1] + this.py + random(-30,30), random(-3, 3), random(-3, 3), 8, "hsla(197, 100.00%, 50.00%, 0.56)", random(20, 30)))
+
+    }
+}
 this.Timshots = 0;
 }
 }
@@ -343,10 +502,16 @@ bossbar = [];
 }
 Ezekiel.prototype.spec1 = function(){
 //abilities
-console.log("working!");
+this.whipattack = true;
 }
 Ezekiel.prototype.spec2 = function(){
-
+let tp = [canvhalfx - this.Timstats[0], canvhalfy - this.Timstats[1]];
+this.Timstats[0] = canvhalfx + this.playershift[0] - this.px;
+this.Timstats[1] = canvhalfy + this.playershift[1] - this.py;
+this.Timshots = 180;
+this.px = tp[0];
+this.py = tp[1];
+this.cooldowns[1] = 30;
 }
 Ezekiel.prototype.spec3 = function(){
 

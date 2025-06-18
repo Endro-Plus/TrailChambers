@@ -486,16 +486,23 @@ if(enemies[index].hitbox.id == this.id){
     //this is the same enemy...
     return;
 }
-try{
-for(let i = 0 ; this.localimmune.length ; i++){
+{
+    let skip = false
+for(let i = 0 ; i < this.localimmune.length ; i++){
     if(this.localimmune[i][0] == index){
         //this enemy has local immunity
-        throw new Error("EEEEEEEEE!!!!!!!!!!! LOCAL IMMUNITY FRAMES")
+        skip = true;
+        break
+    }else{
+        skip = false;
+        
     }
 }
-}catch(e){
-return;
+if(skip == true){
+    return false;
 }
+}
+
     if(this.type == "circle" && enemies[index].hitbox.type == "circle"){
             //just using chatGPT's solution here
             let dx = this.x - enemies[index].hitbox.x;
