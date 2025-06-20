@@ -21,6 +21,7 @@ this.speedmod = 1;//modifies speed, multiplicately
 this.DI = 1;
 this.knockback = [0, 0]; //knockback resistance, essentially.
 this.facing = [0, 0]; //what direction the player is facing
+this.hitstun = 0;
 this.hitstunmod = 1;
 this.knockbackmod = 1;
 this.height = 8;
@@ -31,6 +32,7 @@ this.iframe = false;
 this.marked = null;
 this.extendedbox = new hitbox(0, 0, 0, 99, 100)
 this.stance = "ATTACK"
+this.canstance = true;
 
 this.whipdefaultsize = 50;
 this.whip = new hitbox(canvhalfx, canvhalfy, 1, 7, this.whipdefaultsize)
@@ -42,6 +44,8 @@ this.whipattack = false;
 this.Timstats = [canvhalfx + 200, canvhalfy + 200, this.size];
 this.Timshots = 175;
 this.Timbox = new hitbox(this.Timstats[0], this.Timstats[1], 0, 8, this.Timstats[2]);
+this.defenseaura = new hitbox(0, 0, 0, 20, 125);
+this.defenseaura.disable();
 
 //for death orbs
 this.deathorbs = [];
@@ -49,7 +53,7 @@ this.deathphase = [];
 this.meleedirect = [];
 this.targetting = [];
 this.deathshift = []
-
+this.angle = 0;
 
 
 }
@@ -129,8 +133,11 @@ timeplayed++;
 this.tim();
 
 //DEATHORBS KILLS!
+if(this.deathorbs.length > 0){
+    this.angle+=0.1;
 for(let i = 0 ; i < this.deathorbs.length ; i++){
     this.DIE(i);
+}
 }
 //speedmod is ALWAYS 1 to begin with
 this.speedmod = 1;
@@ -254,8 +261,8 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             //hitstun
             if(this.hitstun > 0){
                 this.hurt();
-                return;
-            }
+                
+            }else{
             //movement
             if(inputs.includes("shift")){
                 this.speed = 5;
@@ -294,7 +301,7 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
 for(let i = 0; i < this.cooldowns.length ; i++){
     this.cooldowns[i]--;
 }
-if(this.cooldowns[2] < 0){
+if(this.cooldowns[2] < 0 && this.deathorbs.length < 10){
     screen.fillStyle = "#aaa";
     circle(canvhalfx + this.playershift[0], canvhalfy + this.size*1.5 + this.playershift[1], 5)
 }
@@ -311,10 +318,14 @@ if(this.cooldowns[2] <= 0 && inputs.includes(controls[6]) && this.deathorbs.leng
     this.spec3();
     //no more than 10 bees!
 }
-if(this.cooldowns[3] <= 0 && inputs.includes(controls[7])){
+}//things you can't do in hitstun
+if(this.cooldowns[3] <= 0 && inputs.includes(controls[7]) && this.canstance){
     this.spec4();
+    this.canstance = false;
 }
-
+if(this.canstance == false && !inputs.includes(controls[7])){
+    this.canstance = true
+}
 }
 Ezekiel.prototype.tim = function(){
 //TIM LIVES!!!
@@ -334,7 +345,7 @@ if(this.Timshots == 174){
 this.Timbox.move(this.Timstats[0] + this.px, this.Timstats[1] + this.py);
 this.Timshots--;
 let damage = 15;
-if(this.Timshots != 0 && this.Timshots % 50 == 0 && enemies.length > 0){
+if(this.stance == "ATTACK" && this.Timshots != 0 && this.Timshots % 50 == 0 && enemies.length > 0){
     //aim
     if(typeof this.marked != "number"){
 
@@ -352,9 +363,45 @@ if(this.Timshots != 0 && this.Timshots % 50 == 0 && enemies.length > 0){
     }
 
     projectiles.push(new playerproj("chaos sphere", this.Timstats[0] + this.px, this.Timstats[1] + this.py, 15, velocityX * -1, velocityY * -1, "purple", damage, 200, ["magic"]));
-}else if(this.Timshots <= 0){
+}else if(this.stance == "PANIC" && this.Timshots != 0){
+    //show defense aura
+    if( this.Timshots % 10 == 0){
+        //particle for aura
+    projectiles.push(new movingpart(this.Timstats[0] + this.px + random(-75, 75), this.Timstats[1] + this.py + random(-75, 75), random(-2, 2), random(-2, 2), 8, "rgb(102, 0, 150, 0.5)", random(45, 60)));
+    }
+    this.defenseaura.move(this.Timstats[0] + this.px, this.Timstats[1] + this.py);
+    if(charezmode()){
+        this.defenseaura.size = 150;
+    }else{
+        this.defenseaura.size = 100;
+    }
+    this.defenseaura.showbox("rgb(147, 109, 165, 0.1)");
+    if(this.defenseaura.scanplayer()){
+        //visual indicator of protection
+        screen.fillStyle = "rgb(58, 0, 83)";
+        circle(canvhalfx, canvhalfy, this.size+5);
+    }
+    for(let i = 0 ; i < enemies.length ; i++){
+        if(this.defenseaura.checkenemy(i)){
+            if(i == this.marked){
+            //a miniscule * 2 amount of true damage
+            enemies[i].hit(0.4);
+            enemies[i].speedcause.push(["dark aura", 12, 0.5]);//50% reduction in speed
+            }else{
+            //a miniscule amount of true damage
+            enemies[i].hit(0.2);
+            enemies[i].speedcause.push(["dark aura", 1, 0.7]);//30% reduction in speed
+            }
+        }
+    }
+}if(this.Timshots <= 0){
     //teleport somewhere else
+    //console.log("john")
     try{
+        if(this.stance == "PANIC"){
+            //always teleport near the player
+            throw new Error("hi guys");
+        }
     if(typeof this.marked == "number"){
     this.Timstats[0] = random(enemies[this.marked].x - 300, enemies[this.marked].x + 300)
     this.Timstats[1] = random(enemies[this.marked].y - 300, enemies[this.marked].y + 300)
@@ -365,8 +412,10 @@ if(this.Timshots != 0 && this.Timshots % 50 == 0 && enemies.length > 0){
     this.cooldowns[1] = 15;
     this.Timshots = 175;
     }catch(e){
-        this.Timstats[0] = random(canvhalfx - 50, canvhalfx + 50)
-        this.Timstats[1] = random(canvhalfy - 50, canvhalfy + 50) 
+        
+        this.Timstats[0] = random(canvhalfx - this.px - 80, canvhalfx - this.px + 80);
+        this.Timstats[1] = random(canvhalfy - this.py - 80, canvhalfy - this.py + 80);
+        this.cooldowns[1] = 15;
         this.Timshots = 175;
     }
 }
@@ -440,7 +489,7 @@ Ezekiel.prototype.DIE = function(orb){
         let magnitude = Math.sqrt(dx * dx + dy * dy);
         velocityX = (dx / magnitude) * 15;
         velocityY = (dy / magnitude) * 15;
-        projectiles.push(new playerproj("death orb", this.deathorbs[orb].x + this.px - this.deathshift[orb][0], this.deathorbs[orb].y + this.py - this.deathshift[orb][1], this.deathorbs[orb].size, velocityX * -1, velocityY * -1, "black", 15, 45, ["magic"]));
+        projectiles.push(new playerproj("death orb", this.deathorbs[orb].x + this.px - this.deathshift[orb][0], this.deathorbs[orb].y + this.py - this.deathshift[orb][1], this.deathorbs[orb].size, velocityX * -1, velocityY * -1, "black", (charezmode())? 15: 8, 45, ["magic"]));
        }
 
         this.deathphase[orb]--;
@@ -468,6 +517,11 @@ Ezekiel.prototype.DIE = function(orb){
 
 
     }
+}else{
+    this.deathorbs[orb].x = (canvhalfx) + (this.size + 30) * Math.cos(this.angle + orb*(6.34/this.deathorbs.length));
+    this.deathorbs[orb].y = (canvhalfy) + (this.size + 30) * Math.sin(this.angle + orb*(6.34/this.deathorbs.length));
+
+
 }
 
      //reveal the orb of doom!
@@ -531,12 +585,23 @@ if(arena.pleavedir().includes("u")){
 
 }
 Ezekiel.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
-        //handle damage dealth
+        //handle damage dealt
         var dmg = damage * this.damagemod;
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
             if(damagetype.includes(this.damagetypemod[i][0])){
                 dmg *= this.damagetypemod[i][1];
             }
+        }
+        if(this.damagetype != ["true"] && this.stance == "PANIC" && this.defenseaura.scanplayer()){
+            //if you're in the shield, and it's not true damage
+            if(charezmode()){
+            dmg*=.25;
+            }else{
+                dmg*=0.5//75% reduction was OP, 50 is better for hard mode!
+            }
+            knockback[0]/=2;
+            knockback[1]/=2;
+            hitstun*=0.10;
         }
         if(this.hp > 100 && this.hp - dmg < 100){
         this.hp = 100;
@@ -574,6 +639,8 @@ Ezekiel.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 
         //console.log(this.hp);
 
         //kill deathspheres
+        if(dmg > 1 && this.stance == "ATTACK" || !charezmode()){
+            //only do this if damage is actually done (or don't kill death orbs if in panic stance on easy mode)
         for(let i = 0 ; i < this.deathorbs.length ; i++){
             if(random(0, 1, false)){
                 this.deathorbs.pop();
@@ -583,6 +650,7 @@ Ezekiel.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 
                 this.deathshift.pop();
             }
         }
+    }
     }
 Ezekiel.prototype.death = function(){
 projectiles = [];
@@ -644,7 +712,12 @@ this.py = tp[1];
 this.cooldowns[1] = 30;
 }
 Ezekiel.prototype.spec3 = function(){
+    if(this.stance == "ATTACK"){
 this.deathorbs.push(new hitbox(canvhalfx - this.px, canvhalfy - this.py, 4, 3, 10));
+    }else{
+        this.deathorbs.push(new hitbox(canvhalfx, canvhalfy, 4, 3, 10));
+
+    }
 this.deathorbs[this.deathorbs.length-1].immunityframes(30);
 this.deathphase.push(random(35, 45, false));
 this.targetting.push(this.marked);
@@ -653,7 +726,17 @@ this.deathshift.push([0, 0]);
 this.cooldowns[2] = 150;
 }
 Ezekiel.prototype.spec4 = function(){
-
+if(this.stance == "ATTACK"){
+    
+this.stance = "PANIC";
+this.Timshots = (charezmode())? 0:30;
+}else{
+    this.stance = "ATTACK"
+}
+this.cooldowns[3] = 15;
+if(this.hitstun > 0 && !charezmode()){
+        this.cooldowns[3] = 150;
+    }
 }
 
 Ezekiel.prototype.inst = function(x = this.px, y = this.py, size = this.size){
