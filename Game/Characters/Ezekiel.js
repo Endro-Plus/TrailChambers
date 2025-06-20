@@ -294,6 +294,10 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
 for(let i = 0; i < this.cooldowns.length ; i++){
     this.cooldowns[i]--;
 }
+if(this.cooldowns[2] < 0){
+    screen.fillStyle = "#aaa";
+    circle(canvhalfx + this.playershift[0], canvhalfy + this.size*1.5 + this.playershift[1], 5)
+}
 //attacks
 
 if(this.cooldowns[0] <= 0 && inputs.includes(controls[4])){
@@ -436,7 +440,7 @@ Ezekiel.prototype.DIE = function(orb){
         let magnitude = Math.sqrt(dx * dx + dy * dy);
         velocityX = (dx / magnitude) * 15;
         velocityY = (dy / magnitude) * 15;
-        projectiles.push(new playerproj("death orb", this.deathorbs[orb].x + this.px - this.deathshift[orb][0], this.deathorbs[orb].y + this.py - this.deathshift[orb][1], this.deathorbs[orb].size, velocityX * -1, velocityY * -1, "black", 9, 45, ["magic"]));
+        projectiles.push(new playerproj("death orb", this.deathorbs[orb].x + this.px - this.deathshift[orb][0], this.deathorbs[orb].y + this.py - this.deathshift[orb][1], this.deathorbs[orb].size, velocityX * -1, velocityY * -1, "black", 15, 45, ["magic"]));
        }
 
         this.deathphase[orb]--;
@@ -486,7 +490,7 @@ Ezekiel.prototype.DIE = function(orb){
      for(let i = 0 ; i < enemies.length ; i++){
         if(this.deathorbs[orb].checkenemy(i)){
 
-            enemies[i].hit(24, ["physical", "slashing"]);
+            enemies[i].hit(32, ["physical", "slashing"]);
             this.deathorbs[orb].grantimmunity(i);
         }
      }
@@ -646,7 +650,7 @@ this.deathphase.push(random(35, 45, false));
 this.targetting.push(this.marked);
 this.meleedirect.push([]);
 this.deathshift.push([0, 0]);
-this.cooldowns[2] = 30;
+this.cooldowns[2] = 150;
 }
 Ezekiel.prototype.spec4 = function(){
 
