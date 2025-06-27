@@ -600,8 +600,8 @@ Jade.prototype.death = function(){
 //NOT YET!
 while(this.miracle > 0 && this.hp < 1){
 this.miracle-=0.5;
-this.hp++;
-//this is effectively +50 free hp
+this.hp+=3;
+//this is effectively +60 free hp
 }
 
 if(this.hp >=1 && this.truemiracle < 1){
@@ -609,8 +609,8 @@ if(this.hp >=1 && this.truemiracle < 1){
 return;
 }else if(random(0, 100, false) == 50 && this.truemiracle < 1 && this.hp != null){
 //NOOOTTTT YEEEEEEEETTTTTTTT!!!!!!!!!
-this.hp = 100;
-this.miracle = 15;
+this.hp = 200;
+this.miracle = 20;
 this.truemiracle = random(45, 75);
 this.parry = 99999;//a gift from the Demon Lord!
 

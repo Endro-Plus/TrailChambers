@@ -116,9 +116,9 @@ this.adrenaline++
 //no free adrenaline for hard mode!
 }
 //damage is always being increased
-this.dmgboost = this.adrenaline/900 //roughly +1 damage every 30 seconds (there is no cap for this)
+this.dmgboost = this.adrenaline/450 //roughly +1 damage every 15 seconds (there is no cap for this)
 //defense is always being incerased
-this.defensebonus = this.adrenaline/450//roughly 1 damage negated every 15 seconds (damage negated by defense can only go to a minimum of 1 damage. other than that, no limits)
+this.defensebonus = this.adrenaline/900//roughly 1 damage negated every 30 seconds (damage negated by defense can only go to a minimum of 1 damage. other than that, no limits)
 
 //defense is applied before damagemod
 if(this.defensebonus > 10 && !charezmode()){
@@ -128,10 +128,10 @@ if(this.adrenaline > 2700){
     //passive healing and speed bonus!
     this.regen = (this.adrenaline - 2700)/900 // +1 health regen every 30 seconds
     this.speedbonus = (this.adrenaline - 2700)/450 //+1 speed every 15 seconds
-    if(this.regen > 0.5 && !charezmode()){
-        this.regen = 0.5;//cap at 0.5 on hard mode
-    }else if(this.regen > 3){
-        this.regen = 3;//cap at 3 hp regen
+    if(this.regen > 0.06 && !charezmode()){
+        this.regen = 0.06;//cap at 0.06 on hard mode (about 2 hp a second)
+    }else if(this.regen > 1){
+        this.regen = 1;//cap at 1 hp regen (30 a second)
     }
     
     if(this.speedbonus > this.speedmax){
@@ -397,6 +397,16 @@ if(this.canslide == false && !inputs.includes(controls[6])){
         this.py+=this.knockback[1];
         if(arena.pleave()){
             this.knockback = [0, 0];
+            if(arena.pleavedir().includes("l")){
+                this.px = arena.w - this.size - 3;
+            }else if(arena.pleavedir().includes("r")){
+                this.px = -arena.w + this.size + 3;
+            }
+            if(arena.pleavedir().includes("u")){
+                this.py = arena.h - this.size - 3;
+            }else if(arena.pleavedir().includes("d")){
+                this.py = -arena.h + this.size + 3;
+}
         }
         screen.fillStyle = "grey";
         circle(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size+3, true, false);
@@ -412,10 +422,13 @@ if(this.canslide == false && !inputs.includes(controls[6])){
     if (this.sway < 0) {
         this.sway += 0.2;
         this.cooldowns[3] = 10;
+        if(this.sway < -3){
+        //cancel backsway into palm strike!
         this.cooldowns[0] = 2;
+        }
         this.cooldowns[1] = 2;
         this.cooldowns[2] = 2;
-        if (this.sway < -2) {
+        if (this.sway < -1.2) {
             this.immunityframes = 2;
         }
             
@@ -442,7 +455,7 @@ this.knockback[1]*=0.9;
 if(arena.pleavedir().includes("l") || arena.pleavedir().includes('r')){
 this.hitstun += 3;
 if(!charezmode()){
-this.hit(3, ["physical"]);//slamming into walls hurt!
+this.hit(1, ["physical"]);//slamming into walls hurt, but just a little for this little one
 }
 this.knockback[0]*=-0.5;
 if(arena.pleavedir().includes("l")){
@@ -454,7 +467,7 @@ if(arena.pleavedir().includes("l")){
 if(arena.pleavedir().includes("u") || arena.pleavedir().includes('d')){
 this.hitstun += 3;
 if(!charezmode()){
-this.hit(3, ["physical"]);//slamming into walls hurt!
+this.hit(1, ["physical"]);//slamming into walls hurt, but just a little for this little one!
 }
 this.knockback[1]*=-0.5;
 if(arena.pleavedir().includes("u")){
@@ -616,7 +629,14 @@ this.showchuck = 4;
 this.cooldowns[2] = this.showchuck;
 this.cooldowns[0] = 9;
 if(this.sliding){
-    this.immunityframes = 0;
+    this.immunityframes = -1;
+    this.iframe = false;
+    if(this.sway < 0){
+        //backsway palmstrike has additional active frames, and immediately ends backsway
+        this.showchuck = 8;
+        this.sway = 0;
+    }
+    
     //can't be immune while going for that palm!
 }
 }

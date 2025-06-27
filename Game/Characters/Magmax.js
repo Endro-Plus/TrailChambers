@@ -34,9 +34,10 @@ this.slashbox.immunityframes(2);//really fucking broken, I know.
 this.slashtime = 0;
 this.dashtime = 0;
 this.nohit = false;
-this.repetitivebonus = 1;//get a small damage boost for every dash attack hit
+this.repetitivebonus = 1;//get a small damage boost for every attack hit
 this.projstart = 0;
 this.abilitylock = [false, false];
+this.secondphase = -1;
 //hard mode exclusive
 this.energy = 50;//also straight from evades.io
 this.energyregen = 0.13;//straight from evades.io (4 energy a second)
@@ -84,13 +85,21 @@ if(this.hp > 100){
     this.nohit = 45;
     this.hitstun = 0;
     this.clutch = true;
+    this.secondphase = 0;
     }else{
     //play the death anmiation, then call off
     this.death();
     return "dead";
     }
 }
-
+//indicator of phase change
+if(this.secondphase > -1 && this.secondphase <= 15){
+    screen.strokeStyle = "#f00";
+    screen.lineWidth = 10*(this.secondphase/2)
+    circle(canvhalfx, canvhalfy, this.size * this.secondphase, true, false);
+    this.secondphase+=3;
+    screen.lineWidth = 1;
+}
 timeplayed++;
 if(this.state == "harden" || this.nohit > 0){
     console.log(true)

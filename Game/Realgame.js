@@ -701,6 +701,7 @@ var prep = function(){
 }
 //playing the game
 var gametime = function(){
+     screen.lineWidth = 1;
     screen.fillStyle = "#311";
     screen.strokeStyle = "#000";
     screen.fillRect(0, 0, 999, 999);

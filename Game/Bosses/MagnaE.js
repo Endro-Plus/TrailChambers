@@ -224,7 +224,7 @@ MagnaE.prototype.move = function(){
         if(this.hitbox.hitplayer()){
         console.log("hit")
         //no contact comboes!!!
-            player.hit(2, ["contact", "physical", 0], [2 * this.facing[0], 2 * this.facing[1]], 2);
+            player.hit(2, ["contact", "physical", this.enemyID], [2 * this.facing[0], 2 * this.facing[1]], 2);
             this.x-=7*this.speed*this.speedmod*this.facing[0];
             this.y-=7*this.speed*this.speedmod*this.facing[1];
             
@@ -242,7 +242,8 @@ MagnaE.prototype.move = function(){
             }
             
             if(!enemyezmode() || this.chuckbox.hitplayer()){
-                player.hit(8, ["bludgeoning", "physical", 0], [-12 * this.facing[0], -12 * this.facing[1]], 7);
+                //a little less damage for easy mode
+                player.hit((enemyezmode())? 4:8, ["bludgeoning", "physical"], [-12 * this.facing[0], -12 * this.facing[1]], 7);
             }
             
             this.chuckbox.grantimmunity(player.listname());
@@ -368,8 +369,8 @@ MagnaE.prototype.VROOOM = function(speedx, speedy){
         //contact damage
         if(this.hitbox.hitplayer()){
         console.log("hit")
-        //the love tap
-            player.hit(69, ["contact", "physical", 0], [speedx * 10, 40 * speedy * 10], 30);
+        //the love tap (now does less damage in comboes, because magna just LOVES comboing into it)
+            player.hit((player.hitstun > 0)? 25:69, ["contact", "physical", 0], [speedx * 10, 40 * speedy * 10], 30);
             this.hitstun = 45;
             this.phase[1] = 0;
             
@@ -561,7 +562,7 @@ ParryProjE.prototype.exist = function(){
         if(this.lifetime == 1){
             this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
             if(this.hitbox.hitplayer()){
-                player.hit(24, ["magic"], [this.mx * 2, this.my * 2], 15);
+                player.hit(24, ["magic"], [this.mx * -2, this.my * -2], 15);
                 this.range = i;
                 break;
     }

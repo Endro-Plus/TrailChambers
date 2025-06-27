@@ -15,7 +15,7 @@ this.playershift = [0, 0];//shift the position of the player
 this.cooldowns = [0, 0, 0, 0];
 this.damagetypemod = [["sexual", 4], ["seduction", 2], ["dark", 0.8], ["light", 2], ["pain", 5], ["headpat", 999], ["magic", 0.9], ["physical", 1.2], ["psychic", 2]];//Read it and weep... I know I am.
 this.hp = 100;//I was genuinely considering giving me less hp... be no, multiplication and percent math is much better :)
-this.damagemod = 1.1; //And to think this character is my self insert... yep, fuck me.
+this.damagemod = 1.2; //And to think this character is my self insert... yep, fuck me.
 this.speed = 15; //+5 speed so I can run the fuck away.
 this.speedmax = 15//yeah, should've had this a while ago.
 this.speedmod = 1;
@@ -102,7 +102,7 @@ this.desperation = enemies[0].hp - this.hp;
 if(this.desperation < 10){
 this.desperation = 0;
 }else{
-this.desperation*=1.2;
+this.desperation*=1.4;//I really need the extra damage
 if(this.desperation > 20 && this.momentum < this.desperation && this.speedtoggle == false){
 this.momentum+=0.3;//so I can actually make use of desperation without immediately dying, sometimes...
 this.hitstun-=this.desperation/100;//THE ABILITY TO ESCAPE COMBOS!!!!
@@ -332,14 +332,14 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
                 if(!charezmode()){
                 if(this.combo > 12){
                     //this move is fucking cringe
-                    enemies[hi].hit((26 + this.desperation) + (this.combo) * 2, ["physical", "bludgeoning", "cringe"], [(this.px < enemies[hi].x)? 5:-5 , (this.py < enemies[hi].y)? 5:-5], 15);
+                    enemies[hi].hit((46 + this.desperation) + (this.combo) * 2, ["physical", "bludgeoning", "cringe"], [(this.px < enemies[hi].x)? 5:-5 , (this.py < enemies[hi].y)? 5:-5], 15);
                 }else{
 
-                enemies[hi].hit((21 + this.desperation) + (this.combo - 1) * 2, ["physical", "bludgeoning"], [(this.px < enemies[hi].x)? 5:-5 , (this.py < enemies[hi].y)? 5:-5], 15);
+                enemies[hi].hit((40 + this.desperation) + (this.combo - 1) * 2, ["physical", "bludgeoning"], [(this.px < enemies[hi].x)? 5:-5 , (this.py < enemies[hi].y)? 5:-5], 15);
                 }
                 this.combo += 5;//I had to give this some use. This move is fucking ass
                 }else{
-                enemies[hi].hit((26 + this.desperation), ["physical", "bludgeoning"], [(this.px < enemies[hi].x)? 5:-5 , (this.py < enemies[hi].y)? 5:-5], 15);
+                enemies[hi].hit((46 + this.desperation), ["physical", "bludgeoning"], [(this.px < enemies[hi].x)? 5:-5 , (this.py < enemies[hi].y)? 5:-5], 15);
                 }
                 this.savior_frames = 5;
                 this.sweepbox.grantimmunity(enemies[hi]);
@@ -668,15 +668,15 @@ Simia.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
 
             this.windup = 0;
             if(this.grounded == true){
-            enemies[damagetype[damagetype.length - 1]].hit((18  + this.desperation), ["contact", "physical"], [this.airmv[0], this.airmv[1]], 30);
+            enemies[damagetype[damagetype.length - 1]].hit((36  + this.desperation), ["contact", "physical"], [this.airmv[0], this.airmv[1]], 30);
             }else{
             if(!charezmode()){
             //a blessing? Or a curse! Gotta use those air options for more damage!
             this.combo+=1;
-            enemies[damagetype[damagetype.length - 1]].hit((15 + this.desperation) + this.combo, ["contact", "physical"], [(2 * this.combo + 2) * this.facing[0], (2 * this.combo + 2) * this.facing[1]]);
+            enemies[damagetype[damagetype.length - 1]].hit((20 + this.desperation) + this.combo, ["contact", "physical"], [(2 * this.combo + 2) * this.facing[0], (2 * this.combo + 2) * this.facing[1]]);
             }else{
 
-            enemies[damagetype[damagetype.length - 1]].hit((18 + this.desperation), ["contact", "physical"], [2 * this.facing[0], 2 * this.facing[1]], 45);
+            enemies[damagetype[damagetype.length - 1]].hit((28 + this.desperation), ["contact", "physical"], [2 * this.facing[0], 2 * this.facing[1]], 45);
 
             }
             if(charezmode()){

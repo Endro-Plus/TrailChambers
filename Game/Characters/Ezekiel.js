@@ -8,7 +8,7 @@ this.size = size;
 //character poster/character color
 this.postColor = "#0000FF";
 this.color = "#0088FF";
-this.desc = ["The Summoner! Overwhelm your foes with superior numbers, and swap places with your Tim when you're in danger!", "Tim: Your skeletal companion teleports around at random and fires magical orbs at your opponents!", "    He is completely autonomous, teleports instantly when in danger, and cannot be killed.", "1. Whip: A VERY long reach melee attack! A successful hit marks your opponent for death", "    When marked for death, all summons target the enemy, and summons do additional damage to marked enemies.", "2. Swap: swap places with Tim. Tim can just teleport out of danger anyway! Goes on cooldown if Tim teleports.", "3. Death Sphere: Summon up to 10 autonomous death spheres that fire projectiles and rush at enemies!", "Death Spheres block projectiles, BUT if Ezekiel takes damage, there's a 50% chance for a Death Sphere to be die. Death Spheres don't take damage.", "4. PANIC/ATTACK: Changes stance to PANIC stance, causing all death sphere to orbit you, and Tim to stop attacking.", "  While PANIC is active, Tim emits an aura that negates 75% of damage instead of attacking. This aura passively damages bosses, but it's weak", "    Use again to go back to ATTACK stance. Can be used in hitstun"]
+this.desc = ["The Summoner! Overwhelm your foes with superior numbers, and swap places with your Tim when you're in danger!", "Tim: Your skeletal companion teleports around at random and fires magical orbs at your opponents!", "    He is completely autonomous, teleports instantly when in danger, and cannot be killed.", "Pain Split: For every existing deathorb, you are given a +5% resistance to damage", "1. Whip: A VERY long reach melee attack! A successful hit marks your opponent for death", "    When marked for death, all summons target the enemy, and summons do additional damage to marked enemies.", "2. Swap: swap places with Tim. Tim can just teleport out of danger anyway! Goes on cooldown if Tim teleports.", "3. Death Sphere: Summon up to 10 autonomous death spheres that fire projectiles and rush at enemies!", "Death Spheres block projectiles, BUT if Ezekiel takes damage, there's a 50% chance for a Death Sphere to be die. Death Spheres don't take damage.", "4. PANIC/ATTACK: Changes stance to PANIC stance, causing all death sphere to orbit you, and Tim to stop attacking.", "  While PANIC is active, Tim emits an aura that negates 75% of damage instead of attacking. This aura passively damages bosses, but it's weak", "    Use again to go back to ATTACK stance. Can be used in hitstun"]
 //game stats
 this.playershift = [0, 0];//shift the position of the player
 this.cooldowns = [0, 0, 0, 0];
@@ -218,7 +218,7 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
                                 enemies[x].hit(52, ["pain", "physical", "CRITICAL"], [9 * this.whipattack[0], 9 * this.whipattack[1]], 60);
                                 //That shit hurts!
                                 for(let part = 0 ; part < 10 ; part++){
-                                    projectiles.push(new movingpart(enemies[x].x + this.px + random(-13, 13), enemies[x].y + this.py + random(-13,13), random(-1, 1), random(-1, 1), 6, "hsla(197, 100.00%, 50.00%, 0.56)", random(25, 35)))
+                                    projectiles.push(new movingpart(enemies[x].x + this.px + random(-13, 13), enemies[x].y + this.py + random(-13,13), random(-6, 6), random(-6, 6), 6, "hsla(197, 100.00%, 50.00%, 0.56)", random(25, 35, false)))
                                 }
                                 this.whip.grantimmunity(x);
                                 if(this.marked != null){
@@ -319,6 +319,8 @@ if(this.cooldowns[2] <= 0 && inputs.includes(controls[6]) && this.deathorbs.leng
     //no more than 10 bees!
 }
 }//things you can't do in hitstun
+
+//you CAN do this in hitstun
 if(this.cooldowns[3] <= 0 && inputs.includes(controls[7]) && this.canstance){
     this.spec4();
     this.canstance = false;
@@ -586,7 +588,7 @@ if(arena.pleavedir().includes("u")){
 }
 Ezekiel.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
         //handle damage dealt
-        var dmg = damage * this.damagemod;
+        var dmg = damage * this.damagemod * (100 - (this.deathorbs.length * 5))/100;
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
             if(damagetype.includes(this.damagetypemod[i][0])){
                 dmg *= this.damagetypemod[i][1];
@@ -642,7 +644,7 @@ Ezekiel.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 
         if(dmg > 1 && this.stance == "ATTACK" || !charezmode()){
             //only do this if damage is actually done (or don't kill death orbs if in panic stance on easy mode)
         for(let i = 0 ; i < this.deathorbs.length ; i++){
-            if(random(0, 1, false)){
+            if(this.stance == "PANIC" && random(0, 4, false) == 1 || this.stance == "ATTACK" && random(0, 1)){
                 this.deathorbs.pop();
                 this.deathphase.pop();
                 this.targetting.pop();
