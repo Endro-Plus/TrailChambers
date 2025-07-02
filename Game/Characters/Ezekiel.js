@@ -76,7 +76,7 @@ if(typeof this.marked == "number" && enemies.length > 0){
     try{
         if(enemies[this.marked].markedfordeathdebuff == true){
             //the current enemy is marked for death
-            this.extendedbox.reassign(enemies[this.marked].x + this.px, enemies[this.marked].y + this.py, 0, 999, enemies[this.marked].size * 5);
+            this.extendedbox.reassign(enemies[this.marked].x + this.px - enemies[this.marked].shift[0], enemies[this.marked].y + this.py - enemies[this.marked].shift[1], 0, 999, enemies[this.marked].size * 5);
             this.extendedbox.showbox("rgb(100, 100, 255, 0.1)");
             for(let i = 0 ; i < projectiles.length ; i++){
                 if(["chaos sphere", "death orb", "boosted!"].includes(projectiles[i].name) && this.extendedbox.scanproj(i)){

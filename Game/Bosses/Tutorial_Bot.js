@@ -4,7 +4,7 @@ function Tutorial_Bot(startposx, startposy, size , lvl = 0, ID = -5){
 this.enemyID = ID;
 this.x = startposx;
 this.y = startposy;
-this.shift = ["", ""];
+this.shift = [0, 0];
 this.z = 0; //distance up.
 this.size = size;
 this.height = 8;//How tall they are, if small enough, higher hitting attacks may miss! However, if too tall, that's just a hitbox extension.
@@ -89,7 +89,7 @@ this.hitbox.enable();
 this.hitbox.move(this.x + player.px, this.y + player.py);
 //The character exists in my plane of existance!
 screen.fillStyle = this.color;
-circle(this.x + player.px, this.y + player.py, this.size);
+circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size);
 
 
 

@@ -480,6 +480,9 @@ if(arena.pleavedir().includes("u")){
 }
 Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
         //handle damage dealt
+        if(this.iframe){
+            return;
+        }
         //on parry
         if(this.blocking < 8 && this.blocking != -1){
             //PARRIED!
@@ -519,7 +522,12 @@ Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
             return;
 
         }
-
+        //immunity to hitscans if you would've parried it
+        if(damagetype.includes("hitscan") && this.showchuck > 0){
+            this.immunityframes = 15;
+            this.adrenaline+=450;//+15 seconds for absolutely shredding that!
+            return;
+        }
         //apply defense bonus
         if(damage > 1){
             //don't negate damage if it's under 1 already

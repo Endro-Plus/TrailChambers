@@ -785,6 +785,7 @@ var gametime = function(){
     try{
     for(let i = 0 ; enemies.length; i++){
     if (enemies[i].exist() == "delete"){
+        enemies[i].hp == -999;
     bossbar.splice(i, 1);
     enemies.splice(i--, 1);
 

@@ -4,7 +4,7 @@ function Blueboss(startposx, startposy, size , lvl = 0, ID = -5){
 this.enemyID = ID;
 this.x = startposx;
 this.y = startposy;
-this.shift = [this.x, this.y];//how their position may shift
+this.shift = [0, 0];//how their position may shift
 this.z = 0; //distance up.
 this.size = size;
 this.height = 8;//How tall they are, if small enough, higher hitting attacks may miss! However, if too tall, that's just a hitbox extension.

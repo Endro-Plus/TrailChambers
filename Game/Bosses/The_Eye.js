@@ -18,7 +18,7 @@ this.lvl = lvl; //difficulty of boss (0 for no dif, 10 for DOOM).
 this.damagetypemod = [];//some people may take more or less damage from certain sources...
 this.hp = 100; //
 this.facing = [-1, 0];
-this.damagemod = 0.2; //Naturally, a lesser damage taken does, in fact, make bosses feel like bosses. Not the tutorial boss though
+this.damagemod = 0.02; //Naturally, a lesser damage taken does, in fact, make bosses feel like bosses. Not the tutorial boss though
 this.speed = 8 + lvl * 2//base speed
 this.speedmod = 1;//modifies speed, multiplicately
 this.speedcause = [];
@@ -92,7 +92,7 @@ this.hitbox.updateimmunity();
 
         if(this.phase <= 0){
         if(this.phasetimer % 75 == 0){
-            enemies.push(new Eye(this.x, this.y, this.z, this.lvl, this.lvl/20));
+            enemies.push(new Eye(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, this.lvl, this.lvl/20));
             if(!enemyezmode()){
                 //defeat enemy commander for easy mode
                 bossbar.push(enemies[enemies.length - 1]);//ROUT THE ENEMY FOR HARD MODE!
@@ -178,13 +178,13 @@ this.hitbox.updateimmunity();
         this.hitbox.enable();
 //The character exists in my plane of existance!
 screen.fillStyle = this.color;
-circle(this.x + player.px, this.y + player.py, this.size);
+circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size);
 
 
 
 
 
-        this.hitbox.reassign(this.x + player.px, this.y + player.py, this.z, 8, this.size);
+        this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
 
         if(this.hitbox.hitplayer()){
             if(charezmode()){
@@ -261,7 +261,7 @@ function Eye(x, y, z, speed, acc, ID = 99){
     this.enemyID = ID;
     this.x = x;
     this.y = y;
-    this.shift = [this.x, this.y];
+    this.shift = [player.px, player.py];
     this.mx = 0;
     this.my = 0;
     this.mz = 0;
@@ -343,8 +343,8 @@ if(arena.leave(this.x + player.px - this.shift[0], this.y + player.py - this.shi
         return "delete";
     }
         screen.fillStyle = "#222";
-        circle(this.x + player.px, this.y + player.py, this.size + this.z);
-        this.hitbox.reassign(this.x + player.px, this.y + player.py, this.z, 8, this.size);
+        circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size + this.z);
+        this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
     //can't take too much hitstun on hard mode!
     if(!enemyezmode() && this.hitstun > 30){
         this.hitstun = 30;
@@ -389,24 +389,24 @@ if(arena.leave(this.x + player.px - this.shift[0], this.y + player.py - this.shi
         }
 
         //all these enemies really do is approach
-        if(this.x + player.px < canvhalfx && this.mx < this.speed){
+        if(this.x + player.px - this.shift[0]< canvhalfx && this.mx < this.speed){
                     //it can go faster based on what it's level is!
 
                     this.mx+=this.acc;
 
-                }else if(this.x + player.px > canvhalfy && this.mx > -(this.speed)){
+                }else if(this.x + player.px  - this.shift[0]> canvhalfy && this.mx > -(this.speed)){
                             //it can go faster based on what it's level is!
 
                                         this.mx-=this.acc;
 
                         }
 
-                if(this.y + player.py > canvhalfy && this.my > -(this.speed)){
+                if(this.y + player.py  - this.shift[1]> canvhalfy && this.my > -(this.speed)){
                             //aim over the player, not on!
 
                                         this.my-=this.acc;
 
-                        }else if(this.y + player.py < canvhalfy && this.my < (this.speed)){
+                        }else if(this.y + player.py  - this.shift[1]< canvhalfy && this.my < (this.speed)){
                                     //it can go faster based on what it's level is!
 
                                                 this.my+=this.acc

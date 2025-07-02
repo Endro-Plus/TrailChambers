@@ -36,7 +36,7 @@ console.log("Um... w-wait I'm not supposed to be loaded! U-um... well... Test ch
 
 Test.prototype.exist = function(){
 //HP check
-if(this.hp <= 100){
+if(this.hp <= 100 && this.hp > 0){
 //under max
 screen.fillStyle = "#F00";
 screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
@@ -97,19 +97,7 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             screen.fillStyle = this.color;
             circle(canvhalfx, canvhalfy, this.size)
             //hp
-            if(this.hp <= 100){
-            //under max
-            screen.fillStyle = "#F00";
-            screen.fillRect(this.px - 25, this.py - this.size - 10, 50, 4);//max hp
-            screen.fillStyle = "#0F0";
-            screen.fillRect(this.px - 25, this.py - this.size - 10, this.hp / 2, 4);//current hp
-            }else{
-            //over max
-            screen.fillStyle = "#0F0";
-            screen.fillRect(this.px - 25 - (this.hp - 100) * 0.25, this.py - this.size - 10, this.hp / 2, 4);//current hp
-            screen.fillStyle = "#00F";
-            screen.fillRect(this.px - 25, this.py - this.size - 10, 50, 4);//max hp
-            }
+            
             //hitstun
             if(this.hitstun > 0){
                 this.hurt();

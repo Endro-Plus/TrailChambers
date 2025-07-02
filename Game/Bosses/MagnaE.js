@@ -241,9 +241,10 @@ MagnaE.prototype.move = function(){
                 this.chuckdown = 9
             }
             
-            if(!enemyezmode() || this.chuckbox.hitplayer()){
+            if(this.chuckbox.hitplayer()){
                 //a little less damage for easy mode
                 player.hit((enemyezmode())? 4:8, ["bludgeoning", "physical"], [-12 * this.facing[0], -12 * this.facing[1]], 7);
+                phase[1]-=10;//these comboes are too long...
             }
             
             this.chuckbox.grantimmunity(player.listname());
@@ -529,6 +530,7 @@ function ParryProjE(x, y, size, mx, my, delay = 0){
     this.name = "PARRIED";
     this.x = x;
     this.y = y;
+    this.type = "hitscan"
     this.origin = [this.x, this.y]
     this.shift = [player.px, player.py];
     this.size = size
@@ -562,7 +564,7 @@ ParryProjE.prototype.exist = function(){
         if(this.lifetime == 1){
             this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
             if(this.hitbox.hitplayer()){
-                player.hit(24, ["magic"], [this.mx * -2, this.my * -2], 15);
+                player.hit(24, ["magic", "hitscan"], [this.mx * -2, this.my * -2], 15);
                 this.range = i;
                 break;
     }

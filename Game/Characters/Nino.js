@@ -12,7 +12,7 @@ this.desc = ["The wizard! Many strong projectiles that are hard to miss, but not
 //game stats
 this.playershift = [0, 0]
 this.cooldowns = [0, 0, 0, 0];
-this.damagetypemod = [["seduction", 0.6], ["light", 2], ["radiant", 2], ["magic", 0.5], ["dark", 0.1], ["headpat", 999]];//Bro does NOT like his hat being removed. Also, he's a renowned dark wizard, that light weakness caught up to him.
+this.damagetypemod = [["seduction", 0.6], ["light", 2], ["radiant", 2], ["magic", 0.5], ["dark", 0.5], ["headpat", 999]];//Bro does NOT like his hat being removed. Also, he's a renowned dark wizard, that light weakness caught up to him.
 this.hp = 100;
 this.damagemod = 1;
 this.speed = 10;
@@ -24,6 +24,9 @@ this.hitstunmod = 1;
 this.knockbackmod = 1;
 this.height = 6; //POV: canonically short
 this.iframe = false;
+
+//extras
+this.defenemies = [];
 }
 Nino.prototype.listname = function(){
 //to help position the characters correctly
@@ -33,9 +36,9 @@ Nino.prototype.greeting = function(){
 //The formal greeting for the console log! Useless? Sure, but still!
 console.log("Shadow Wizard Money Gang enthusiast Nino is ready to cast spells!")
 }
-Test.prototype.exist = function(){
+Nino.prototype.exist = function(){
 //HP check
-if(this.hp <= 100){
+if(this.hp <= 100 && this.hp>0){
 //under max
 screen.fillStyle = "#F00";
 screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
@@ -57,6 +60,27 @@ screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
 
 
 timeplayed++;
+
+//growing darkness passive
+for(let i = 0 ; i < this.defenemies.length ; i++){
+    if(this.defenemies[i].hp >= 0 && "GDdetonationtime" in this.defenemies[i]){
+        screen.strokeStyle = "rgb(111, 0, 255)"
+        screen.lineWidth = 3;
+        screen.beginPath();
+        screen.arc(this.defenemies[i].x + this.px - this.defenemies[i].shift[0], this.defenemies[i].y + this.py - this.defenemies[i].shift[1], this.defenemies[i].size + 2, ((100-this.defenemies[i].GDdetonationtime)/100) * (2 * Math.PI), 2 * Math.PI);
+        screen.stroke();
+        screen.closePath();
+        this.defenemies[i].GDdetonationtime--;
+        if(this.defenemies[i].GDdetonationtime <= 0){
+            delete this.defenemies[i].GDdetonationtime;
+            projectiles.push(new Darkblast(this.defenemies[i].x + this.px - this.defenemies[i].shift[0], this.defenemies[i].y + this.py - this.defenemies[i].shift[1], this.defenemies[i].growingdarknessdebuff/2))
+            delete this.defenemies[i].growingdarknessdebuff;
+        }
+    }else{
+        //this no longer applies to this enemy
+        this.defenemies.splice(i--, 1);
+    }
+}
 
 //speedmod is ALWAYS 1 to begin with
 this.speedmod = 1;
@@ -95,20 +119,7 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
 //The character exists in my plane of existance!
             screen.fillStyle = this.color;
             circle(canvhalfx, canvhalfy, this.size)
-            //hp
-            if(this.hp <= 100){
-            //under max
-            screen.fillStyle = "#F00";
-            screen.fillRect(this.px - 25, this.py - this.size - 10, 50, 4);//max hp
-            screen.fillStyle = "#0F0";
-            screen.fillRect(this.px - 25, this.py - this.size - 10, this.hp / 2, 4);//current hp
-            }else{
-            //over max
-            screen.fillStyle = "#0F0";
-            screen.fillRect(this.px - 25 - (this.hp - 100) * 0.25, this.py - this.size - 10, this.hp / 2, 4);//current hp
-            screen.fillStyle = "#00F";
-            screen.fillRect(this.px - 25, this.py - this.size - 10, 50, 4);//max hp
-            }
+            
             //hitstun
             if(this.hitstun > 0){
                 this.hurt();
@@ -156,7 +167,6 @@ for(let i = 0; i < this.cooldowns.length ; i++){
 
 if(this.cooldowns[0] <= 0 && inputs.includes(controls[4])){
     this.spec1();
-    this.cooldowns[0] = fps;//keep in mind the user can change the FPS freely.
 }
 if(this.cooldowns[1] <= 0 && inputs.includes(controls[5])){
     this.spec2();
@@ -170,9 +180,9 @@ if(this.cooldowns[3] <= 0 && inputs.includes(controls[7])){
 
 }
 
-}
 
-Test.prototype.hurt = function(){
+
+Nino.prototype.hurt = function(){
 this.hitstun--;
 console.log(this.hitstun);
 this.px += this.knockback[0];
@@ -205,7 +215,7 @@ if(arena.pleavedir().includes("u")){
 }
 
 }
-Test.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
+Nino.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
         //handle damage dealth
         var dmg = damage * this.damagemod;
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
@@ -248,7 +258,7 @@ Test.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         }
         //console.log(this.hp);
     }
-Test.prototype.death = function(){
+Nino.prototype.death = function(){
 projectiles = [];
 summons = [];
 enemies = [];
@@ -263,7 +273,7 @@ circle(canvhalfx, this.size + 40, this.size)
 screen.fillStyle = "#FFF";
 screen.textAlign = "center";
 screen.font = "25px Times New Roman";
-screen.fillText("Test Character!!!1 NOOOOOOOO", canvhalfx, 20);//char name
+screen.fillText("Nino", canvhalfx, 20);//char name
 screen.fillText("Made it to lvl: " + Math.floor(level), canvhalfx, canvhalfy - 60);//made it to what level
 screen.fillText("Was playing on " + difficulty + " mode", canvhalfx, canvhalfy - 20);//On what difficulty
 
@@ -294,22 +304,377 @@ bossbar = [];
 }
 
 }
-Test.prototype.spec1 = function(){
-//abilities
-console.log("working!");
+Nino.prototype.spec1 = function(){
+    let bolt = false
+//this is buffed if already electrofied
+for(let i = 0 ; i < projectiles.length ; i++){
+    if(projectiles[i].name == "chain lightning" && projectiles[i].hitbox.scanplayer()){
+        projectiles.push(new chain_lightning(canvhalfx, canvhalfy, 24, [this.facing[0], this.facing[1]]));
+        bolt = true;
+        break;
+    }
 }
-Test.prototype.spec2 = function(){
+if(!bolt){
+projectiles.push(new chain_lightning(canvhalfx, canvhalfy, 12, this.facing));
+}
+this.cooldowns[0] = 45;
+if(this.cooldowns[1] < 15){
+    //casting spells takes full focus
+this.cooldowns[1] = 15;
+}
+}
+Nino.prototype.spec2 = function(){
+projectiles.push(new Pyromine(canvhalfx, canvhalfy, 100, 24 * this.facing[0], 24 * this.facing[1]));
+this.cooldowns[1] = 30;
+if(this.cooldowns[0] < 15){
+    //casting spells takes full focus
+this.cooldowns[0] = 15;
+}
+}
+Nino.prototype.spec3 = function(){
 
 }
-Test.prototype.spec3 = function(){
-
-}
-Test.prototype.spec4 = function(){
+Nino.prototype.spec4 = function(){
 
 }
 
-Test.prototype.inst = function(x = this.px, y = this.py, size = this.size){
-player = new Test(x, y, size);
+Nino.prototype.inst = function(x = this.px, y = this.py, size = this.size){
+player = new Nino(x, y, size);
 }
 //center stage and 20 size is the default, feel free to change it up!
 chars.push(new Nino(canvhalfx, canvhalfy, 20));
+
+
+//projectiles
+function chain_lightning(x, y, size, facing){
+    this.name = "chain lightning";
+    this.phase = 1;//just shoot, then target enemies
+    this.x = x;
+    this.y = y;
+    this.shift = [player.px, player.py];
+    this.origin = [x, y]
+    this.size = size
+    this.facing = [facing[0], facing[1]]
+    this.hitbox = new hitbox(x, y, 2, size/2, size);
+    this.hitbox.disable();
+    this.lifetime = null;
+    this.visibility = 100;
+    this.dist = 20
+    this.target;
+}
+chain_lightning.prototype.exist = function(){
+    this.hitbox.enable();
+
+    
+    if(this.phase == 1){
+    this.x = this.origin[0];
+    this.y = this.origin[1];
+    for(let move = 0 ; move < 40 ; move++){
+    
+    
+    this.x += this.size * 3 * this.facing[0]
+    this.y += this.size * 3 * this.facing[1]
+    this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    if(this.visibility > 95){
+    //enemies first
+    for(let i = 0 ; i < enemies.length ; i++){
+        if(this.hitbox.checkenemy(i)){
+            if(player.defenemies.includes(enemies[i])){
+            enemies[i].hit(this.size + enemies[i].growingdarknessdebuff/24, ["electric", "magic"]);
+            enemies[i].growingdarknessdebuff += this.size + enemies[i].growingdarknessdebuff/24
+             enemies[i].GDdetonationtime = 100;
+        }else{
+            enemies[i].hit(this.size, ["electric", "magic"]);
+            enemies[i].growingdarknessdebuff = this.size
+            enemies[i].GDdetonationtime = 100;
+            player.defenemies.push(enemies[i]);
+        }
+            this.target = enemies[i];
+            move = 102;
+            this.phase = 2;
+            
+        }
+    }
+    //now projectiles
+    for(let i = 0 ; i < projectiles.length ; i++){
+        if(this.hitbox.scanproj(i) && projectiles[i].name != "chain lightning"){
+            
+            this.target = projectiles[i];
+            move = 102;
+            this.phase = 2;
+            
+        }
+    }
+}
+
+
+    }
+    screen.beginPath();
+    screen.lineWidth = this.size;
+    screen.strokeStyle = `rgba(100, 100, 200,${this.visibility--/100})`
+    
+    screen.moveTo(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    screen.lineTo(this.origin[0] + player.px - this.shift[0], this.origin[1] + player.py - this.shift[1]);
+  
+    screen.stroke();
+    screen.closePath();
+    //this.visibility-=10;
+    
+    }else{
+        try{
+        if(this.target == player){
+            this.x = canvhalfx - player.playershift[0];
+            this.y = canvhalfy - player.playershift[1];
+            //player.speedcause.push(["Electro boost!", 15, 1.2])
+        }else{
+        this.x = this.target.x + player.px - this.target.shift[0];
+        this.y = this.target.y + player.py - this.target.shift[1];
+        }
+        screen.strokeStyle = `rgba(100, 100, 200,${this.visibility/100})`;
+        this.visibility-=0.5;
+        screen.lineWidth = 3;
+        circle(this.x, this.y, this.target.size+this.dist, true, false);
+
+        //debuff enemies
+        if("speedcause" in this.target && this.target != player){
+            //this is an enemy then!
+            this.target.speedcause.push(["electrified", 45, 0.8]);
+            this.target.hit(0.25, ["electric"])
+        }
+        
+
+        if(this.target.name != "pyro mine" || this.target.name=="pyro mine" && this.visibility % 20 == 0){
+            //attempt to jump
+            if(this.target.name == "pyro mine"){
+                this.dist += 100;
+            }
+            this.dist+=10;
+            this.hitbox.resize(this.target.size+this.dist);
+            this.hitbox.move(this.x, this.y)
+            //prioritize enemies
+            for(let i = 0 ; i < enemies.length ; i++){
+        if(this.hitbox.checkenemy(i) && enemies[i] != this.target){
+            this.dist = 20;
+            screen.beginPath();
+            screen.lineWidth = 10;
+        screen.strokeStyle = `rgba(100, 100, 200,${this.visibility--/100})`
+    
+        screen.moveTo(this.x, this.y);
+        if(player.defenemies.includes(enemies[i])){
+            enemies[i].hit(8 + enemies[i].growingdarknessdebuff/24, ["electric", "magic"]);
+            enemies[i].growingdarknessdebuff += 8 + enemies[i].growingdarknessdebuff/24
+             enemies[i].GDdetonationtime = 100;
+        }else{
+            enemies[i].hit(8, ["electric", "magic"]);
+            enemies[i].growingdarknessdebuff = 8
+             enemies[i].GDdetonationtime = 100;
+            player.defenemies.push(enemies[i]);
+        }
+        
+        this.target = enemies[i];
+        this.x = this.target.x + player.px - this.target.shift[0];
+        this.y = this.target.y + player.py - this.target.shift[1];
+        screen.lineTo(this.x, this.y);
+  
+        screen.stroke();
+        screen.closePath();
+        return
+            
+            
+            
+        }
+    }
+    
+        //now projectiles
+        for(let i = 0 ; i < projectiles.length ; i++){
+        if(this.hitbox.scanproj(i) && projectiles[i].name != "chain lightning" && projectiles[i].name != "passive dark blast" && projectiles[i] != this.target){
+            
+            this.dist = 20;
+            screen.beginPath();
+            screen.lineWidth = 10;
+        screen.strokeStyle = `rgba(100, 100, 200,${this.visibility--/100})`
+    
+        screen.moveTo(this.x, this.y);
+        
+        this.target = projectiles[i];
+        this.x = this.target.x + player.px - this.target.shift[0];
+        this.y = this.target.y + player.py - this.target.shift[1];
+        screen.lineTo(this.x, this.y);
+  
+        screen.stroke();
+        screen.closePath();
+            return
+        }
+        }
+        //finally, the player
+        if(this.target != player && this.hitbox.scanplayer()){
+            this.dist = 20;
+            screen.beginPath();
+            screen.lineWidth = 10;
+        screen.strokeStyle = `rgba(100, 100, 200,${this.visibility--/100})`
+    
+        screen.moveTo(this.x, this.y);
+        
+        this.target = player;
+        this.x = canvhalfx - player.playershift[0];
+        this.y = canvhalfy - player.playershift[1];
+        screen.lineTo(this.x, this.y);
+  
+        screen.stroke();
+        screen.closePath();
+        }
+    }
+        }catch(e){
+            
+            return "delete"
+        }
+    }
+
+    //console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
+    //console.log(arena.leavedir(this.x, this.y, this.size))
+    if(this.visibility < 0){
+        return "delete";
+    }
+    //hitting the enemy
+    //console.log(en);
+    }
+
+    function Darkblast(x, y, dmg){
+    this.name = "passive dark blast";
+    this.x = x;
+    this.y = y;
+    this.shift = [player.px, player.py];
+    this.size = 50
+    this.color = "rgba(50, 0, 50, 0.5)";
+    this.hitbox = new hitbox(x, y, 2, 0, 10);
+    this.hitbox.disable();
+    this.hitbox.immunityframes(999);//one massive hit!
+    this.lifetime = null;
+    this.dmg = dmg;
+}
+Darkblast.prototype.exist = function(){
+    if(this.size > 400){
+    //no subtracting null!
+    return "delete";
+    }
+    this.hitbox.enable();
+    //no need to update immunity, since it's just one hit
+    this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    this.hitbox.resize(this.size);
+    this.hitbox.showbox(this.color);
+    for(let i = 0 ; i < enemies.length ; i++){
+        if(this.hitbox.checkenemy(i)){
+            enemies[i].hit(this.dmg, ["dark", "magic"]);
+            this.hitbox.grantimmunity(i);
+        }
+    }
+    this.size+=50;
+    //console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
+    //console.log(arena.leavedir(this.x, this.y, this.size))
+    }
+
+    function Pyromine(x, y, size, mx, my){
+    this.name = "pyro mine"
+    this.x = x;
+    this.y = y;
+    this.shift = [player.px , player.py];
+    this.size = 8
+    this.radius = size
+    this.mx = mx;
+    this.my = my;
+    this.last = 600;//20 second duration!
+    this.hitbox = new hitbox(this.x, this.y, 8, 0, 9);
+    this.hitbox.disable();
+    this.hitbox.immunityframes(999);
+    this.lifetime = 30;//1 second to arm, one second of it being parriable
+    this.blast = -1;
+
+}
+Pyromine.prototype.exist = function(){
+    this.hitbox.enable();
+    //this.hitbox.updateimmunity();
+    screen.fillStyle = "#F00";
+    
+    if(this.lifetime >= 0){
+        this.x+=this.mx;
+        this.y+=this.my;
+        this.mx*= 0.7;
+        this.my*= 0.7;
+        this.lifetime--;
+        
+    }
+    if(this.blast < 0){
+    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
+    }
+    this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    if(this.last <=0 || this.blast >4){
+        return "delete";
+    }
+    //hitting the enemy
+    if(this.lifetime < 0 || this.lifetime == null){
+        console.log(true)
+        this.lifetime = null;
+        this.hitbox.resize(this.radius);
+        screen.strokeStyle = "#F00";
+        screen.lineWidth = 2;
+        if(this.blast >= 0){
+            this.hitbox.showbox("rgba(255, 0, 0, 0.5)");
+        }
+        circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.radius, true, false);
+        for(let i = 0 ; i < enemies.length ; i++){
+            if(this.hitbox.checkenemy(i)){
+                if(player.defenemies.includes(enemies[i])){
+                enemies[i].hit(30 + enemies[i].growingdarknessdebuff/24, ["fire", "bludgeoning", "magic"], [(this.x < enemies[i].x)? 12:-12, (this.y < enemies[i].y)? 12:-12], 45);
+                for(let x = 0 ; x < projectiles.length ; x++){
+                    //if electrified, do bonus damage!
+                    if(projectiles[x].name == "chain lightning" && this.hitbox.scanproj(x)){
+                        enemies[i].hit(60 + enemies[i].growingdarknessdebuff/24, ["CRITICAL", "electric"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
+
+                        //electrify the enemy
+                        projectiles.push(new chain_lightning(0, 0, 0, [0, 0]));
+                        projectiles[projectiles.length-1].phase = 2;
+                        projectiles[projectiles.length-1].target = enemies[i];
+                        enemies[i].growingdarknessdebuff += 60 + enemies[i].growingdarknessdebuff/24;
+                        break;
+                    }
+                }
+                enemies[i].growingdarknessdebuff += 30 + enemies[i].growingdarknessdebuff/24
+                enemies[i].GDdetonationtime = 100;
+                }else{
+                enemies[i].hit(30, ["fire", "bludgeoning", "magic"], [(this.x < enemies[i].x)? 12:-12, (this.y < enemies[i].y)? 12:-12], 45);
+                for(let x = 0 ; x < projectiles.length ; x++){
+                    //if electrified, do bonus damage!
+                    if(projectiles[x].name == "chain lightning" && this.hitbox.scanproj(x)){
+                        enemies[i].hit(60, ["CRITICAL", "electric"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
+
+                        //electrify the enemy
+                        projectiles.push(new chain_lightning(0, 0, 0, [0, 0]));
+                        projectiles[projectiles.length-1].phase = 2;
+                        projectiles[projectiles.length-1].target = enemies[i];
+                        enemies[i].growingdarknessdebuff = 60
+                        break;
+                    }
+                }
+                enemies[i].growingdarknessdebuff = 30
+                enemies[i].GDdetonationtime = 100;
+                player.defenemies.push(enemies[i]);
+                }
+                
+                
+                this.hitbox.grantimmunity(i);
+                if(this.blast < 0){
+                this.blast = 0;
+                return;
+                }
+            }
+
+
+        }
+        if(this.blast >=0){
+            this.blast++;
+            this.radius+=50;
+        }
+
+            
+    }
+}
