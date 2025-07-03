@@ -18,7 +18,7 @@ this.lvl = lvl; //difficulty of boss (0 for no dif, 10 for DOOM).
 this.damagetypemod = [];//some people may take more or less damage from certain sources...
 this.hp = 100; //
 this.facing = [-1, 0];
-this.damagemod = 0.02; //Naturally, a lesser damage taken does, in fact, make bosses feel like bosses. Not the tutorial boss though
+this.damagemod = 0.2; //Naturally, a lesser damage taken does, in fact, make bosses feel like bosses. Not the tutorial boss though
 this.speed = 8 + lvl * 2//base speed
 this.speedmod = 1;//modifies speed, multiplicately
 this.speedcause = [];
@@ -35,8 +35,8 @@ this.my = 0;
 
 }
 The_Eye.prototype.face = function(){
-        let dx = canvhalfx - (this.x + player.px);
-        let dy = canvhalfy - (this.y + player.py);
+        let dx = canvhalfx - (this.x + player.px - this.shift[0]);
+        let dy = canvhalfy - (this.y + player.py - this.shift[1]);
         let magnitude = Math.sqrt(dx * dx + dy * dy);
         this.velocityX = (dx / magnitude) * this.speed;
         this.velocityY = (dy / magnitude) * this.speed;
@@ -100,14 +100,14 @@ this.hitbox.updateimmunity();
 
             }
         }
-        if(this.x + player.px < canvhalfx && this.mx < this.lvl){
+        if(this.x + player.px - this.shift[0]< canvhalfx && this.mx < this.lvl){
             //it can go faster based on what it's level is!
             if(this.hp > 50){
             this.mx+=(1 + this.lvl)/10;
             }else{
             this.mx+=(1 + this.lvl)/5;
             }
-        }else if(this.x + player.px > canvhalfx && this.mx > -(this.lvl)){
+        }else if(this.x + player.px  - this.shift[0]> canvhalfx && this.mx > -(this.lvl)){
                     //it can go faster based on what it's level is!
                     if(this.hp > 50){
                                 this.mx-=(1 + this.lvl)/10;
@@ -116,14 +116,14 @@ this.hitbox.updateimmunity();
                                 }
                 }
 
-        if(this.y + player.py > canvhalfy - 200 && this.my > -(this.lvl)){
+        if(this.y + player.py - this.shift[1] > canvhalfy - 200 && this.my > -(this.lvl)){
                     //aim over the player, not on!
                     if(this.hp > 50){
                                 this.my-=(1 + this.lvl)/10;
                                 }else{
                                 this.my-=(1 + this.lvl)/5;
                                 }
-                }else if(this.y + player.py < canvhalfy - 200 && this.my < (this.lvl)){
+                }else if(this.y + player.py - this.shift[1]< canvhalfy - 200 && this.my < (this.lvl)){
                             //it can go faster based on what it's level is!
                             if(this.hp > 50){
                                         this.my+=(1 + this.lvl)/10;
@@ -394,7 +394,7 @@ if(arena.leave(this.x + player.px - this.shift[0], this.y + player.py - this.shi
 
                     this.mx+=this.acc;
 
-                }else if(this.x + player.px  - this.shift[0]> canvhalfy && this.mx > -(this.speed)){
+                }else if(this.x + player.px  - this.shift[0]> canvhalfx && this.mx > -(this.speed)){
                             //it can go faster based on what it's level is!
 
                                         this.mx-=this.acc;
