@@ -70,7 +70,7 @@ for(let i = 0 ; i < this.defenemies.length ; i++){
         screen.arc(this.defenemies[i].x + this.px - this.defenemies[i].shift[0], this.defenemies[i].y + this.py - this.defenemies[i].shift[1], this.defenemies[i].size + 2, ((100-this.defenemies[i].GDdetonationtime)/100) * (2 * Math.PI), 2 * Math.PI);
         screen.stroke();
         screen.closePath();
-        this.defenemies[i].GDdetonationtime--;
+        this.defenemies[i].GDdetonationtime-=1.25;
         if(this.defenemies[i].GDdetonationtime <= 0){
             delete this.defenemies[i].GDdetonationtime;
             projectiles.push(new Darkblast(this.defenemies[i].x + this.px - this.defenemies[i].shift[0], this.defenemies[i].y + this.py - this.defenemies[i].shift[1], this.defenemies[i].growingdarknessdebuff/2))
@@ -322,6 +322,10 @@ if(this.cooldowns[1] < 15){
     //casting spells takes full focus
 this.cooldowns[1] = 15;
 }
+if(this.cooldowns[2] < 15){
+    
+this.cooldowns[2] = 15;
+}
 }
 Nino.prototype.spec2 = function(){
 projectiles.push(new Pyromine(canvhalfx, canvhalfy, 100, 24 * this.facing[0], 24 * this.facing[1]));
@@ -330,8 +334,32 @@ if(this.cooldowns[0] < 15){
     //casting spells takes full focus
 this.cooldowns[0] = 15;
 }
+if(this.cooldowns[2] < 15){
+    
+this.cooldowns[2] = 15;
+}
 }
 Nino.prototype.spec3 = function(){
+for(let i = -1 ; i <= 1 ; i+=0.5){
+    for(let x = -1 ; x <= 1 ; x+=0.5){
+        if(i == x && i == 0){
+            //overcomplicated way if saying if I and X are 0
+            continue;
+        }
+        projectiles.push(new Cutting_Gale(canvhalfx, canvhalfy, random(11, 13), random(11,13), [i/2, x/2]));
+    
+    }
+
+}
+this.cooldowns[2] = 120;
+if(this.cooldowns[0] < 15){
+    //casting spells takes full focus
+this.cooldowns[0] = 15;
+}
+if(this.cooldowns[1] < 15){
+    
+this.cooldowns[1] = 15;
+}
 
 }
 Nino.prototype.spec4 = function(){
@@ -369,13 +397,13 @@ chain_lightning.prototype.exist = function(){
     if(this.phase == 1){
     this.x = this.origin[0];
     this.y = this.origin[1];
-    for(let move = 0 ; move < 40 ; move++){
+    for(let move = 0 ; move < 25 ; move++){
     
     
     this.x += this.size * 3 * this.facing[0]
     this.y += this.size * 3 * this.facing[1]
     this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
-    if(this.visibility > 95){
+    if(this.visibility > 97){
     //enemies first
     for(let i = 0 ; i < enemies.length ; i++){
         if(this.hitbox.checkenemy(i)){
@@ -677,4 +705,76 @@ Pyromine.prototype.exist = function(){
 
             
     }
+}
+
+function Cutting_Gale(x, y, size, speed, facing){
+    this.name = "Cutting Gale";
+    this.x = x;
+    this.y = y;
+    this.shift = [player.px, player.py];
+    this.size = size
+    this.speed = speed
+    this.hitbox = new hitbox(x, y, 2, size/2, size);
+    this.hitbox.disable();
+    this.lifetime = 210;
+    this.facing = [facing[0], facing[1]];
+    this.turning = [0, 0, 10]//force, rate, time
+    this.hitbox.immunityframes(10);
+}
+Cutting_Gale.prototype.exist = function(){
+    if(typeof this.lifetime == "number"){
+    //no subtracting null!
+    this.lifetime--;
+    }
+    this.hitbox.enable();
+    this.hitbox.updateimmunity();
+
+    //turning
+    this.facing[0]+=this.turning[0];
+    this.facing[1]+=this.turning[1];
+
+    if(this.facing[0] > 1){
+        this.facing[0] = 1
+    }else if(this.facing[0] < -1){
+        this.facing[0] = -1
+    }
+
+    if(this.facing[1] > 1){
+        this.facing[1] = 1
+    }else if(this.facing[1] < -1){
+        this.facing[1] = -1
+    }
+    //turn a new direction
+    if(this.turning[2]-- <= 0){
+        this.turning = [random(-3, 2, true)/50, random(-3, 2, true)/50, random(1, 10, false)];
+    }
+
+    //SHOWING
+    screen.fillStyle = "rgb(29, 255, 97)";
+    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
+    this.x+=this.speed * this.facing[0];
+    this.y+=this.speed * this.facing[1];
+
+    this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    if(this.lifetime < 0){
+        return "delete";
+    }
+    //hitting the enemy
+    for(let i = 0 ; i < enemies.length ; i++){
+    if(this.hitbox.checkenemy(i)){
+        
+            if(player.defenemies.includes(enemies[i])){
+            enemies[i].hit(24 + enemies[i].growingdarknessdebuff/24, ["wind", "magic", "slashing"]);
+            enemies[i].growingdarknessdebuff += 24 + enemies[i].growingdarknessdebuff/24
+             enemies[i].GDdetonationtime = 100;
+        }else{
+           enemies[i].hit(24, ["wind", "magic", "slashing"]);
+            enemies[i].growingdarknessdebuff = 24
+            enemies[i].GDdetonationtime = 100;
+            player.defenemies.push(enemies[i]);
+        }
+        this.hitbox.grantimmunity(i);
+        this.lifetime-=random(10, 30, false)
+        }
+        }
 }
