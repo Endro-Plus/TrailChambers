@@ -27,6 +27,8 @@ this.iframe = false;
 
 //extras
 this.defenemies = [];
+this.miasma_aura = new hitbox(0, 0, 0, 9, 45);
+this.miasmatime = 0;
 }
 Nino.prototype.listname = function(){
 //to help position the characters correctly
@@ -119,6 +121,31 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
 //The character exists in my plane of existance!
             screen.fillStyle = this.color;
             circle(canvhalfx, canvhalfy, this.size)
+
+            //attacks (basically just miasma storm)
+
+if(this.miasmatime > 0){
+    this.miasmatime--;
+    this.miasma_aura.enable();
+    this.miasma_aura.move(canvhalfx, canvhalfy);
+    this.miasma_aura.resize(100 + (40 - this.miasmatime/5))
+    this.miasma_aura.showbox("rgba(108, 0, 158, 0.5)");
+    for(let i = 0 ; i < enemies.length ; i++){
+        if(this.miasma_aura.checkenemy(i)){
+            enemies[i].hit(1.2, ["magic", "dark"]);
+        }
+    }
+    if(this.miasmatime % 15 == 0){
+        for(let i = 1 ; i <= 3 ; i++){
+        let speed = 20;
+        let velx = random(0, speed) * (random(0, 1, false)? -1:1)
+        speed -= Math.abs(velx)
+        let vely = speed * (random(0, 1, false)? -1:1)
+        
+        projectiles.push(new Miasma(canvhalfx, canvhalfy, 15, velx, vely));
+        }
+    }
+}
             
             //hitstun
             if(this.hitstun > 0){
@@ -162,8 +189,12 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
 //lower all cooldowns
 for(let i = 0; i < this.cooldowns.length ; i++){
     this.cooldowns[i]--;
+    if(this.miasmatime <= 0 && this.cooldowns[3] < 0){
+        screen.fillStyle = "rgba(255, 0, 212, 0.02)";
+        circle(canvhalfx, canvhalfy, this.size + 10)
+    }
 }
-//attacks
+
 
 if(this.cooldowns[0] <= 0 && inputs.includes(controls[4])){
     this.spec1();
@@ -363,8 +394,24 @@ this.cooldowns[1] = 15;
 
 }
 Nino.prototype.spec4 = function(){
+this.miasmatime = 210;
+this.cooldowns[3] = 510;
 
+
+if(this.cooldowns[0] < 7){
+    //casting this spell takes partial focus!
+this.cooldowns[0] = 7;
 }
+if(this.cooldowns[1] < 7){
+    
+this.cooldowns[1] = 7;
+}
+if(this.cooldowns[2] < 7){
+    
+this.cooldowns[2] = 7;
+}
+}
+
 
 Nino.prototype.inst = function(x = this.px, y = this.py, size = this.size){
 player = new Nino(x, y, size);
@@ -778,3 +825,83 @@ Cutting_Gale.prototype.exist = function(){
         }
         }
 }
+
+function Miasma(x, y, size, mx, my){
+    this.name = "Miasma";
+    this.x = x;
+    this.y = y;
+    this.shift = [player.px, player.py];
+    this.size = size
+    this.mx = mx;
+    this.my = my;
+    this.color = "rgb(80, 0, 80)";
+    this.hitbox = new hitbox(x, y, 2, size/2, size);
+    this.hitbox.disable();
+    this.lifetime = 200;
+    this.phase = 0;
+    this.follow = "not null";
+}
+Miasma.prototype.exist = function(){
+    if(typeof this.lifetime == "number"){
+    //no subtracting null!
+    this.lifetime--;
+    }
+    this.hitbox.enable();
+
+    screen.fillStyle = this.color;
+    
+    if(this.phase == 0){
+
+        circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
+         this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    this.x+=this.mx;
+    this.y+=this.my;
+    }else{
+        this.x = this.follow.x + player.px - this.follow.shift[0];
+        this.y = this.follow.y + player.py - this.follow.shift[1];
+        this.hitbox.move(this.x, this.y)
+        this.hitbox.resize(this.size)
+        this.size-=1.5;
+        circle(this.x, this.y, this.size)
+    }
+   
+    //console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
+    //console.log(arena.leavedir(this.x, this.y, this.size))
+    if(this.lifetime < 0 || this.follow.hp < 0){
+        return "delete";
+    }
+    //hitting the enemy
+    //console.log(en);
+    for(let i = 0 ; i < enemies.length ; i++){
+    if(this.hitbox.checkenemy(i)){
+        if(this.phase == 0){
+            
+             if(player.defenemies.includes(enemies[i])){
+            enemies[i].hit(30 + enemies[i].growingdarknessdebuff/24, ["magic", "dark"]);
+            enemies[i].growingdarknessdebuff += 30 + enemies[i].growingdarknessdebuff/24
+             enemies[i].GDdetonationtime = 100;
+        }else{
+           enemies[i].hit(30, ["magic", "dark"]);
+            enemies[i].growingdarknessdebuff = 30
+            enemies[i].GDdetonationtime = 100;
+            player.defenemies.push(enemies[i]);
+        }
+            this.size = enemies[i].size + 100;
+            this.lifetime = null;//unparriable now!
+            this.follow = enemies[i]
+            this.phase = 1
+            this.color = "rgba(60, 0, 60, 0.7)"
+        }else{
+            enemies[i].hit(0.8, ["magic", "dark"]);
+            if(player.defenemies.includes(enemies[i])){
+                enemies[i].growingdarknessdebuff += 3
+            }
+            this.size+=0.5
+        }
+        }
+        }
+    
+        if(this.size < this.follow.size){
+            return "delete";
+        }
+    }
