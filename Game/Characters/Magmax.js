@@ -1,4 +1,9 @@
-
+/* 
+hardmode changes:
+    can no longer overheal past 120 hp
+    gets the energy feature from evaedes (clutch mode makes you regen energy faster... because of course it does)
+    flow gives slightly less invincibility
+*/
 
 function Magz(startposx, startposy, size){
 this.px = startposx;
@@ -38,6 +43,7 @@ this.repetitivebonus = 1;//get a small damage boost for every attack hit
 this.projstart = 0;
 this.abilitylock = [false, false];
 this.secondphase = -1;
+this.hitboxsize = 50;//just so you know, this is a LOT bigger than what you think it is
 //hard mode exclusive
 this.energy = 50;//also straight from evades.io
 this.energyregen = 0.13;//straight from evades.io (4 energy a second)
@@ -86,6 +92,7 @@ if(this.hp > 100){
     this.hitstun = 0;
     this.clutch = true;
     this.secondphase = 0;
+    this.hitboxsize = 75;
     }else{
     //play the death anmiation, then call off
     this.death();
@@ -310,49 +317,50 @@ if(this.facing[0] == -1){
 if(this.facing[1] == -1){
 //up left
 screen.arc(canvhalfx - 10, canvhalfy - 10, 30, 2.74, 5.23);
-this.slashbox.reassign(canvhalfx - 20, canvhalfy - 20, this.pz, 2, 30);
+this.slashbox.reassign(canvhalfx - 20, canvhalfy - 20, this.pz, 2, this.hitboxsize);
 //screen.arc(this.px - 20, this.py - 20, 35, 0, 2 * Math.PI);
 }else if(this.facing[1] == 1){
 //down left
 screen.arc(canvhalfx - 10, canvhalfy + 10, 30, 1, 3.43);
-this.slashbox.reassign(canvhalfx - 20, canvhalfy + 20, this.pz, 2, 30);
+this.slashbox.reassign(canvhalfx - 20, canvhalfy + 20, this.pz, 2, this.hitboxsize);
 }else{
 //just left
 screen.arc(canvhalfx - 10, canvhalfy, 30, 1.8, 4.48);
-this.slashbox.reassign(canvhalfx - 20, canvhalfy, this.pz, 2, 30);
+this.slashbox.reassign(canvhalfx - 20, canvhalfy, this.pz, 2, this.hitboxsize);
 }
 }else if(this.facing[0] == 1){
 if(this.facing[1] == -1){
 //up right
 screen.arc(canvhalfx + 10, canvhalfy - 10, 30, -2.1, 0.43);
-this.slashbox.reassign(canvhalfx + 20, canvhalfy - 20, this.pz, 2, 30);
+this.slashbox.reassign(canvhalfx + 20, canvhalfy - 20, this.pz, 2, this.hitboxsize);
 
 }else if(this.facing[1] == 1){
 //down right
 screen.arc(canvhalfx + 10, canvhalfy + 10, 30, -0.39, 1.9);
-this.slashbox.reassign(canvhalfx + 20, canvhalfy + 20, this.pz, 2, 30);
+this.slashbox.reassign(canvhalfx + 20, canvhalfy + 20, this.pz, 2, this.hitboxsize);
 }else{
 //just right
 screen.arc(canvhalfx + 10, canvhalfy, 30, -1.2, 1.23);
-this.slashbox.reassign(canvhalfx + 20, canvhalfy, this.pz, 2, 30);
+this.slashbox.reassign(canvhalfx + 20, canvhalfy, this.pz, 2, this.hitboxsize);
 }
 }else{
 if(this.facing[1] == -1){
 //just up
 screen.arc(canvhalfx, canvhalfy - 10, 30, -2.74, -0.41);
-this.slashbox.reassign(canvhalfx, canvhalfy - 20, this.pz, 2, 30);
+this.slashbox.reassign(canvhalfx, canvhalfy - 20, this.pz, 2, this.hitboxsize);
 
 }else{
 //just down
 screen.arc(canvhalfx, canvhalfy + 10, 30, -12.25, -9.76);
-this.slashbox.reassign(canvhalfx, canvhalfy + 20, this.pz, 2, 30);
+this.slashbox.reassign(canvhalfx, canvhalfy + 20, this.pz, 2, this.hitboxsize);
 }
 }
+//this.slashbox.showbox()
 
-let hi = this.slashbox.hitenemy();
-if(typeof hi == "number"){
+for(let i = 0 ; i < enemies.length ; i++){
+if(this.slashbox.checkenemy(i)){
 if(this.projstart <=0){
-enemies[hi].hit(8 * (this.repetitivebonus * 1.5), ["physical", "slashing"]);//devestating when in a combo!
+enemies[i].hit(8 * (this.repetitivebonus * 1.5), ["physical", "slashing"]);//devestating when in a combo!
 if(!charezmode() && this.hp < 101){
 //you can overheal with this one!
 this.hp+= 2 * (this.repetitivebonus * 1.5)//lifesteal
@@ -364,11 +372,11 @@ this.hp+= 2 * (this.repetitivebonus * 1.5)//lifesteal, and overheal cheese!
 }
 this.repetitivebonus+=3;//MOAR DAMAGE!
 this.nohit=17;
-this.slashbox.grantimmunity(hi);
+this.slashbox.grantimmunity(i);
 this.cooldowns[0] = 0;//HIT EM AGAIN AND AGAIN AND AGAIN AND ah man... I missed.
 this.speedcause.push(["Frenzy!", 17, 2]);
 }else{
-enemies[hi].hit(8 * this.repetitivebonus, ["physical", "slashing"], [8 * this.facing[0], 8 * this.facing[1]], 20);
+enemies[i].hit(8 * this.repetitivebonus, ["physical", "slashing"], [8 * this.facing[0], 8 * this.facing[1]], 20);
 this.repetitivebonus+=1;
 if(this.hp < 99){
 this.hp+= 2 * (this.repetitivebonus / 2)//weak lifesteal
@@ -377,7 +385,7 @@ this.hp = 100//this move is no longer allowed to overheal... it was too OP
 }
 }
 this.nohit=6;
-this.slashbox.grantimmunity(hi);
+this.slashbox.grantimmunity(i);
 }
 }else if(this.projstart<=0){
 {
@@ -400,7 +408,7 @@ this.repetitivebonus = 1;//only combos allowed!!!
 }
 }
 }
-
+}
 screen.fill();
 screen.closePath();
 
@@ -532,7 +540,7 @@ if(arena.pleavedir().includes("u")){
 }
 
 }
-Magz.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0, special = []){
+Magz.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
         if(this.nohit > 0 || this.state == "harden"){
             return;//so complex!
         }
@@ -558,16 +566,16 @@ Magz.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         knockback[0] *= this.knockbackmod;
         knockback[1] *= this.knockbackmod;
         if(inputs.includes(controls[0])){
-            knockback[0] -= this.DI;
+            knockback[0] += this.DI * DImod;
         }
         if(inputs.includes(controls[1])){
-            knockback[0] += this.DI;
+            knockback[0] -= this.DI * DImod;
         }
         if(inputs.includes(controls[2])){
-            knockback[1] -= this.DI;
+            knockback[1] += this.DI * DImod;
         }
         if(inputs.includes(controls[3])){
-            knockback[1] += this.DI;
+            knockback[1] -= this.DI * DImod;
         }
         if(this.hp < 100){
         if(this.hitstun > 0){
@@ -712,13 +720,19 @@ skatebeam.prototype.exist = function(){
     //hitting the enemy
     let en = this.hitbox.hitenemy();
     //console.log(en);
-    if(typeof en != "boolean"){
-        enemies[en].hit(5 + this.esist + player.repetitivebonus,  ["magic", "slashing"], [12 * this.facing[0], 12 * this.facing[1]], 5);
+    for(let i = 0 ; i < enemies.length ; i++){
+    if(this.hitbox.checkenemy(i)){
+        if(enemies[i].knockback == "legacy"){
+                enemies[i].hit(0, [], [], 45);
+            }
+        enemies[i].hit(5 + this.esist + player.repetitivebonus,  ["magic", "slashing"], [12 * this.facing[0], 12 * this.facing[1]], 5);
         player.repetitivebonus+= 1 * (this.esist/10)
         this.esist+=10;
-        this.hitbox.grantimmunity(en);
+        this.hitbox.grantimmunity(i);
+        
         //return "delete";
     }
+}
     if(this.esist > -2){
     this.esist--;
     }

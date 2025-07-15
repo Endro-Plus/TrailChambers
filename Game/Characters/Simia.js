@@ -648,7 +648,7 @@ if(arena.pleavedir().includes("u")){
 }
 
 }
-Simia.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0, special = []){
+Simia.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
         if(this.windup == -1 && damagetype.includes("contact") && typeof damagetype[damagetype.length - 1] == "number"){
             //dive kick connected!
             this.savior_frames = 8;
@@ -733,16 +733,16 @@ Simia.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
         }
         //console.log(this.DI + DIadd);
         if(inputs.includes(controls[0])){
-            knockback[0] += this.DI + DIadd;
+            knockback[0] += this.DI * DImod + DIadd;
         }
         if(inputs.includes(controls[1])){
-            knockback[0] -= this.DI + DIadd;
+            knockback[0] -= this.DI * DImod + DIadd;
         }
         if(inputs.includes(controls[2])){
-            knockback[1] += this.DI + DIadd;
+            knockback[1] += this.DI * DImod + DIadd;
         }
         if(inputs.includes(controls[3])){
-            knockback[1] -= this.DI + DIadd;
+            knockback[1] -= this.DI * DImod + DIadd;
         }
         if(this.hp < 100){
         if(this.hitstun > 0){

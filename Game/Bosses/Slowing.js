@@ -1,6 +1,7 @@
-function Blueboss(startposx, startposy, size , lvl = 0, ID = -5){
+function Slowing(alive, startposx, startposy, size, speed , lvl = 0, ID = -5){
 //the boss in "bosses" should not be used. It's mostly just a list.
 //startup
+this.alive = alive;
 this.enemyID = ID;
 this.x = startposx;
 this.y = startposy;
@@ -10,35 +11,39 @@ this.size = size;
 this.height = 8;//How tall they are, if small enough, higher hitting attacks may miss! However, if too tall, that's just a hitbox extension.
 this.hitbox = new hitbox(this.x, this.y, this.z, this.height, this.size);
 this.hitbox.disable();
-this.hitbox.immunityframes(9);
+//this.hitbox.immunityframes(60);
 //color
-this.color = "#0000ff";
+this.color = "rgba(255, 0, 0, 1)";
 //game
 this.lvl = lvl; //difficulty of boss (0 for no dif, 10 for DOOM). You can go over!
-this.damagetypemod = [];//some people may take more or less damage from certain sources...
+this.damagetypemod = [["CRITICAL", 0.8]];//slightly resistant to crits
 this.hp = 100; //EVEN THE FUCKING BOSSES GET 100!!!!!!
 this.facing = [0, 0];
-this.damagemod = 0.5;//weaker boss noises
-this.speed = 5; //base speed
+this.damagemod = 0.15;//POWER
+this.speed = speed; //base speed
 this.speedmod = 1;//modifies speed, multiplicately
 this.speedcause = [];
 this.hitstunmod = 1; //POV: weak ass boss who isn't immune to hitstun
-this.knockbackmod = 1; //POV: weak ass boss who isn't immune to knockback
-this.knockback = [0, 0];//x and y position of knockback
-
+this.hitstun = 60;//for these enemies, hitstun is just how long they're harmless
+this.knockbackmod = 0; //knockback, what's that?
+this.knockback = "legacy"
 
 //extras
-this.tutorial = 0;
-this.turnRate = 0.05;
-Blueboss.prototype.listname = function(){
+this.direction = null
+this.aura = new hitbox(this.x, this.y, this.z, 99, this.size * lvl)
+Slowing.prototype.listname = function(){
 //to help position the characters correctly
-return "Blueboss";
+return "Slowing";
 }
 }
-Blueboss.prototype.exist = function(){
-    if(this.hp < 0){
+Slowing.prototype.exist = function(){
+    if(this.alive == true && this.hp < 0 || bossbar.length == 0 && this.alive == false){
         return "delete";
     }
+    if(this.hitstun >= 0){
+        this.hitstun--;
+    }
+    
     //speedmod is ALWAYS 1 to begin with (here anyways)
     this.speedmod = 1;
     this.speedcause.sort();//sorting it makes it easier to check for duplicated
@@ -75,58 +80,72 @@ Blueboss.prototype.exist = function(){
     }
 this.hitbox.enable();
 this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+//this.hitbox.updateimmunity();
 //The character exists in my plane of existance!
+//harmless color
+if(this.hitstun > 25){
+    this.color = "#ff000030";
+}else{
+    this.color = `rgba(255, 0, 0, ${1 - this.hitstun/30}`;
+}
 screen.fillStyle = this.color;
-circle(this.x + player.px, this.y + player.py, this.size);
+screen.strokeStyle = "black"
+screen.lineWidth = 3;
+circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size, false, false);
+if(this.alive){
+    screen.fillStyle = "#33333380"
+    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size * 0.5);
+}
+screen.lineWidth = 1;
+this.aura.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+this.aura.showbox("rgba(255, 0, 0, 0.1)");
+//aura (slowing)
+if(this.aura.scanplayer()){
+    player.speedcause.push(["slowing aura", 1, 0.7])
+}
+//damage
+if(this.hitbox.scanplayer() && this.hitstun <= 0){
+    //deal devestating damage!
+    this.hitstun = 30 - (this.lvl*3);
+    player.hit(10 + (this.lvl*2), ["contact", this.enemyID]);
+}
+//moving
+if(this.direction == null){
+    //time to direct my influence!
+    this.direction = [];
+    this.direction.push(random(-this.speed, this.speed))
+    this.speed-= Math.abs(this.direction[0])
+    this.direction.push((random(0, 1, false))? -this.speed:this.speed)
+}
 
+this.x+= this.direction[0]*this.speedmod;
+this.y+= this.direction[1]*this.speedmod;
 
+//out of bounds
+if(this.x - this.shift[0] - this.size < canvhalfx - arena.w){
+//bounce right
 
-//boss AI goes here
+this.direction[0] = Math.abs(this.direction[0])
+
+}else if(this.x - this.shift[0] + this.size > canvhalfx - arena.w + arena.w*2){
+//bounce left
+
+this.direction[0] = Math.abs(this.direction[0]) * -1
 
 }
-Blueboss.prototype.move = function(){
-        if(this.hitstun > 0){
-        this.hurt();
-        this.hitbox.reassign(this.x + player.px, this.y + player.px, this.z, 8, this.size);
-        return;
-        }
-        // really basic following script (yes I just copied the tutorial boss)
-        this.hitbox.updateimmunity();
-        if(this.x + player.px > canvhalfx + 10){
-            this.x-=this.speed * this.speedmod;
-            this.facing = [-1, 0];
-        }else if(this.x + player.px < canvhalfx - 10){
-            this.x+=this.speed * this.speedmod;
-            this.facing = [1, 0];
-        }else if(this.y + player.py < canvhalfy){
-            this.y+=this.speed * this.speedmod;
-            this.facing = [0, 1];
-        }else{
-            this.y-=this.speed * this.speedmod;
-            this.facing = [0, -1];
-        }
+if(this.y - this.shift[1]  - this.size< canvhalfy - arena.h){
+//bounce down
 
-        this.hitbox.reassign(this.x + player.px, this.y + player.py, this.z, 8, this.size);
+this.direction[1] = Math.abs(this.direction[1])
 
-        if(this.hitbox.hitplayer()){
-        console.log("hit")
-            if(this.lvl < 5){
-            player.hit(5, ["contact", "physical", 0], [6 * this.facing[0], 6 * this.facing[1]], 10);
-            this.x+=2*this.speed*this.speedmod*this.facing[0];
-            this.y+=2*this.speed*this.speedmod*this.facing[1];
-            }else{
-                //bro comboed too good using easy mode stats
-                player.hit(4, ["contact", "physical", 0], [(this.speed + 3)  * this.facing[0], (this.speed + 3) * this.facing[1]], 10);
-                this.x+=this.speed*this.speedmod*this.facing[0];
-                this.y+=this.speed*this.speedmod*this.facing[1];
-            }
-            this.hitbox.grantimmunity(player.listname());
-        }
+}else if(this.y - this.shift[1]  + this.size> canvhalfy - arena.h + arena.h*2){
+//bounce up
 
-
+this.direction[1] = Math.abs(this.direction[1]) * -1
 
 }
-Blueboss.prototype.hurt = function(){
+}
+Slowing.prototype.hurt = function(){
 this.hitstun--;
 this.x += this.knockback[0];
 this.y += this.knockback[1];
@@ -152,7 +171,8 @@ if(arena.leavedir(0, this.y - this.shift[1], this.size).includes('u')){
 }
 
 }
-Blueboss.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
+Slowing.prototype.hit = function(damage, damagetype = ["true"], knockback = "legacy", hitstun = 0){
+    //knockback is gay tbh
     var dmg = damage * this.damagemod;
     for(let i = 0 ; i < this.damagetypemod.length ; i++){
         if(damagetype.includes(this.damagetypemod[i][0])){
@@ -160,23 +180,21 @@ Blueboss.prototype.hit = function(damage, damagetype = ["true"], knockback = [0,
         }
     }
     this.hp-=dmg;
-    knockback[0] *= this.knockbackmod;
-    knockback[1] *= this.knockbackmod;
+    
     if(this.hitstun > 0){
-    knockback[0] += this.knockback[0];
-    knockback[1] += this.knockback[1];
-    //hitstun+=this.hitstun;
-    this.knockback = knockback;
-    this.hitstun += hitstun * this.hitstunmod;
+        return
     }else{
-    this.knockback = knockback;
     this.hitstun = hitstun * this.hitstunmod;
+    if(this.hitstun > 120){
+        this.hitstun = 120;
+        //not too much i frames lol
+    }
     }
     //console.log(this.hitstun);
 }
-Blueboss.prototype.inst = function(lvl = 0, startposx = this.x, startposy = this.y, size = this.size, ){
+Slowing.prototype.inst = function(alive, speed, lvl = 0, startposx = this.x, startposy = this.y, size = this.size, ){
 //adds a boss to the game!
-enemies.push(new Blueboss(startposx, startposy, size, lvl, enemies.length));
+enemies.push(new Slowing(alive, startposx, startposy, size, speed, lvl, enemies.length));
 }
 //center stage and 20 size is the default, feel free to change it up!
-bosses.push(new Blueboss(canvhalfx+200, canvhalfy, 20));
+bosses.push(new Slowing(canvhalfx+200, canvhalfy, 30));

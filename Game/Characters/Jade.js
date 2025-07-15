@@ -1,3 +1,10 @@
+/*
+hard mode changes:
+    all healing is limited now, and you can no longer have 999 overheal
+    parry timing is shorter
+    cooldowns are no longer reset on dash
+    
+*/
 function Jade(startposx, startposy, size){
 this.px = startposx;
 this.py = startposy;
@@ -477,8 +484,8 @@ if(this.truemiracle > 1){
         }
 this.hitstun--;
 console.log(this.hitstun);
-this.px -= this.knockback[0];
-this.py -= this.knockback[1];
+this.px += this.knockback[0];
+this.py += this.knockback[1];
 this.knockback[0]*=0.9;
 this.knockback[1]*=0.9;
 if(arena.pleavedir().includes("l") || arena.pleavedir().includes('r')){
@@ -508,7 +515,7 @@ if(arena.pleavedir().includes("u")){
 }
 
 }
-Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0,  special = []){
+Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0,  DImod = 1){
         //handle damage dealth
         if(this.truemiracle > 1){
         return;
@@ -560,7 +567,7 @@ Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         this.hp = 1;
         knockback[0]*=2;
         knockback[1]*=2;
-        this.parry = 100;
+        this.parry = 999;
         }else{
         this.hp-=dmg;
         }
@@ -570,16 +577,16 @@ Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         knockback[0] *= this.knockbackmod;
         knockback[1] *= this.knockbackmod;
         if(inputs.includes(controls[0])){
-            knockback[0] -= this.DI;
+            knockback[0] += this.DI * DImod;
         }
         if(inputs.includes(controls[1])){
-            knockback[0] += this.DI;
+            knockback[0] -= this.DI * DImod;
         }
         if(inputs.includes(controls[2])){
-            knockback[1] -= this.DI;
+            knockback[1] += this.DI * DImod;
         }
         if(inputs.includes(controls[3])){
-            knockback[1] += this.DI;
+            knockback[1] -= this.DI * DImod;
         }
         if(this.hp < 100){
         if(this.hitstun > 0){
@@ -982,13 +989,18 @@ Abraxas.prototype.exist = function(){
             return "delete";
         }
         //hitting the enemy
-            let en = this.hitbox.hitenemy();
+            for(let en = 0 ; en < enemies.length ; en++){
             //console.log(en);
-            if(typeof en != "boolean"){
+            if(this.hitbox.checkenemy(en)){
                 enemies[en].hit(30, ["light", "magic"]);
                 player.hp+=5;
                 this.hitbox.grantimmunity(en);
+
+                if(enemies[en].knockback == "legacy"){
+                enemies[en].hit(0, [], [], 30)
             }
+            }
+        }
         //contact with player
         this.hitbox.enable();
         this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 0, 999, this.size);

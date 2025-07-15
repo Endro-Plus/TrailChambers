@@ -86,7 +86,7 @@ Tutorial_Bot.prototype.exist = function(){
         }
     }
 this.hitbox.enable();
-this.hitbox.move(this.x + player.px, this.y + player.py);
+this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
 //The character exists in my plane of existance!
 screen.fillStyle = this.color;
 circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size);
@@ -200,7 +200,7 @@ Tutorial_Bot.prototype.move = function(){
             this.y+=2*this.speed*this.speedmod*this.facing[1];
             }else{
                 //bro comboed too good using easy mode stats
-                player.hit(4, ["contact", "physical", 0], [-(this.speed + 3)  * this.facing[0], -(this.speed + 3) * this.facing[1]], 10);
+                player.hit(4, ["contact", "physical", 0], [-(this.speed + 3)  * this.facing[0], -(this.speed + 3) * this.facing[1]], 10, 3);
                 this.x+=this.speed*this.speedmod*this.facing[0];
                 this.y+=this.speed*this.speedmod*this.facing[1];
             }

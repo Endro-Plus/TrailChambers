@@ -1,3 +1,11 @@
+/*
+hard mode changes:
+    death orbs do less damage
+    PANIC in hitstun has a much longer cooldown
+    Tim takes his sweet time getting to you after activating panic mode
+    death orbs can die on PANIC mode, albeit still less frequently. For context, easy mode makes deathorbs immortal
+    Tim's defensive aura is smaller, and only defense 50% of the damage
+*/
 function Ezekiel(startposx, startposy, size){
 //startup
 this.px = startposx;
@@ -547,6 +555,9 @@ Ezekiel.prototype.DIE = function(orb){
         if(this.deathorbs[orb].checkenemy(i)){
 
             enemies[i].hit(32, ["physical", "slashing"]);
+            if(enemies[i].knockback == "legacy"){
+                enemies[i].hitstun = 10;
+            }
             this.deathorbs[orb].grantimmunity(i);
         }
      }
@@ -586,7 +597,7 @@ if(arena.pleavedir().includes("u")){
 }
 
 }
-Ezekiel.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
+Ezekiel.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
         //handle damage dealt
         var dmg = damage * this.damagemod * (100 - (this.deathorbs.length * 5))/100;
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
@@ -615,16 +626,16 @@ Ezekiel.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 
         knockback[0] *= this.knockbackmod;
         knockback[1] *= this.knockbackmod;
         if(inputs.includes(controls[0])){
-            knockback[0] += this.DI;
+            knockback[0] += this.DI * DImod;
         }
         if(inputs.includes(controls[1])){
-            knockback[0] -= this.DI;
+            knockback[0] -= this.DI * DImod;
         }
         if(inputs.includes(controls[2])){
-            knockback[1] += this.DI;
+            knockback[1] += this.DI * DImod;
         }
         if(inputs.includes(controls[3])){
-            knockback[1] -= this.DI;
+            knockback[1] -= this.DI * DImod;
         }
         if(this.hp < 100){
         if(this.hitstun > 0){
@@ -720,7 +731,7 @@ this.deathorbs.push(new hitbox(canvhalfx - this.px, canvhalfy - this.py, 4, 3, 1
         this.deathorbs.push(new hitbox(canvhalfx, canvhalfy, 4, 3, 10));
 
     }
-this.deathorbs[this.deathorbs.length-1].immunityframes(30);
+this.deathorbs[this.deathorbs.length-1].immunityframes(45);
 this.deathphase.push(random(35, 45, false));
 this.targetting.push(this.marked);
 this.meleedirect.push([]);

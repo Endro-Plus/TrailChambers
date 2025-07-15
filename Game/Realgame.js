@@ -226,7 +226,7 @@ var player;
 var projectiles = [];
 var enemies = [];
 var summons = [];
-var level = 0;
+var level = 3;
 var rest = 100;
 var resttimer = 0;
 
@@ -845,6 +845,37 @@ var gametime = function(){
 
         level +=0.5;
         
+    }else if(level == 3){
+        projectiles = [];
+        enemies = [];
+        player.inst(0, 0);
+        arena.w = canvhalfx * 2;
+        arena.h = canvhalfy * 2;
+        if(enemyezmode()){
+            bosses[3].inst(true, 2, 4, random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 45);
+            bosses[3].inst(true, 2, 4, random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 45);
+            boss_title = "Slowing Enemy"
+            bossbarmode = 1;
+            for(let i = 0 ; i < 45 ; i++){
+                bosses[4].inst(false, 6, 2, random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 24);
+            }
+        }else{
+             bosses[3].inst(true, 8, 9,  random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 60);
+             bosses[3].inst(true, 12, 6, random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 42);
+            bossbarmode = 2;
+            for(let i = 0 ; i < 24 ; i++){
+                if(i < 10){
+                    bosses[3].inst(false, 10, 8,  random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 36);
+                }
+                bosses[4].inst(false, 10, 5, random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 24);
+            }
+            boss_title = "Slowing Enemies"
+        }
+        bossbar.push(enemies[0]);
+        bossbar.push(enemies[1]);
+        
+
+        level +=0.5;
     }
     }
     }

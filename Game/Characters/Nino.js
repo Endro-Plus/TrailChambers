@@ -1,3 +1,12 @@
+/*
+all hardmode changes:
+    crits only do half 30 damage instead of 60 (+ the standard)
+    defense reduction is half effective
+    miasma aura no longer lowers defense
+    less cutting gales
+    miasma storm grows more slowly, and doesn't shoot as often.
+
+*/
 function Nino(startposx, startposy, size){
 //startup
 this.px = startposx;
@@ -12,13 +21,13 @@ this.desc = ["The wizard! Many strong projectiles that are hard to miss, but not
 //game stats
 this.playershift = [0, 0]
 this.cooldowns = [0, 0, 0, 0];
-this.damagetypemod = [["seduction", 0.6], ["light", 2], ["radiant", 2], ["magic", 0.5], ["dark", 0.5], ["headpat", 999]];//Bro does NOT like his hat being removed. Also, he's a renowned dark wizard, that light weakness caught up to him.
+this.damagetypemod = [["seduction", 0.6], ["light", 2], ["radiant", 2], ["magic", 0.5], ["dark", 0.5], ["headpat", 999], ["aura", 0.5]];//Bro does NOT like his hat being removed. Also, he's a renowned dark wizard, that light weakness caught up to him.
 this.hp = 100;
 this.damagemod = 1;
 this.speed = 10;
 this.speedmod = 1;//modifies speed, multiplicately
 this.speedcause = [];
-this.DI = 1;
+this.DI = 0.7;//definitely the worse DI in the game
 this.facing = [0, 0]
 this.hitstunmod = 1;
 this.knockbackmod = 1;
@@ -29,7 +38,10 @@ this.iframe = false;
 this.defenemies = [];
 this.miasma_aura = new hitbox(0, 0, 0, 9, 45);
 this.miasmatime = 0;
+this.defdiv = null;
 }
+
+
 Nino.prototype.listname = function(){
 //to help position the characters correctly
 return "Nino";
@@ -39,6 +51,13 @@ Nino.prototype.greeting = function(){
 console.log("Shadow Wizard Money Gang enthusiast Nino is ready to cast spells!")
 }
 Nino.prototype.exist = function(){
+if(this.defdiv == null){
+    if(charezmode()){
+        this.defdiv = 24;
+    }else{
+        this.defdiv = 48;//defense reduction is only half as effective on hard mode
+    }
+}
 //HP check
 if(this.hp <= 100 && this.hp>0){
 //under max
@@ -128,14 +147,14 @@ if(this.miasmatime > 0){
     this.miasmatime--;
     this.miasma_aura.enable();
     this.miasma_aura.move(canvhalfx, canvhalfy);
-    this.miasma_aura.resize(100 + (40 - this.miasmatime/5))
+    this.miasma_aura.resize(((charezmode())? 150:100) + (40 - this.miasmatime/((charezmode())? 2:5)))
     this.miasma_aura.showbox("rgba(108, 0, 158, 0.5)");
     for(let i = 0 ; i < enemies.length ; i++){
         if(this.miasma_aura.checkenemy(i)){
-            enemies[i].hit(1.2, ["magic", "dark"]);
+            enemies[i].hit(1.2, ["aura", "magic", "dark"]);
         }
     }
-    if(this.miasmatime % 15 == 0){
+    if(this.miasmatime % ((charezmode())? 10:15) == 0){
         for(let i = 1 ; i <= 3 ; i++){
         let speed = 20;
         let velx = random(0, speed) * (random(0, 1, false)? -1:1)
@@ -246,7 +265,7 @@ if(arena.pleavedir().includes("u")){
 }
 
 }
-Nino.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
+Nino.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
         //handle damage dealth
         var dmg = damage * this.damagemod;
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
@@ -264,16 +283,16 @@ Nino.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         knockback[0] *= this.knockbackmod;
         knockback[1] *= this.knockbackmod;
         if(inputs.includes(controls[0])){
-            knockback[0] += this.DI;
+            knockback[0] += this.DI * DImod;
         }
         if(inputs.includes(controls[1])){
-            knockback[0] -= this.DI;
+            knockback[0] -= this.DI * DImod;
         }
         if(inputs.includes(controls[2])){
-            knockback[1] += this.DI;
+            knockback[1] += this.DI * DImod;
         }
         if(inputs.includes(controls[3])){
-            knockback[1] -= this.DI;
+            knockback[1] -= this.DI * DImod;
         }
         if(this.hp < 100){
         if(this.hitstun > 0){
@@ -371,8 +390,8 @@ this.cooldowns[2] = 15;
 }
 }
 Nino.prototype.spec3 = function(){
-for(let i = -1 ; i <= 1 ; i+=0.5){
-    for(let x = -1 ; x <= 1 ; x+=0.5){
+for(let i = -1 ; i <= 1 ; i+=(charezmode())? 0.5:1){
+    for(let x = -1 ; x <= 1 ; x+=(charezmode())? 0.5:1){
         if(i == x && i == 0){
             //overcomplicated way if saying if I and X are 0
             continue;
@@ -380,6 +399,7 @@ for(let i = -1 ; i <= 1 ; i+=0.5){
         projectiles.push(new Cutting_Gale(canvhalfx, canvhalfy, random(11, 13), random(11,13), [i/2, x/2]));
     
     }
+    
 
 }
 this.cooldowns[2] = 120;
@@ -455,8 +475,8 @@ chain_lightning.prototype.exist = function(){
     for(let i = 0 ; i < enemies.length ; i++){
         if(this.hitbox.checkenemy(i)){
             if(player.defenemies.includes(enemies[i])){
-            enemies[i].hit(this.size + enemies[i].growingdarknessdebuff/24, ["electric", "magic"]);
-            enemies[i].growingdarknessdebuff += this.size + enemies[i].growingdarknessdebuff/24
+            enemies[i].hit(this.size + enemies[i].growingdarknessdebuff/player.defdiv, ["electric", "magic"]);
+            enemies[i].growingdarknessdebuff += this.size + enemies[i].growingdarknessdebuff/player.defdiv
              enemies[i].GDdetonationtime = 100;
         }else{
             enemies[i].hit(this.size, ["electric", "magic"]);
@@ -527,6 +547,10 @@ chain_lightning.prototype.exist = function(){
             this.hitbox.resize(this.target.size+this.dist);
             this.hitbox.move(this.x, this.y)
             //prioritize enemies
+            if(charezmode() || this.visibility % 5 == 0){
+                //only jump every 5 frames on hard mode
+
+           
             for(let i = 0 ; i < enemies.length ; i++){
         if(this.hitbox.checkenemy(i) && enemies[i] != this.target){
             this.dist = 20;
@@ -537,7 +561,7 @@ chain_lightning.prototype.exist = function(){
         screen.moveTo(this.x, this.y);
         if(player.defenemies.includes(enemies[i])){
             enemies[i].hit(8 + enemies[i].growingdarknessdebuff/24, ["electric", "magic"]);
-            enemies[i].growingdarknessdebuff += 8 + enemies[i].growingdarknessdebuff/24
+            enemies[i].growingdarknessdebuff += 8 + enemies[i].growingdarknessdebuff/player.defdiv
              enemies[i].GDdetonationtime = 100;
         }else{
             enemies[i].hit(8, ["electric", "magic"]);
@@ -599,6 +623,7 @@ chain_lightning.prototype.exist = function(){
         screen.closePath();
         }
     }
+     }
         }catch(e){
             
             return "delete"
@@ -699,34 +724,34 @@ Pyromine.prototype.exist = function(){
         for(let i = 0 ; i < enemies.length ; i++){
             if(this.hitbox.checkenemy(i)){
                 if(player.defenemies.includes(enemies[i])){
-                enemies[i].hit(30 + enemies[i].growingdarknessdebuff/24, ["fire", "bludgeoning", "magic"], [(this.x < enemies[i].x)? 12:-12, (this.y < enemies[i].y)? 12:-12], 45);
+                enemies[i].hit(30 + enemies[i].growingdarknessdebuff/player.defdiv, ["fire", "bludgeoning", "magic"], [(this.x < enemies[i].x)? 12:-12, (this.y < enemies[i].y)? 12:-12], 45);
                 for(let x = 0 ; x < projectiles.length ; x++){
                     //if electrified, do bonus damage!
                     if(projectiles[x].name == "chain lightning" && this.hitbox.scanproj(x)){
-                        enemies[i].hit(60 + enemies[i].growingdarknessdebuff/24, ["CRITICAL", "electric"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
+                        enemies[i].hit(((charezmode())? 60:30) + enemies[i].growingdarknessdebuff/player.defdiv, ["CRITICAL", "electric"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
 
                         //electrify the enemy
                         projectiles.push(new chain_lightning(0, 0, 0, [0, 0]));
                         projectiles[projectiles.length-1].phase = 2;
                         projectiles[projectiles.length-1].target = enemies[i];
-                        enemies[i].growingdarknessdebuff += 60 + enemies[i].growingdarknessdebuff/24;
+                        enemies[i].growingdarknessdebuff += ((charezmode())? 60:30) + enemies[i].growingdarknessdebuff/player.defdiv;
                         break;
                     }
                 }
-                enemies[i].growingdarknessdebuff += 30 + enemies[i].growingdarknessdebuff/24
+                enemies[i].growingdarknessdebuff += 30 + enemies[i].growingdarknessdebuff/player.defdiv
                 enemies[i].GDdetonationtime = 100;
                 }else{
                 enemies[i].hit(30, ["fire", "bludgeoning", "magic"], [(this.x < enemies[i].x)? 12:-12, (this.y < enemies[i].y)? 12:-12], 45);
                 for(let x = 0 ; x < projectiles.length ; x++){
                     //if electrified, do bonus damage!
                     if(projectiles[x].name == "chain lightning" && this.hitbox.scanproj(x)){
-                        enemies[i].hit(60, ["CRITICAL", "electric"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
+                        enemies[i].hit(((charezmode())? 60:30), ["CRITICAL", "electric"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
 
                         //electrify the enemy
                         projectiles.push(new chain_lightning(0, 0, 0, [0, 0]));
                         projectiles[projectiles.length-1].phase = 2;
                         projectiles[projectiles.length-1].target = enemies[i];
-                        enemies[i].growingdarknessdebuff = 60
+                        enemies[i].growingdarknessdebuff = ((charezmode())? 60:30)
                         break;
                     }
                 }
@@ -811,8 +836,8 @@ Cutting_Gale.prototype.exist = function(){
     if(this.hitbox.checkenemy(i)){
         
             if(player.defenemies.includes(enemies[i])){
-            enemies[i].hit(24 + enemies[i].growingdarknessdebuff/24, ["wind", "magic", "slashing"]);
-            enemies[i].growingdarknessdebuff += 24 + enemies[i].growingdarknessdebuff/24
+            enemies[i].hit(24 + enemies[i].growingdarknessdebuff/player.defdiv, ["wind", "magic", "slashing"]);
+            enemies[i].growingdarknessdebuff += 24 + enemies[i].growingdarknessdebuff/player.defdiv
              enemies[i].GDdetonationtime = 100;
         }else{
            enemies[i].hit(24, ["wind", "magic", "slashing"]);
@@ -846,12 +871,12 @@ Miasma.prototype.exist = function(){
     //no subtracting null!
     this.lifetime--;
     }
-    this.hitbox.enable();
+    
 
     screen.fillStyle = this.color;
     
     if(this.phase == 0){
-
+        this.hitbox.enable();
         circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
          this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
     this.x+=this.mx;
@@ -860,6 +885,7 @@ Miasma.prototype.exist = function(){
         this.x = this.follow.x + player.px - this.follow.shift[0];
         this.y = this.follow.y + player.py - this.follow.shift[1];
         this.hitbox.move(this.x, this.y)
+        this.hitbox.disable();
         this.hitbox.resize(this.size)
         this.size-=1.5;
         circle(this.x, this.y, this.size)
@@ -892,9 +918,9 @@ Miasma.prototype.exist = function(){
             this.phase = 1
             this.color = "rgba(60, 0, 60, 0.7)"
         }else{
-            enemies[i].hit(0.8, ["magic", "dark"]);
+            enemies[i].hit(0.8, ["magic", "dark", "aura"]);
             if(player.defenemies.includes(enemies[i])){
-                enemies[i].growingdarknessdebuff += 3
+                enemies[i].growingdarknessdebuff += (charezmode())? 4: 0;
             }
             this.size+=0.5
         }

@@ -145,10 +145,10 @@ if(this.phase[1] < 0){
     
 }
 }
-this.hitbox.move(this.x + player.px, this.y + player.py);
+this.hitbox.move(this.x + player.px  - this.shift[0], this.y + player.py  - this.shift[0]);
 //The character exists in my plane of existance!
 screen.fillStyle = this.color;
-circle(this.x + player.px, this.y + player.py, this.size);
+circle(this.x + player.px  - this.shift[0], this.y + player.py  - this.shift[1], this.size);
 
 
 
@@ -243,7 +243,7 @@ MagnaE.prototype.move = function(){
             
             if(this.chuckbox.hitplayer()){
                 //a little less damage for easy mode
-                player.hit((enemyezmode())? 4:8, ["bludgeoning", "physical"], [-12 * this.facing[0], -12 * this.facing[1]], 7);
+                player.hit((enemyezmode())? 4:8, ["bludgeoning", "physical"], [-12 * this.facing[0], -12 * this.facing[1]], 5);
                 phase[1]-=10;//these comboes are too long...
             }
             

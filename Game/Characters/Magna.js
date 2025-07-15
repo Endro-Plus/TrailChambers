@@ -1,3 +1,11 @@
+/*
+hard mode changes:
+    defense is now limited
+    adrenaline no longer is naturally gained
+    the projectile parry hitscan is smaller
+    you can no longer block in hitstun
+    the limits for health regen is more strict
+*/
 function Magna(startposx, startposy, size){
 this.px = startposx;
 this.py = startposy;
@@ -478,7 +486,7 @@ if(arena.pleavedir().includes("u")){
 }
 
 }
-Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
+Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
         //handle damage dealt
         if(this.iframe){
             return;
@@ -497,7 +505,7 @@ Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
 
         }else if(this.blocking > 7){
             //only a defense...
-            this.blocking+=hitstun/2;
+            this.blocking+=Math.round(hitstun/2);
             if(this.blocking > 60){
                 this.blocking = 60;
             }
@@ -524,8 +532,9 @@ Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
         }
         //immunity to hitscans if you would've parried it
         if(damagetype.includes("hitscan") && this.showchuck > 0){
-            this.immunityframes = 15;
-            this.adrenaline+=450;//+15 seconds for absolutely shredding that!
+            this.immunityframes = 45;
+            this.adrenaline+=900;//+30 seconds for absolutely shredding that!
+            this.hp+=10;//ngl, you deserve that!
             return;
         }
         //apply defense bonus
@@ -555,16 +564,16 @@ Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
         knockback[0] *= this.knockbackmod;
         knockback[1] *= this.knockbackmod;
         if(inputs.includes(controls[0])){
-            knockback[0] += this.DI;
+            knockback[0] += this.DI * DImod;
         }
         if(inputs.includes(controls[1])){
-            knockback[0] -= this.DI;
+            knockback[0] -= this.DI * DImod;
         }
         if(inputs.includes(controls[2])){
-            knockback[1] += this.DI;
+            knockback[1] += this.DI * DImod;
         }
         if(inputs.includes(controls[3])){
-            knockback[1] -= this.DI;
+            knockback[1] -= this.DI * DImod;
         }
         if(this.hp < 100){
         if(this.hitstun > 0){
