@@ -215,7 +215,7 @@ var presets = [['arrowleft', 'arrowright', 'arrowup', 'arrowdown', 'z', 'x', 'c'
                 ['a','d','w','s','arrowleft','arrowdown','arrowright','arrowup'],
                 ['arrowleft', 'arrowright', 'arrowup', 'arrowdown', 'a', 's', 'd', 'w']];
 
-var controls = presets[1];
+var controls = [...presets[0]];
 //left, right, up, down, spec1, spec2, spec3, spec4
 //for the setup
 var timeplayed = 0;
@@ -226,7 +226,7 @@ var player;
 var projectiles = [];
 var enemies = [];
 var summons = [];
-var level = 3;
+var level = 0;
 var rest = 100;
 var resttimer = 0;
 
@@ -236,7 +236,7 @@ var selection = 0;
 var Hidden = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'earrowleft', 'earrowright', 'earrowleft', 'earrowright', 0];
 var thicc = function(){//change the screen size
     screen.fillStyle = "#522";
-    screen.fillRect(0, 0, 999, 999);
+    screen.fillRect(0, 0, 9999, 9999);
     screen.fillStyle = "#744";
     screen.fillRect(canvhalfx - 150, canvhalfy - 150, 300, 300);
     screen.fillStyle = "#000"
@@ -286,9 +286,135 @@ var thicc = function(){//change the screen size
     }
     
 }
+var controlscheme = function(){//change the controls
+    screen.fillStyle = "#522";
+    screen.fillRect(0, 0, 9999, 9999);
+    screen.fillStyle = "#000"
+    screen.textAlign = "left";
+    screen.font = "20px Times New Roman";
+    if(presets.some(x => x.toString() == controls)){
+        screen.fillText(`current scheme [${presets.findIndex(x => x.toString() == controls)}]:`, canvhalfx - 130, canvhalfy - 190);
+    }else{
+        screen.fillText("custom control scheme :)", canvhalfx - 130, canvhalfy - 190);
+    }
+    //showing controls
+    screen.fillText(`left = [${controls[0]}]`, canvhalfx - 130, canvhalfy - 130);    
+    screen.fillText(`right = [${controls[1]}]`, canvhalfx - 130, canvhalfy - 110);
+    screen.fillText(`up = [${controls[2]}]`, canvhalfx - 130, canvhalfy - 90);
+    screen.fillText(`down = [${controls[3]}]`, canvhalfx - 130, canvhalfy - 70);
+    screen.fillText(`ability 1 = [${controls[4]}]`, canvhalfx - 130, canvhalfy - 50);
+    screen.fillText(`ability 2 = [${controls[5]}]`, canvhalfx - 130, canvhalfy - 30);
+    screen.fillText(`ability 3 = [${controls[6]}]`, canvhalfx - 130, canvhalfy - 10);
+    screen.fillText(`ability 4 = [${controls[7]}]`, canvhalfx - 130, canvhalfy + 10);
+
+
+    //changing controls
+    if(selection < 8){
+    screen.fillStyle = "#999";
+    screen.fillRect(canvhalfx + 50, canvhalfy - 150 + (selection * 20), 100, 30);
+    screen.fillStyle = "#000";
+    screen.fillText("change " + (selection+1), canvhalfx + 60, canvhalfy - 130 + (selection * 20));
+    }
+
+    //previous scheme
+    screen.fillStyle = (selection != 8)? "#999":"#333";
+    screen.fillRect(canvhalfx - 150, canvhalfy + 40, 100, 30);
+    screen.fillStyle = "#000";
+    screen.fillText("Previous", canvhalfx - 135, canvhalfy + 60);
+    //next scheme
+    screen.fillStyle = (selection != 9)? "#999":"#333";
+    screen.fillRect(canvhalfx, canvhalfy + 40, 100, 30);
+    screen.fillStyle = "#000";
+    screen.fillText("Next", canvhalfx + 30, canvhalfy + 60);
+    //back
+    screen.fillStyle = (selection != 10)? "#999":"#333";
+    screen.fillRect(canvhalfx - 70, canvhalfy + 90, 100, 30);
+    screen.fillStyle = "#000";
+    screen.fillText("Back", canvhalfx - 40, canvhalfy + 110);
+
+
+    //actually changing the controls
+    if(controls[selection] == "none"){
+        screen.fillStyle = "#999";
+        screen.fillRect(canvhalfx + 50, canvhalfy - 150 + (selection * 20), 175, 30);
+        screen.fillStyle = "#000";
+        screen.fillText("esc to unbind", canvhalfx + 60, canvhalfy - 130 + (selection * 20));
+
+
+
+        if(input != ''){
+            if(input == "escape"){
+                controls[selection] = "unbound";
+            }else{
+                controls[selection] = input;
+            }
+            input = '';
+        }else{
+            return;
+        }
+    }
+    if(input == 'arrowdown'){
+        selection = (++selection == 11)? 0:selection;
+        
+        if(selection > 8){
+            selection = 10;
+        }
+        input = '';
+    }
+    if(["arrowleft", "arrowright"].includes(input)){
+        if(input == "arrowright" && selection < 8 || selection == 10){
+            selection = 9
+        }else{
+        selection = (selection == 8)? 9:8;
+        }
+        
+        input = '';
+    }
+    if(input == 'arrowup'){
+        selection = (--selection == -1)? 10:selection;
+        if([7, 8].includes(selection)){
+            selection = 7;
+        }
+        input = '';
+    }
+    if(input == " "){
+        if(selection == 8){
+            if(presets.some(x => x.toString() == controls) &&presets.findIndex(x => x.toString() == controls)-1 >= 0){
+                controls =  [...presets[presets.findIndex(x => x.toString() == controls)-1]]
+                
+            }else{
+                controls =  [...presets[0]]
+            }
+        }else if (selection == 9){
+            if(presets.some(x => x.toString() == controls) && presets.findIndex(x => x.toString() == controls) < presets.length - 1){
+                controls =  [...presets[presets.findIndex(x => x.toString() == controls)+1]]
+            }else{
+                controls =  [...presets[presets.length-1]]
+            }
+        }else if (selection == 10){
+            selection = 0;
+            clearInterval(setup);
+            input = '';
+            setup = setInterval(settings, 1000 / fps);
+        }else{
+            //custom
+            controls[selection] = "none"
+        
+        }
+
+    }
+
+
+
+
+    input = '';
+
+
+    
+}
 var settings = function(){
     screen.fillStyle = "#522";
-    screen.fillRect(0, 0, 999, 999);
+    screen.fillRect(0, 0, 9999, 9999);
     screen.textAlign = "left";
     screen.font = "20px Times New Roman";
     //changing controls
@@ -336,10 +462,17 @@ var settings = function(){
         input = '';
     }
     if(input == 'arrowup'){
-        selection = (--selection == -1)? 2:selection;
+        selection = (--selection == -1)? 3:selection;
 
         input = '';
     }
+    if(input == ' ' && selection == 0){
+            selection = 0;
+            clearInterval(setup);
+            input = '';
+            setup = setInterval(controlscheme, 1000 / fps);
+        }
+    //fps
     if(input == "arrowleft" && selection == 1 && fps > 1){
 
         fps--;
@@ -353,11 +486,13 @@ var settings = function(){
          setup = setInterval(settings, 1000 / fps);
          input = '';
     }
+    //screen change
     if(input == ' ' && selection == 2){
             clearInterval(setup);
             input = '';
             setup = setInterval(thicc, 1000 / fps);
         }
+        //go back!
     if(input == ' ' && selection == 3){
             clearInterval(setup);
             selection = 1;
@@ -371,7 +506,7 @@ var scroll = 0;
 var charSelect = function(){
     screen.font = "25px Times New Roman";
     screen.fillStyle = screen_color;
-    screen.fillRect(0, 0, 999, 999);
+    screen.fillRect(0, 0, 9999, 9999);
 
     for(let i = 0; i < chars.length; i++){
         screen.fillStyle = chars[i].postColor;
@@ -429,7 +564,7 @@ var stageSelect = function(){
     scroll = 0;
     //Normal, Hard, Maddening
     screen.fillStyle = screen_color;
-    screen.fillRect(0, 0, 999, 999);
+    screen.fillRect(0, 0, 9999, 9999);
     screen.fillStyle = (selection != 0)? "#C00":"#500";
     circle(canvhalfx - 150, canvhalfy, 75);
 
@@ -568,7 +703,7 @@ var Hidden1Select = function(){
     spawntime--;
 
     screen.fillStyle = screen_color;
-    screen.fillRect(0, 0, 999, 999);
+    screen.fillRect(0, 0, 9999, 9999);
     //EGG
     if(selection == 0){
         screen.fillStyle = "#F00";
@@ -668,10 +803,10 @@ var prep = function(){
 
     //after setup, see the play and settings button
     screen.fillStyle = "#311";
-    screen.fillRect(0, 0, 999, 999);
-    screen.fillStyle = (selection != 0)? "#F00":"#500";
+    screen.fillRect(0, 0, 9999, 9999);
+    screen.fillStyle = (selection != 0)? "#500":"#F00";
     circle(canvhalfx - 150, canvhalfy, 50);
-    screen.fillStyle = (selection != 1)? "#F00":"#500";
+    screen.fillStyle = (selection != 1)? "#500":"#F00";
     circle(canvhalfx + 150, canvhalfy, 50);
     screen.fillStyle = "#000";
     screen.font = "25px Times New Roman";
@@ -704,7 +839,7 @@ var gametime = function(){
      screen.lineWidth = 1;
     screen.fillStyle = "#311";
     screen.strokeStyle = "#000";
-    screen.fillRect(0, 0, 999, 999);
+    screen.fillRect(0, 0, 9999, 9999);
     screen.strokeRect(canvhalfx - arena.w + player.px, canvhalfy - arena.h + player.py, arena.w*2, arena.h*2);
     //bossbar
     if(bossbarmode == 2){
@@ -853,26 +988,28 @@ var gametime = function(){
         arena.h = canvhalfy * 2;
         if(enemyezmode()){
             bosses[3].inst(true, 2, 4, random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 45);
-            bosses[3].inst(true, 2, 4, random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 45);
+            //bosses[3].inst(true, 2, 4, random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 45);
             boss_title = "Slowing Enemy"
             bossbarmode = 1;
             for(let i = 0 ; i < 45 ; i++){
                 bosses[4].inst(false, 6, 2, random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 24);
             }
+             bossbar.push(enemies[0]);
         }else{
              bosses[3].inst(true, 8, 9,  random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 60);
              bosses[3].inst(true, 12, 6, random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 42);
             bossbarmode = 2;
-            for(let i = 0 ; i < 24 ; i++){
-                if(i < 10){
+            for(let i = 0 ; i < 30 ; i++){
+                if(i < 5){
                     bosses[3].inst(false, 10, 8,  random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 36);
                 }
                 bosses[4].inst(false, 10, 5, random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 24);
             }
             boss_title = "Slowing Enemies"
-        }
-        bossbar.push(enemies[0]);
+            bossbar.push(enemies[0]);
         bossbar.push(enemies[1]);
+        }
+        
         
 
         level +=0.5;
