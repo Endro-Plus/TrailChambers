@@ -1,1 +1,1 @@
-Only 5 characters work, Jade, Magmax, Simia, Magna, and Ezekiel. Only 3 bosses are in the game, Tutorial bot The orb, and Magna. You cannot change your controls yet.
+Only 6 characters work, Jade, Magmax, Simia, Magna, Ezekiel, and Nino. Only 4 bosses are in the game! We're getting somewhere with this!!!
