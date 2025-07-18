@@ -4,7 +4,7 @@ function Tutorial_Bot(startposx, startposy, size , lvl = 0, ID = -5){
 this.enemyID = ID;
 this.x = startposx;
 this.y = startposy;
-this.shift = [0, 0];
+this.shift = [this.x, this.y];
 this.z = 0; //distance up.
 this.size = size;
 this.height = 8;//How tall they are, if small enough, higher hitting attacks may miss! However, if too tall, that's just a hitbox extension.
@@ -171,18 +171,18 @@ this.move();
 Tutorial_Bot.prototype.move = function(){
         if(this.hitstun > 0){
         this.hurt();
-        this.hitbox.reassign(this.x + player.px, this.y + player.px, this.z, 8, this.size);
+        this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
         return;
         }
         // really basic following script
         this.hitbox.updateimmunity();
-        if(this.x + player.px > canvhalfx + 10){
+        if(this.x + player.px - this.shift[0]> canvhalfx + 10){
             this.x-=this.speed * this.speedmod;
             this.facing = [-1, 0];
-        }else if(this.x + player.px < canvhalfx - 10){
+        }else if(this.x + player.px - this.shift[0]< canvhalfx - 10){
             this.x+=this.speed * this.speedmod;
             this.facing = [1, 0];
-        }else if(this.y + player.py < canvhalfy){
+        }else if(this.y + player.py  - this.shift[1]< canvhalfy){
             this.y+=this.speed * this.speedmod;
             this.facing = [0, 1];
         }else{
@@ -190,7 +190,7 @@ Tutorial_Bot.prototype.move = function(){
             this.facing = [0, -1];
         }
 
-        this.hitbox.reassign(this.x + player.px, this.y + player.py, this.z, 8, this.size);
+        this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
 
         if(this.hitbox.hitplayer()){
         console.log("hit")

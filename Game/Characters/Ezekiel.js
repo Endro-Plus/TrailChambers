@@ -223,6 +223,8 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
                         //damage
                         for(let x = 0 ; x < enemies.length ; x++){
                             if(this.whip.checkenemy(x)){
+                                crit++;
+                                playerattack = "whip"
                                 enemies[x].hit(52, ["pain", "physical", "CRITICAL"], [9 * this.whipattack[0], 9 * this.whipattack[1]], 60);
                                 //That shit hurts!
                                 for(let part = 0 ; part < 10 ; part++){
@@ -244,6 +246,7 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
                     //damage
                     for(let x = 0 ; x < enemies.length ; x++){
                             if(this.whip.checkenemy(x)){
+                                playerattack = "whip"
                                 enemies[x].hit(16, ["pain", "physical"], [9 * this.whipattack[0], 9 * this.whipattack[1]], 24);
                                 //OOWWWW!
                                 this.whip.grantimmunity(x);
@@ -553,7 +556,7 @@ Ezekiel.prototype.DIE = function(orb){
      //damage enemies
      for(let i = 0 ; i < enemies.length ; i++){
         if(this.deathorbs[orb].checkenemy(i)){
-
+            playerattack = "deathorb melee"
             enemies[i].hit(32, ["physical", "slashing"]);
             if(enemies[i].knockback == "legacy"){
                 enemies[i].hitstun = 10;

@@ -82,6 +82,7 @@ function playerproj(name, x, y, size, mx, my, color, dmg, lifetime, dmgtype = ["
     this.hitstun = hitstun;
 }
 playerproj.prototype.exist = function(){
+    
     if(typeof this.lifetime == "number"){
     //no subtracting null!
     this.lifetime--;
@@ -103,6 +104,7 @@ playerproj.prototype.exist = function(){
     //console.log(en);
     for(let i = 0 ; i < enemies.length ; i++){
     if(this.hitbox.checkenemy(i)){
+        playerattack = this.name;
         enemies[i].hit(this.dmg, this.dmgtype, this.knockback, this.hitstun);
         return "delete";
         }
@@ -210,12 +212,25 @@ return ["normal", "Mob"].includes(difficulty)//if true, then easy mode!
 var enemyezmode = function(){
 return ["normal", "Player"].includes(difficulty)//if true, then easy enemies!
 }
+var notcharezmode = function(){
+return !["normal", "Mob"].includes(difficulty)//if true, then easy mode!
+}
+var notenemyezmode = function(){
+return !["normal", "Player"].includes(difficulty)//if true, then easy enemies!
+}
+//for challenges
+var nohitstatus = function(challengenum){
+if(player.hp  < 100){
+    challengenum[2] = false;
+}
+}
+
 var presets = [['arrowleft', 'arrowright', 'arrowup', 'arrowdown', 'z', 'x', 'c', 'v'],
                 ['a', 'd', 'w', 's', 'j', 'k', 'l', ';'],
                 ['a','d','w','s','arrowleft','arrowdown','arrowright','arrowup'],
                 ['arrowleft', 'arrowright', 'arrowup', 'arrowdown', 'a', 's', 'd', 'w']];
 
-var controls = [...presets[0]];
+var controls = [...presets[1]];
 //left, right, up, down, spec1, spec2, spec3, spec4
 //for the setup
 var timeplayed = 0;
@@ -226,11 +241,31 @@ var player;
 var projectiles = [];
 var enemies = [];
 var summons = [];
-var level = 0;
+var level = 2;
 var rest = 100;
 var resttimer = 0;
+var pauseselection = 0;
 
-
+//for challenges
+var challenges = 
+    [
+    //lvl 0
+    [[enemyezmode, "Have fun!!!", true], [notenemyezmode, "No hit the boss!!!", true], [["Jade", "Magmax"], "End the encounter with 100+% hp", false], [["Simia"], "Hit a tornado kick", false], [["Magna","Jade"], "Hit a parry!", false], [["Ezekiel"], "Hit the boss with a deathorb while in PANIC", false], [[ "Nino"], "Electrically charge a miasma ball", false], [[ "Magna"], "Use nunchuck and parry your own shuriken", false], [[ "Magmax"], "Use flow to cancel harden", false], [["Ezekiel", "Nino"], "Land a critical hit!", false]],
+    //lvl 1
+    [[enemyezmode, "rout the enemies!", false], [notenemyezmode, "kill the boss last", true]], 
+    //lvl 2
+    [[true, "don't get parried", true], ["Magna", "Parry the parry beam!", false]],
+    //lvl 3
+    [[true, "Don't take any damage!", true], [notenemyezmode, "Kill both bosses within 3 seconds of the other dying"]]
+]//visibility condition, description, completed
+var completedchallenges = 0;
+var parried = 0;
+var crit = 0;
+var proj_parry = [];
+var playerattack;
+var enemyattack;
+var playerhp = 0;//remember what it was before a reset
+var framesplayed = 0;//good for calculating time
 {
 var selection = 0;
 var Hidden = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'earrowleft', 'earrowright', 'earrowleft', 'earrowright', 0];
@@ -504,6 +539,9 @@ var screen_color = "#311";
 var cruel_delay = 2;
 var scroll = 0;
 var charSelect = function(){
+    if(enemyezmode()){
+        completedchallenges = 1;//simply being on easy mode is a challenge!
+    }
     screen.font = "25px Times New Roman";
     screen.fillStyle = screen_color;
     screen.fillRect(0, 0, 9999, 9999);
@@ -514,7 +552,7 @@ var charSelect = function(){
         screen.fillStyle = chars[i].color;
         circle((canvhalfx) + i * 200 - scroll, canvhalfy - 145, chars[i].size)
         screen.textAlign = "center";
-        screen.fillText(chars[i].listname(),  (canvhalfx) + i * 200 - scroll, canvhalfy + 05, 200, 75)
+        screen.fillText(chars[i].listname(),  (canvhalfx) + i * 200 - scroll, canvhalfy + 5, 200, 75)
 
     }
 
@@ -799,6 +837,27 @@ var Hidden1Select = function(){
 
 }
 var prep = function(){
+    //reset challenges
+challenges = 
+    [
+    //lvl 0
+    [[enemyezmode, "Have fun!!!", true], [notenemyezmode, "No hit the boss!!!", true], [["Jade", "Magmax"], "End the encounter with 100+% hp", false], [["Simia"], "Hit a tornado kick", false], [["Magna","Jade"], "Hit a parry!", false], [["Ezekiel"], "Hit the boss with a deathorb while in PANIC", false], [[ "Nino"], "Electrically charge a miasma ball", false], [[ "Magna"], "Use nunchuck and parry your own shuriken", false], [[ "Magmax"], "Use flow to cancel harden", false], [["Ezekiel", "Nino"], "Land a critical hit!", false]],
+    //lvl 1
+    [[enemyezmode, "rout the enemies!", false], [notenemyezmode, "kill the boss last", true]], 
+    //lvl 2
+    [[true, "don't get parried", true], ["Magna", "Parry the parry beam!", false]],
+    //lvl 3
+    [[true, "Don't take any damage!", true], [notenemyezmode, "Kill both bosses within 3 seconds of the other dying"]]
+]//visibility condition, description, completed
+completedchallenges = 0;
+parried = 0;
+crit = 0;
+proj_parry = [];
+playerattack;
+enemyattack;
+playerhp = 0;//remember what it was before a reset
+framesplayed = 0;//good for calculating time
+
     //what people choose
 
     //after setup, see the play and settings button
@@ -893,6 +952,10 @@ var gametime = function(){
     }
     //console.log(totalbosshp)
     if(level == 0 && !enemyezmode()){
+        projectiles = [];
+        bossbar = [];
+    enemies = [];
+    player.inst(100, 0);
     arena.w = canvhalfx + 40;
     arena.h = canvhalfy + 40;
     //This boss gets significatly harder out of normal or player mode
@@ -902,6 +965,10 @@ var gametime = function(){
     bossbar.push(enemies[0]);
     level += 0.5;
     }else if (level == 0){
+        projectiles = [];
+    enemies = [];
+    bossbar = [];
+    player.inst(0, 0);
     boss_title = "Tutorial Bot"
     bossbarmode = 1;
     bosses[0].inst();
@@ -910,6 +977,159 @@ var gametime = function(){
     }
 
     if(player.exist()!="dead"){
+        //challenges in levels
+        switch (Math.floor(level)){
+
+            case 0:
+                playerhp = player.hp
+                //no hit on hard mode
+                if(notenemyezmode()){
+                    nohitstatus(challenges[0][1]);
+                }
+                //parry
+                if(parried == true){
+                    challenges[0][4][2] = true;
+                }
+                //projectile parry
+                if(proj_parry.length > 0){
+                    challenges[0][7][2] = true;
+                }
+
+                //hitting tornado kick
+                if(playerattack == "Tornado Kick"){
+                    challenges[0][3][2] = true;
+                }
+                //going from harden to flow
+                if(challenges[0][8][2] == false){
+                if(player.state == "harden"){
+                    crit = 1;
+                }else if(player.state == "flow" && crit == 1){
+                    challenges[0][8][2] = true;
+                    crit = 0;
+                }else if(player.listname() == "Magmax"){
+                    crit = 0;
+                }
+            }
+                //critical hit
+                if(crit > 0 && player.listname() != "Magmax"){
+                    challenges[0][challenges[0].length-1][2] = true;
+                }
+
+                //charging a miasma ball
+                for(let i = 0 ; challenges[0][6][2] == false && i < projectiles.length ; i++){
+                    if(projectiles[i].name == "Miasma" && projectiles.some(x => x.name == "chain lightning" && x.hitbox.scanproj(i))){
+                        challenges[0][6][2] = true;
+                    }
+                }
+
+                //deathorb
+                if(playerattack == "deathorb melee" && player.stance == "PANIC"){
+                    challenges[0][5][2] = true;
+                }
+
+                
+
+
+
+            break;
+            case 1:
+                //acquire challenge points
+                //check for completed challenges (in this case, hp being over 100)
+                
+                if(challenges[0][2][2] == false && playerhp > 100){
+                    challenges[0][2][2] = true;
+                    completedchallenges++;
+                }
+                //no hit in hard mode
+                if(!enemyezmode() && challenges[0][1][2]){
+                    challenges[0][1][2] = false;
+                    completedchallenges++;
+                }
+                //parry
+                if(challenges[0][4][2] == true){
+                    challenges[0][4][2] = false;
+                    completedchallenges++
+                }
+                //proj parry
+                if(challenges[0][7][2] == true){
+                    challenges[0][7][2] = false;
+                    completedchallenges++
+                }
+                //hitting tornado kick
+                if(challenges[0][3][2] == true){
+                    challenges[0][3][2] = false;
+                    completedchallenges++
+                }
+                //proj parry
+                if(challenges[0][8][2] == true){
+                    challenges[0][8][2] = false;
+                    completedchallenges++
+                }
+                //critical hit
+                if(challenges[0][challenges[0].length-1][2] == true){
+                    challenges[0][challenges[0].length-1][2] = false;
+                    completedchallenges++;
+                }
+                //charged miasma ball
+                if(challenges[0][6][2] == true){
+                    challenges[0][6][2] = false;
+                    completedchallenges++;
+                }
+                //deathorb
+                if(challenges[0][5][2] == true){
+                    challenges[0][5][2] = false;
+                    completedchallenges++;
+                }
+
+                //level 1 challenges
+                framesplayed++;
+
+                //routing the enemy (easy)
+                if(enemies.length == 0 && enemyezmode() && framesplayed > 10){
+                    challenges[1][0][2] = true;
+                }
+                //boss killed last
+                if(notenemyezmode() && framesplayed > 10 && enemies.length > 0 && enemies[0].phasetimer == undefined){
+                    challenges[1][1][2] = false;
+                }
+
+
+                break;
+
+                case 2:
+                //acquire points
+
+                //easy
+                if(challenges[1][0][2] == true){
+                    challenges[1][0][2] = false;
+                    completedchallenges++;
+                }
+
+                //hard
+                if(challenges[1][1][2] == true){
+                    challenges[1][1][2] = false;
+                    completedchallenges++;
+                }
+
+                //challenges
+
+
+                //don't get parried! (and hit... shhhhhh)
+                if(enemyattack == "PARRIED"){
+                    challenges[2][0][2] = false;
+                }
+                //counterparry!
+                
+
+
+
+
+        }
+
+
+
+
+
     //console.log(inputs);
     //console.log(projectiles);
     for(let i = 0; i < projectiles.length ; i++){
@@ -940,10 +1160,18 @@ var gametime = function(){
     }else{
     resttimer =0;
     }
-
+    if(level % 1 == 0){
+        //reset challenge variables
+        parried = 0;
+        proj_parry = [];
+        crit = 0;
+    }
     if(!["SIMIA", "EGG", "boss rush"].includes(difficulty)){
     //regular progression
     if(level == 1){
+    
+
+    bossbar = [];
     projectiles = [];
     enemies = [];
     player.inst(100, 0);
@@ -1015,6 +1243,144 @@ var gametime = function(){
         level +=0.5;
     }
     }
+
+
+    if(input == "escape"){
+        //pause the game
+        pauseselection = 0;
+        clearInterval(setup);
+        setup = setInterval(pause, 1000 / fps);
+        screen.fillStyle = "#00000099";
+        screen.fillRect(0, 0, 9999, 9999);
+        input = '';
+    
+
+
+    }
+    }
+}
+var pause = function(){
+    //no background needed here
+    let challengeskip = challenges[Math.floor(level)]//I'm not typing that all the time!
+    let challengenum = 0;
+    //challenges
+    screen.fillStyle = "#161616";
+    for(let i = 0 ; challengeskip != undefined && i < challengeskip.length ; i++){
+    screen.fillStyle = "#161616";
+    //console.log(challengeskip[i])
+    //first, are there any challenges???
+    
+    //second, does the challenge even show?
+    if(Array.isArray(challengeskip[i][0])){
+        //there are many character names or conditions. all functions must be true, only 1 string has to be true
+        
+        let strings = false;
+        let skipstring = false;
+        let contin = false
+        for(let x = 0 ; x < challengeskip[i][0].length ; x++){
+            if(typeof challengeskip[i][0][x] == "function" && challengeskip[i][0][x]() == false){
+                //this was false
+                contin = true;
+                break;
+            }else if(skipstring == false && challengeskip[i][0][x] == player.listname()){
+                //check no more strings!
+                skipstring = true;
+            }else if(skipstring == false && challengeskip[i][0][x] != player.listname()){
+                //this was a string, but not OUR string
+                strings = true;
+            }
+        }
+        if(contin == true || strings == true && skipstring == false){
+            //a single false function, or the character isn't what we want it to be, skip this challenge
+            continue;
+        }
+    }else if(typeof challengeskip[i][0] == "function" && challengeskip[i][0]() == false){
+        //only proceed if the function is true!
+        
+        continue;
+    }else if(typeof challengeskip[i][0] == "string" && challengeskip[i][0] != player.listname()){
+        
+        //it's a string, check to see if it's the same as the player name
+        continue
+
+    }else if (challengeskip[i][0] == false){
+        //it's a booleon... for some reason
+        continue;
+    }
+    
+    screen.fillRect(canvhalfx - 300, 30 + (challengenum * 50), 600, 50);
+    
+    screen.fillStyle = (challengeskip[i][2] == true)? "#0f0" : "#fff";
+    screen.font = "25px Times New Roman";
+    screen.textAlign = "center"
+    screen.fillText(challengeskip[i][1], canvhalfx, 65 + (challengenum * 50))
+    challengenum++;
+
+   
+
+}
+ //resume
+    screen.fillStyle = (pauseselection == 0)? "#666" : "#333";
+    screen.fillRect(canvhalfx - 80, canvhalfy - 40, 160, 50);
+    
+    screen.fillStyle = "#fff";
+    screen.font = "25px Times New Roman";
+    screen.textAlign = "center"
+    screen.fillText("Resume", canvhalfx, canvhalfy - 10)
+    //reset
+    screen.fillStyle = (pauseselection == 1)? "#666" : "#333";
+    screen.fillRect(canvhalfx - 80, canvhalfy + 80, 160, 50);
+    
+    screen.fillStyle = "#fff";
+    screen.font = "25px Times New Roman";
+    screen.textAlign = "center"
+    screen.fillText("Reset", canvhalfx, canvhalfy + 110)
+    //exit
+    screen.fillStyle = (pauseselection == 2)? "#666" : "#333";
+    screen.fillRect(canvhalfx - 80, canvhalfy + 200, 160, 50);
+    
+    screen.fillStyle = "#fff";
+    screen.font = "25px Times New Roman";
+    screen.textAlign = "center"
+    screen.fillText("Exit", canvhalfx, canvhalfy + 230)
+
+    //going up or down
+    if(input == "arrowdown"){
+        pauseselection = (++pauseselection > 2)? 0: pauseselection;
+        input = '';
+    }
+    if(input == "arrowup"){
+        pauseselection = (--pauseselection < 0)? 2: pauseselection;
+        input = '';
+    }
+
+    //inputs
+    if(input == "escape" || input == ' ' && pauseselection == 0){
+        //resume the game
+
+        //pause the game
+        pauseselection = 0;
+        clearInterval(setup);
+        setup = setInterval(gametime, 1000 / fps);
+        
+        input = '';
+    }else if(input == ' ' && pauseselection == 1){
+        //restart the current level
+        level = Math.floor(level);
+        pauseselection = 0;
+        clearInterval(setup);
+        setup = setInterval(gametime, 1000 / fps);
+        
+        input = '';
+    }else if (input == ' '){
+        player = null;
+        clearInterval(setup);
+        setup = setInterval(prep, 1000/fps);
+        screen.textAlign = "left";
+        level = 0;
+        input = '';
+        bossbar = [];
+
     }
 }
 
@@ -1055,7 +1421,7 @@ document.body.onload = function(){
     //do the same thing for bosses
     //console.log(bosslist)
     let truepos = [];
-    let pos2 = [];
+    //let pos2 = [];
     for(let i = 0; i < bosses.length; i++){
             if(bosslist[i] == "undefined"){
                 //JUUUUST incase.

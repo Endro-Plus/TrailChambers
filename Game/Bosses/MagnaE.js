@@ -521,6 +521,7 @@ ShurikenE.prototype.exist = function(){
     //hitting the player
     //console.log(en);
     if(this.hitbox.hitplayer()){
+        enemyattack = this.name;
         player.hit(12, ["physical", "slashing"]);
         return "delete";
     }
@@ -564,6 +565,7 @@ ParryProjE.prototype.exist = function(){
         if(this.lifetime == 1){
             this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
             if(this.hitbox.hitplayer()){
+                enemyattack = this.name;
                 player.hit(24, ["magic", "hitscan"], [this.mx * -2, this.my * -2], 15);
                 this.range = i;
                 break;

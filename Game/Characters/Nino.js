@@ -474,6 +474,7 @@ chain_lightning.prototype.exist = function(){
     //enemies first
     for(let i = 0 ; i < enemies.length ; i++){
         if(this.hitbox.checkenemy(i)){
+            playerattack = this.name;
             if(player.defenemies.includes(enemies[i])){
             enemies[i].hit(this.size + enemies[i].growingdarknessdebuff/player.defdiv, ["electric", "magic"]);
             enemies[i].growingdarknessdebuff += this.size + enemies[i].growingdarknessdebuff/player.defdiv
@@ -553,6 +554,7 @@ chain_lightning.prototype.exist = function(){
            
             for(let i = 0 ; i < enemies.length ; i++){
         if(this.hitbox.checkenemy(i) && enemies[i] != this.target){
+            playerattack = this.name;
             this.dist = 20;
             screen.beginPath();
             screen.lineWidth = 10;
@@ -664,6 +666,7 @@ Darkblast.prototype.exist = function(){
     this.hitbox.showbox(this.color);
     for(let i = 0 ; i < enemies.length ; i++){
         if(this.hitbox.checkenemy(i)){
+            playerattack = this.name;
             enemies[i].hit(this.dmg, ["dark", "magic"]);
             this.hitbox.grantimmunity(i);
         }
@@ -723,6 +726,7 @@ Pyromine.prototype.exist = function(){
         circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.radius, true, false);
         for(let i = 0 ; i < enemies.length ; i++){
             if(this.hitbox.checkenemy(i)){
+                playerattack = this.name;
                 if(player.defenemies.includes(enemies[i])){
                 enemies[i].hit(30 + enemies[i].growingdarknessdebuff/player.defdiv, ["fire", "bludgeoning", "magic"], [(this.x < enemies[i].x)? 12:-12, (this.y < enemies[i].y)? 12:-12], 45);
                 for(let x = 0 ; x < projectiles.length ; x++){
@@ -746,7 +750,7 @@ Pyromine.prototype.exist = function(){
                     //if electrified, do bonus damage!
                     if(projectiles[x].name == "chain lightning" && this.hitbox.scanproj(x)){
                         enemies[i].hit(((charezmode())? 60:30), ["CRITICAL", "electric"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
-
+                        crit++;
                         //electrify the enemy
                         projectiles.push(new chain_lightning(0, 0, 0, [0, 0]));
                         projectiles[projectiles.length-1].phase = 2;
@@ -834,8 +838,8 @@ Cutting_Gale.prototype.exist = function(){
     //hitting the enemy
     for(let i = 0 ; i < enemies.length ; i++){
     if(this.hitbox.checkenemy(i)){
-        
             if(player.defenemies.includes(enemies[i])){
+                
             enemies[i].hit(24 + enemies[i].growingdarknessdebuff/player.defdiv, ["wind", "magic", "slashing"]);
             enemies[i].growingdarknessdebuff += 24 + enemies[i].growingdarknessdebuff/player.defdiv
              enemies[i].GDdetonationtime = 100;
@@ -901,6 +905,7 @@ Miasma.prototype.exist = function(){
     for(let i = 0 ; i < enemies.length ; i++){
     if(this.hitbox.checkenemy(i)){
         if(this.phase == 0){
+        playerattack = this.name;
             
              if(player.defenemies.includes(enemies[i])){
             enemies[i].hit(30 + enemies[i].growingdarknessdebuff/24, ["magic", "dark"]);

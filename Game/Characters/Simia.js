@@ -329,6 +329,8 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
                 this.sweepframes += 5;
                 }
                 this.momentum+=10;
+                playerattack = "Tornado Kick";
+
                 if(!charezmode()){
                 if(this.combo > 12){
                     //this move is fucking cringe
@@ -650,6 +652,8 @@ if(arena.pleavedir().includes("u")){
 }
 Simia.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
         if(this.windup == -1 && damagetype.includes("contact") && typeof damagetype[damagetype.length - 1] == "number"){
+            playerattack = "Dive kick";
+
             //dive kick connected!
             this.savior_frames = 8;
             this.jumpv = 5;

@@ -523,8 +523,9 @@ Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         if(this.cooldowns[2] < 15){
             this.cooldowns[2] = 15;//no parry cheesing!
         }
-        console.log(this.parry)
+        
         if(this.parry >= 0){
+            parried++;
             if(this.powerup < 1){
                 this.powerup = 0;
             }
@@ -737,6 +738,7 @@ Seraphim.prototype.exist = function(){
     let en = this.hitbox.hitenemy();
     //console.log(en);
     if(typeof en != "boolean"){
+        playerattack = this.name;
         enemies[en].hit(this.size / 2, ["light", "magic"]);
         if(charezmode() || player.hp < 110){
         player.hp += this.size / 5;
@@ -825,6 +827,7 @@ Nosferatu.prototype.exist = function(){
         let en = this.hitbox.hitenemy();
         //console.log(en);
         if(typeof en != "boolean"){
+            playerattack = this.name;
             enemies[en].hit(this.size / 4, ["light", "magic"], [this.mx * this.size, this.my * this.size], this.size * 5);
             for(let i = 0 ; i < 40+this.size; i++){
                     if(this.size>=90 && random(0,1,false)){
@@ -877,7 +880,9 @@ Nosferatu_blast.prototype.exist = function(){
         if(arena.leave(this.x - this.shift[0], this.y - this.shift[1], this.size)){
                     this.last = -5;
                     }
-        if(typeof en != "boolean"){
+        for(let en = 0 ; en < enemies.length ; en++){
+            if(this.hitbox.checkenemy(en)){
+            playerattack = this.name;
             enemies[en].hit(this.size / 10, ["light", "magic"]);
             if(Math.abs(this.mx) + Math.abs(this.my) > 20){
                 enemies[en].hit(0, ["light", "magic"], [this.mx / 2, this.my / 2], 40);
@@ -888,6 +893,7 @@ Nosferatu_blast.prototype.exist = function(){
             }
 
             this.hitbox.grantimmunity(en);
+        }
         }
 }
 
@@ -992,6 +998,7 @@ Abraxas.prototype.exist = function(){
             for(let en = 0 ; en < enemies.length ; en++){
             //console.log(en);
             if(this.hitbox.checkenemy(en)){
+                playerattack = this.name;
                 enemies[en].hit(30, ["light", "magic"]);
                 player.hp+=5;
                 this.hitbox.grantimmunity(en);
@@ -1099,15 +1106,17 @@ Light_Spark.prototype.exist = function(){
         return "delete";
     }
     //hitting the enemy
-        let en = this.hitbox.hitenemy();
+        for(let en = 0 ; en < enemies.length ; en++){
         //console.log(en);
-        if(typeof en != "boolean"){
+        if(this.hitbox.checkenemy(en)){
             enemies[en].hit(this.size, ["light", "magic"]);
+            playerattack = this.name;
             if(charezmode() || player.hp < 110){
             player.hp+=this.size/2
             }
             return "delete";
         }
+    }
 
 }
 

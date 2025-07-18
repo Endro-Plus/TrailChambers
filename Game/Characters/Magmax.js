@@ -722,6 +722,7 @@ skatebeam.prototype.exist = function(){
     //console.log(en);
     for(let i = 0 ; i < enemies.length ; i++){
     if(this.hitbox.checkenemy(i)){
+        playerattack = this.name;
         if(enemies[i].knockback == "legacy"){
                 enemies[i].hit(0, [], [], 45);
             }

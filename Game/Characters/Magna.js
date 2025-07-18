@@ -285,7 +285,7 @@ this.chuckbox.updateimmunity();
                 this.cooldowns[0] = 0;//parry chain?
                 this.cooldowns[2] = 0;//instantly start sliding again!
                 
-            projectiles.push(new ParryProj(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], (charezmode())? 18:12, (6 * this.facing[0]),6 * this.facing[1], 2));
+            projectiles.push(new ParryProj(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], (charezmode())? 18:12, (6 * this.facing[0]),6 * this.facing[1], 2, projectiles[i].type));
         }
     }
 }else if(this.showchuck > 0){
@@ -494,6 +494,7 @@ Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
         //on parry
         if(this.blocking < 8 && this.blocking != -1){
             //PARRIED!
+            parried = true;
             this.adrenaline+=150;//5 seconds of adrenaline
             this.immunityframes = 45;//OP PARRY IK
             this.blocking = -1;
@@ -753,6 +754,7 @@ function Shuriken(x, y, size, mx, my){
 Shuriken.prototype.dealdamage = function(){
     for(let i = 0 ; i < enemies.length ; i++){
     if(this.hitbox.checkenemy(i)){
+        playerattack = this.name;
         enemies[i].hit(7 + player.dmgboost + (this.bounces), ["physical", "slashing"]);
         if(this.bounces < 2){
         return "delete";//go through enemeis if bouncing!
@@ -918,10 +920,11 @@ Shuriken.prototype.exist = function(){
 }
 }
 
-function ParryProj(x, y, size, mx, my, delay = 0){
+function ParryProj(x, y, size, mx, my, delay = 0, parried = null){
     this.name = "PARRIED";
     this.x = x;
     this.y = y;
+    this.parried = parried
     this.origin = [this.x, this.y]
     this.shift = [player.px, player.py];
     this.size = size
@@ -933,6 +936,7 @@ function ParryProj(x, y, size, mx, my, delay = 0){
     this.delay = delay;
     this.life = 1;
     this.lifetime = null;//yeah this ain't parriable
+    proj_parry.push(parried);
 }
 ParryProj.prototype.exist = function(){
     
@@ -958,7 +962,12 @@ ParryProj.prototype.exist = function(){
             this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
             for(let sti = 0; sti < enemies.length ; sti++){
             if(this.hitbox.checkenemy(sti)){
+                playerattack = this.name;
+                
                 enemies[sti].hit(24+player.dmgboost, ["magic"], [this.mx * 2, this.my * 2], 15);
+                if(this.parried == "hitscan"){
+                    enemies[sti].hit(999+player.dmgboost, ["CRITICAL"], [this.mx * 2, this.my * 2], 15);
+                }
                 this.range = i;
                 breakout = true
                 break;
@@ -1014,6 +1023,7 @@ function Parrypart(x, y) {
 }
 Parrypart.prototype.exist = function () {
     //all this does is disappear, and move!
+   
     screen.fillStyle = `rgb(255, 80, 80, ${this.life})`
     circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size);
     this.x += this.mx;
