@@ -16,7 +16,7 @@ this.py = startposy;
 //card info
 this.postColor = "#FF4C00";
 this.color = "#FF8B00";
-this.desc = ["SMALL AND CUUUUTTTEEEE!!!!! His size may leave him going under attacks that would normally hit! A little easier to knock around.", "Adrenaline: This passively makes him stronger overtime. With enough adrenaline, passive healing is possible!", "1. Nunchuck: swing your nunchuck forwards! Can parry most projectiles.", "    parried projectiles are reflected as a high damage beam!","    While sliding, this becomes a contact damage move with extremely high damage, but a lot of recovry on miss! This ends slide stance, hit or miss.", "2. Shuriken: Standard issue projectile. Simple yet effective","    Shurikens thrown while sliding are faster, and auto-aim towards nearby shurikens or the boss.", "3. Slide: Move incredibly fast in a single direction, and enter sliding stance! Exit sliding stance if already in it.", "     While sliding, you're lower to the ground, and your moves are replaced with higher damage ones!", "This is at the cost of parrying and mobility, as you cannot turn while sliding", "4. Block: Defend yourself. Has 8 frames worth of parry frames, and blocks for as long as you hold it", "  If you're sliding, this instead has you dash back and forth once, quickly. This variant has immunity frames, but may leave you vulnerable near the end."];
+this.desc = ["SMALL AND CUUUUTTTEEEE!!!!! His size may leave him going under attacks that would normally hit! A little easier to knock around.", "Adrenaline: This passively makes him stronger overtime. With enough adrenaline, passive healing is possible!", "1. Nunchuck: swing your nunchuck forwards! Can parry most projectiles.", "    parried projectiles are reflected as a high damage beam, parrying hitscans makes this beam deal critical damage!!!","    While sliding, this becomes a contact damage move with extremely high damage, but a lot of recovry on miss! This ends slide stance, hit or miss.", "2. Shuriken: Standard issue projectile. Simple yet effective","    Shurikens thrown while sliding become hitscans. They bounce off of other shurikens and enemies! Can be parried with nunchuck if no other targets are available!", "3. Slide: Move incredibly fast in a single direction, and enter sliding stance! Exit sliding stance if already in it.", "     While sliding, you're lower to the ground, and your moves are replaced with higher damage ones!", "This is at the cost of parrying and mobility, as you cannot turn while sliding", "4. Block: Defend yourself. Has 8 frames worth of parry frames, and blocks for as long as you hold it", "  If you're sliding, this instead has you dash back and forth once, quickly. This variant has immunity frames, but may leave you vulnerable near the end."];
 //game stats
 this.cooldowns = [0, 0, 0, 0];
 this.playershift = [0, 0];//shift the position of the player
@@ -47,13 +47,12 @@ this.blocking = -1;
 this.showchuck = 0;//this variable applies for both using nunchuck, and palm strike\
 this.canslide = true;//holding the slide button does nothing
 this.immunityframes = 0;
-
+this.shurikenspeed = 20;
+this.charge = 30;
 //hitboxes
 this.chuckbox = new hitbox(0, 0, this.pz+1, this.height - 1, 40);
 this.chuckbox.disable();
 this.chuckbox.immunityframes(5);
-this.autoaim = new hitbox(0, 0, this.pz+1, this.height - 1, 175);
-this.autoaim.disable();
 
 }
 Magna.prototype.listname = function(){
@@ -97,10 +96,13 @@ for(;this.adrenaline > 9000;this.adrenaline-=1800){
     return;
 }else{
     //if hp is between 0 and 100, apply health regen
+    if(this.hp < 100){
     this.hp+=this.regen;
+    
     if(this.hp > 100){
         this.hp = 100;
     }
+}
 
 
 }
@@ -114,12 +116,12 @@ if(this.immunityframes > 0){
         this.iframe = false;
     }
 }
-if(this.iframe == true && this.cooldowns[2] < 1){
-this.cooldowns[2] = 1;//no defensive options while immune!
+if(this.iframe == true && this.cooldowns[2] < 2){
+this.cooldowns[3] = 2;//no defensive options while immune!
 }
 
 //adrenaline shenanigins
-if(!charezmode()){
+if(charezmode()){
 this.adrenaline++
 //no free adrenaline for hard mode!
 }
@@ -281,7 +283,9 @@ this.chuckbox.updateimmunity();
             if(this.chuckbox.scanproj(i) && typeof projectiles[i].lifetime == "number"){
                 //PARRY THAT SHIT!
                 projectiles[i].lifetime = 0;
-                
+                if(projectiles[i].name != "Shuriken"){
+                    this.adrenaline+=450;//+15 seconds of adrenaline for hitting something sick!
+                }
                 this.cooldowns[0] = 0;//parry chain?
                 this.cooldowns[2] = 0;//instantly start sliding again!
                 
@@ -375,8 +379,10 @@ for(let i = 0; i < this.cooldowns.length ; i++){
 if(this.cooldowns[0] <= 0 && inputs.includes(controls[4])){
     this.spec1();
 }
-if(this.cooldowns[1] <= 0 && inputs.includes(controls[5])){
+if(this.charge < 30 ||this.cooldowns[1] <= 0 && inputs.includes(controls[5]) ){
+    this.charge--;
     this.spec2();
+    
 }
 if(this.cooldowns[2] <= 0 && inputs.includes(controls[6]) && this.canslide){
     this.spec3();
@@ -385,6 +391,13 @@ if(this.cooldowns[2] <= 0 && inputs.includes(controls[6]) && this.canslide){
 if(this.cooldowns[3] <= 0 && inputs.includes(controls[7])){
     this.spec4();
     }
+    //using shuriken charge
+    if(!inputs.includes(controls[5])){
+        //this.charge--;
+        this.charge = 30;
+    }
+        
+    
     if (!inputs.includes(controls[7]) && this.blocking == 8 || this.blocking == -1) {
         this.blocking = -1;//blocking is -1 for as long as you aren't holding the button
         //no backing out of punishments!
@@ -578,7 +591,7 @@ Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
         }
         if(this.hp < 100){
         if(this.hitstun > 0){
-            if(charezmode() && inputs.includes(controls[7]) && this.hitstun < 10){
+            if(charezmode() && inputs.includes(controls[7]) && this.hitstun < 20){
                 //easy mode only! Block early!
                 this.blocking = 10;
             }
@@ -656,54 +669,110 @@ if(this.sliding){
     }
     
     //can't be immune while going for that palm!
+}else{
+    if(this.cooldowns[1] < 4){
+    //skillbased shuriken parrying
+    this.cooldowns[1] = 4;
+}
 }
 }
 Magna.prototype.spec2 = function(){
     if(this.sliding == true){
-        let thrown = false;
-        this.autoaim.move(canvhalfx, canvhalfy);
-        for(let i = 0 ; i < projectiles.length ; i++){
-            //aim at shurikens
-        if(this.autoaim.scanproj(i)){
-
-        
-            let dx = (projectiles[i].x + player.px - projectiles[i].shift[0] + projectiles[i].mx * 2) - (canvhalfx);
-            let dy = (projectiles[i].y + player.py - projectiles[i].shift[1] + projectiles[i].my * 2) - (canvhalfy);
-            let magnitude = Math.sqrt(dx * dx + dy * dy);
-            velocityX = (dx / magnitude) * 50;
-            velocityY = (dy / magnitude) * 50;
-            projectiles.push(new Shuriken(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, velocityX, velocityY));
-            thrown = true;
-            break;
-        }
-        }
-        if(thrown == false){
-            //aim at bosses
-            for(let i = 0 ; i < enemies.length ; i++){
-            
-        if(this.autoaim.checkenemy(i)){
-
-        
-            let dx = (enemies[i].x + player.px - enemies[i].shift[0]) - (canvhalfx);
-            let dy = (enemies[i].y + player.py - enemies[i].shift[1]) - (canvhalfy);
-            let magnitude = Math.sqrt(dx * dx + dy * dy);
-            velocityX = (dx / magnitude) * 50;
-            velocityY = (dy / magnitude) * 50;
-            projectiles.push(new Shuriken(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, velocityX, velocityY));
-            thrown = true;
-            break;
-        }
-        }
-    
-        }
-        if(thrown == false){
-            //just throw it the way you're facing
-            projectiles.push(new Shuriken(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, (50 * this.facing[0]),50 * this.facing[1]));
-        }
-        projectiles[projectiles.length - 1].bounces = 1;//enable the ability for the shurikens to bounce
+        projectiles.push(new Shuriken_beam(canvhalfx + this.playershift[0], canvhalfy + this.playershift[0], this.facing));
+        this.cooldowns[1] = 10;
+        this.charge = 30;
     }else{
-projectiles.push(new Shuriken(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, (15 * this.facing[0]),15* this.facing[1]));
+    if(inputs.includes(controls[5]) && this.charge >= 0){
+        for(let i = 0 ; i < this.cooldowns.length ; i++){
+            if(this.cooldowns[i] < 2){
+                //no using items while charging
+                this.cooldowns[i] = 2;
+            }
+        }
+        screen.fillStyle = "#fff";
+        circle(canvhalfx, canvhalfy+this.size+8, 3)
+        if(this.charge <=20){
+            //indicators
+            
+            circle(canvhalfx + this.size + 3, canvhalfy+this.size, 3)
+            circle(canvhalfx - this.size - 3, canvhalfy+this.size, 3)
+            if(this.charge <= 10){
+                circle(canvhalfx + this.size + 8, canvhalfy, 3)
+                circle(canvhalfx - this.size - 8, canvhalfy, 3)
+            }
+        }
+
+    }else{
+        if(this.charge <=20){
+            //shoot 2 more projectiles
+                    if(Math.abs(this.facing[0]) + Math.abs(this.facing[1]) <= 1){
+                    projectiles.push(new playerproj("Shuriken", canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, 
+                        (this.shurikenspeed-1) * ((this.facing[0] != 0)? this.facing[0] : this.facing[0]-0.25),
+                        (this.shurikenspeed-1) * ((this.facing[1] != 0)? this.facing[1] : this.facing[1]-0.25), "grey", 18, 120, ["physical", "proj", "slashing"]));
+                        
+                    }else{
+                        
+                    projectiles.push(new playerproj("Shuriken", canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, 
+                        (this.shurikenspeed-1) * ((this.facing[0] == this.facing[1])? this.facing[0]+0.25 : this.facing[0]-0.25),
+                        (this.shurikenspeed-1) * ((this.facing[1] == this.facing[0])? this.facing[1]-.25 : this.facing[1]-0.25), "grey", 18, 120, ["physical", "proj", "slashing"]));
+                    }
+                    if(Math.abs(this.facing[0]) + Math.abs(this.facing[1]) <= 1){
+                    projectiles.push(new playerproj("Shuriken", canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, 
+                        (this.shurikenspeed-1) * ((this.facing[0] != 0)? this.facing[0] : this.facing[0]+0.25),
+                        (this.shurikenspeed-1) * ((this.facing[1] != 0)? this.facing[1] : this.facing[1]+0.25), "grey", 18, 120, ["physical", "proj", "slashing"]));
+                        
+                    }else{
+                        
+                    projectiles.push(new playerproj("Shuriken", canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, 
+                        (this.shurikenspeed-1) * ((this.facing[0] == this.facing[1])? this.facing[0]-0.25 : this.facing[0]+0.25),
+                        (this.shurikenspeed-1) * ((this.facing[1] == this.facing[0])? this.facing[1]+.25 : this.facing[1]+0.25), "grey", 18, 120, ["physical", "proj", "slashing"]));
+                    }
+
+                    if(this.charge <= 10){
+                        //shoot the last 2 projectiles
+                        if(Math.abs(this.facing[0]) + Math.abs(this.facing[1]) <= 1){
+                    projectiles.push(new playerproj("Shuriken", canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, 
+                        (this.shurikenspeed-3) * ((this.facing[0] != 0)? this.facing[0] : this.facing[0]-0.5),
+                        (this.shurikenspeed-3) * ((this.facing[1] != 0)? this.facing[1] : this.facing[1]-0.5), "grey", 18, 120, ["physical", "proj", "slashing"]));
+                        
+                    }else{
+                        
+                    projectiles.push(new playerproj("Shuriken", canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, 
+                        (this.shurikenspeed-3) * ((this.facing[0] == this.facing[1])? this.facing[0]+0.5 : this.facing[0]-0.5),
+                        (this.shurikenspeed-3) * ((this.facing[1] == this.facing[0])? this.facing[1]-.5 : this.facing[1]-0.5), "grey", 18, 120, ["physical", "proj", "slashing"]));
+                    }
+                    if(Math.abs(this.facing[0]) + Math.abs(this.facing[1]) <= 1){
+                    projectiles.push(new playerproj("Shuriken", canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, 
+                        (this.shurikenspeed-3) * ((this.facing[0] != 0)? this.facing[0] : this.facing[0]+0.5),
+                        (this.shurikenspeed-3) * ((this.facing[1] != 0)? this.facing[1] : this.facing[1]+0.5), "grey", 18, 120, ["physical", "proj", "slashing"]));
+                        
+                    }else{
+                        
+                    projectiles.push(new playerproj("Shuriken", canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, 
+                        (this.shurikenspeed-3) * ((this.facing[0] == this.facing[1])? this.facing[0]-0.5 : this.facing[0]+0.5),
+                        (this.shurikenspeed-3) * ((this.facing[1] == this.facing[0])? this.facing[1]+.5 : this.facing[1]+0.5), "grey", 18, 120, ["physical", "proj", "slashing"]));
+                    }
+                    }
+
+        }
+        
+
+        
+        if(this.charge > 0){
+        projectiles.push(new playerproj("Shuriken", canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 12, (this.shurikenspeed * this.facing[0]), this.shurikenspeed * this.facing[1], "grey", 18, 120, ["physical", "proj", "slashing"]));
+        }else{
+        projectiles.push(new playerproj("Shuriken", canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 18, (this.shurikenspeed * this.facing[0]), this.shurikenspeed * this.facing[1], "grey", 24, 120, ["physical", "proj", "slashing"]));
+
+        }
+        this.charge = 30;
+        this.cooldowns[1] = 10;
     }
+if(this.cooldowns[0] < 9 - this.charge/5 && this.charge != 30){
+    //skillbased shuriken parrying
+    this.cooldowns[0] = Math.floor(9 -  this.charge/5);
+    
+}    
+}
 this.cooldowns[1] = 10;
 }
 Magna.prototype.spec3 = function(){
@@ -734,190 +803,130 @@ chars.push(new Magna(canvhalfx, canvhalfy, 13));//Literally a small child
 
 //projectiles
 
-function Shuriken(x, y, size, mx, my){
-    this.name = "Shuriken";
+function Shuriken_beam(x, y, facing){
+    this.name = "Shuriken beam";
     this.x = x;
     this.y = y;
     this.shift = [player.px, player.py];
-    this.size = size
-    this.mx = mx;
-    this.my = my;
-    this.hitbox = new hitbox(x, y, 2, size/2, size);
+    this.size = 12
+    this.facing = [...facing];
+    this.type = "hitscan";
+    this.hitbox = new hitbox(x, y, 2, this.size/2, this.size);
     this.hitbox.disable();
-    this.lifetime = 150;
-    this.bounces = 0;
+    this.lifetime = null;
+    this.bounces = 5;
     this.delay = 0;
     this.origin = [];
-    this.endpoint = 0;
-    this.destoy = false;
+    this.endpoint = [];
+    this.detectionrange = 1000;
+    this.memory = [null, null, null]//enemies in memory won't be targetted
 }
-Shuriken.prototype.dealdamage = function(){
+Shuriken_beam.prototype.findenemy = function(){
+    //find the first suitable enemy
+    
     for(let i = 0 ; i < enemies.length ; i++){
-    if(this.hitbox.checkenemy(i)){
-        playerattack = this.name;
-        enemies[i].hit(7 + player.dmgboost + (this.bounces), ["physical", "slashing"]);
-        if(this.bounces < 2){
-        return "delete";//go through enemeis if bouncing!
-        }
-    }
-}
-}
-Shuriken.prototype.exist = function(){
-    
-    if(this.lifetime != null){
-    this.lifetime--;
-    }
-    this.hitbox.enable();
-   
-    screen.fillStyle = "#AAA";
-    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
-    this.x+=this.mx;
-    this.y+=this.my;
-
-    this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
-    //console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
-    //console.log(arena.leavedir(this.x, this.y, this.size))
-    if(this.lifetime != null && this.lifetime < 0){
-        console.log(this.lifetime)
-        return "delete";
-    }
-    //hitting the player
-    //console.log(en);
-    if(this.dealdamage() == "delete"){
-        return "delete";
-    };
-    
-    for(let i = 0 ; i < projectiles.length && this.bounces == 1; i++){
-        //this will not run if the shuriken cannot bounce
-        if(projectiles[i].name == "Shuriken" && projectiles[i].hitbox.id != this.hitbox.id && this.hitbox.scanproj(i)){
-            /*This can only ricochet off of other shurikens, it cannot be itself, and it has to actually hit something*/
-            //I swear this isn't V1!
-            this.name = "Beam2";
-            console.log(this.hitbox.id + " " + projectiles[i].hitbox.id);
-            this.lifetime = null;//now this is unparriable
-            this.bounces +=1;
-            projectiles[i].lifetime = 0;
-            this.origin = [this.x, this.y];
-            this.destroy = false;
-            break;
-
-
-        }
-    }
-
-    for(let i = 0 ; i < projectiles.length && this.bounces > 1 && this.bounces % 1 == 0; i++){
-        if(this.delay > 0){
-            //just bounce back and forth
-            this.x = this.origin[0];
-            this.y = this.origin[1];
-                for(let x = 0 ; x < this.endpoint ; x++){
-                    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
-                    this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
-                    this.x += this.mx;
-                    this.y += this.my;
-                    this.dealdamage();
-
-                }
-                this.delay--;
-                break;//no need to loop this
-        }
-        
-        this.destroy = true;
-        if(projectiles[i].name != "Shuriken"){
-            //don't even bother with this
-            continue;
-        }
-        this.destroy = false;
-        if(this.delay < 1){
-            this.endpoint = 0;
-            this.origin = [this.x, this.y];
-            let dx = (projectiles[i].x + player.px - projectiles[i].shift[0]) - (this.x + player.px - this.shift[0]);
-            let dy = (projectiles[i].y + player.py - projectiles[i].shift[1]) - (this.y + player.py - this.shift[1]);
-            let magnitude = Math.sqrt(dx * dx + dy * dy);
-            this.mx = (dx / magnitude) * 3;
-            this.my = (dy / magnitude) * 3;
-            let e = 0;
-            console.log(this.name)
-            while(!this.hitbox.scanproj(i) && e < 400){
-                //circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
-                this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
-                this.hitbox.z = -5;
-                this.hitbox.height = 999;
-                this.x+=this.mx;
-                this.y+=this.my;
-                this.endpoint++;
-                //this.dealdamage();
-                e++;
-            }
-            if(e == 400){
-                this.destoy = true;
-                this.x = this.origin[0];
-                this.y = this.origin[1];
-                this.delay = 0;
-            }else{
-            this.bounces+=1;
-            projectiles[i].lifetime = 0;
+       //console.log(Math.abs(Math.abs(enemies[i].x - enemies[i].shift[0] + enemies[i].y - enemies[i].shift[1])) - (Math.abs(this.x - this.shift[0] +this.y - this.shift[1])))
+       
+        if(!this.memory.includes(enemies[i]) && Math.abs(enemies[i].x - enemies[i].shift[0] + (enemies[i].y - enemies[i].shift[1])) - Math.abs(this.x - this.shift[0] +(this.y - this.shift[1])) < this.detectionrange){
             
-            this.delay = 3;
-            }
+            return enemies[i];
         }
     }
-    if(this.destroy){
-        
-        if(this.delay > 0){
-            //just bounce back and forth
-            this.x = this.origin[0];
-            this.y = this.origin[1];
-                for(let x = 0 ; x < this.endpoint ; x++){
-                    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
-                    //this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
-                    this.hitbox.disable();
-                    this.hitbox.move(9999, 9999);
-                    this.hitbox.z = 999;
-                    this.x += this.mx;
-                    this.y += this.my;
-                    //this.dealdamage();
+    //console.log(false)
+    return false;
 
-                }
-                this.delay--;
-                if(this.delay < 1){
-                    return "delete";//finally done!
-                }
-                return;
-        }else{
-        //go to the first enemy, usually the main boss, and fucking destroy them!
-        if(enemies.length == 0){
-            return "delete";//there is no enemies
-        }
-        this.origin = [this.x, this.y];
-        this.endpoint = 0;
-        this.bounces*=1.5;//bonus damage!
-            let dx = (enemies[0].x + player.px - enemies[0].shift[0]) - (this.x + player.px - this.shift[0]);
-            let dy = (enemies[0].y + player.py - enemies[0].shift[1]) - (this.y + player.py - this.shift[1]);
-            let magnitude = Math.sqrt(dx * dx + dy * dy);
-            this.mx = (dx / magnitude) * 12;
-            this.my = (dy / magnitude) * 12;
-            let e = 0
-            console.log("second hit")
-            while(!this.hitbox.checkenemy(0) && e < 400){
-                this.dealdamage();
-                circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
-                this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
-                this.x+=this.mx;
-                this.y+=this.my;
-                this.endpoint++;
-                
-                e++
-            }
-            //if(e != 400){
-            enemies[0].hit(9 + player.dmgboost + (this.bounces), ["magic"]);
-            //}
-            this.delay = 5;
-            if(this.bounces % 1 != 0){
-            this.bounces+=0.1;
-            }
-    }
 }
+Shuriken_beam.prototype.findproj = function(){
+    //find the first suitable shuriken projectile
+    
+    for(let i = 0 ; i < projectiles.length ; i++){
+       
+        if(projectiles[i].name == "Shuriken" && Math.abs(projectiles[i].x - projectiles[i].shift[0] + (projectiles[i].y - projectiles[i].shift[1])) - Math.abs(this.x - this.shift[0] +(this.y - this.shift[1])) < this.detectionrange){
+            return projectiles[i];
+        }
+        
+    }
+    return false;
+
+}
+Shuriken_beam.prototype.remember = function(r){
+    this.memory.push(r);
+    this.memory.shift();
+    //imagine having a memory like that! how bad could it be!!!
+}
+Shuriken_beam.prototype.exist = function(){
+    if(this.bounces > 0){
+        if(this.delay == 0){
+            //TIME TO GO
+            this.origin = [this.x - this.shift[0], this.y - this.shift[1]];
+
+            let enemy = this.findenemy()
+            let proj = this.findproj();
+            if(enemy != false && this.bounces >= 3){
+                //only target 1 enemy, then a projectile, unless there's no projectile available
+                console.log(enemy != false)
+                playerattack = this.name
+                enemy.hit(18, ["magic", "slashing", "proj"]);
+                this.remember(enemy);
+                this.bounces--;
+                this.delay = 3;
+                this.endpoint = [enemy.x - enemy.shift[0], enemy.y - enemy.shift[1]];
+                
+            }else if (proj != false){
+                //target the shuriken!
+                proj.lifetime = 0;
+               
+                this.bounces = 5;
+                this.delay = 3;
+                this.endpoint = [proj.x - proj.shift[0], proj.y - proj.shift[1]];
+                this.remember(null);
+            }else if(player.showchuck > 0){
+                //Magna will just do it himself!               
+                this.bounces = 0;
+                this.delay = 3;
+                this.endpoint = [canvhalfx, canvhalfy];
+                this.lifetime = 0;
+                this.hitbox.move(canvhalfx, canvhalfy);
+                this.hitbox.enable();
+                
+            }else{
+                //no targets?
+                if(enemy != false){
+                    playerattack = this.name
+                enemy.hit(18, ["magic", "slashing", "proj"]);
+                this.remember(enemy.name);
+                this.bounces--;
+                this.delay = 3;
+                this.endpoint = [enemy.x - enemy.shift[0], enemy.y - enemy.shift[1]];
+                }else{
+                    //no targets... time to die
+                return "delete";
+                }
+            }
+            
+        }else{
+            this.delay--;
+            screen.beginPath();
+            screen.lineWidth = this.size;
+            screen.strokeStyle = "#aaa";
+    
+            screen.moveTo(this.origin[0]+ player.px, this.origin[1]+ player.py);
+            screen.lineTo(this.endpoint[0]+ player.px, this.endpoint[1]+ player.py);
+            
+            screen.stroke();
+            screen.closePath();
+            if(this.delay == 0){
+                this.x = this.endpoint[0] + this.shift[0];
+                this.y = this.endpoint[1] + this.shift[1];
+                
+            }
+
+        }
+    }else{
+        //after it runs out of bounces, die out...
+        return "delete"
+    }
+
 }
 
 function ParryProj(x, y, size, mx, my, delay = 0, parried = null){
@@ -966,7 +975,7 @@ ParryProj.prototype.exist = function(){
                 
                 enemies[sti].hit(24+player.dmgboost, ["magic"], [this.mx * 2, this.my * 2], 15);
                 if(this.parried == "hitscan"){
-                    enemies[sti].hit(999+player.dmgboost, ["CRITICAL"], [this.mx * 2, this.my * 2], 15);
+                    enemies[sti].hit(100+player.dmgboost, ["CRITICAL"], [this.mx * 2, this.my * 2], 15);
                 }
                 this.range = i;
                 breakout = true
