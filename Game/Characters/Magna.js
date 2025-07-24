@@ -678,7 +678,7 @@ if(this.sliding){
 }
 Magna.prototype.spec2 = function(){
     if(this.sliding == true){
-        projectiles.push(new Shuriken_beam(canvhalfx + this.playershift[0], canvhalfy + this.playershift[0], this.facing));
+        projectiles.push(new Shuriken_beam(canvhalfx + this.playershift[0], canvhalfy + this.playershift[0]));
         this.cooldowns[1] = 10;
         this.charge = 30;
     }else{
@@ -803,37 +803,44 @@ chars.push(new Magna(canvhalfx, canvhalfy, 13));//Literally a small child
 
 //projectiles
 
-function Shuriken_beam(x, y, facing){
+function Shuriken_beam(x, y, dmg = 8){
     this.name = "Shuriken beam";
     this.x = x;
     this.y = y;
     this.shift = [player.px, player.py];
     this.size = 12
-    this.facing = [...facing];
+    //this.facing = [...facing];
     this.type = "hitscan";
     this.hitbox = new hitbox(x, y, 2, this.size/2, this.size);
     this.hitbox.disable();
     this.lifetime = null;
     this.bounces = 5;
+    this.dmg = dmg
     this.delay = 0;
     this.origin = [];
     this.endpoint = [];
-    this.detectionrange = 1000;
+    this.detectionrange = 750;
     this.memory = [null, null, null]//enemies in memory won't be targetted
 }
 Shuriken_beam.prototype.findenemy = function(){
-    //find the first suitable enemy
-    
+    //find a suitable enemy
+    let choice = false;
     for(let i = 0 ; i < enemies.length ; i++){
        //console.log(Math.abs(Math.abs(enemies[i].x - enemies[i].shift[0] + enemies[i].y - enemies[i].shift[1])) - (Math.abs(this.x - this.shift[0] +this.y - this.shift[1])))
        
         if(!this.memory.includes(enemies[i]) && Math.abs(enemies[i].x - enemies[i].shift[0] + (enemies[i].y - enemies[i].shift[1])) - Math.abs(this.x - this.shift[0] +(this.y - this.shift[1])) < this.detectionrange){
-            
-            return enemies[i];
+            if(choice != false){
+                choice = (random(0, 1, false) == 0)? choice : enemies[i];
+                if(random(0, 100) > 75){
+                    break;
+                }
+            }else{
+                choice = enemies[i];
+            }
         }
     }
     //console.log(false)
-    return false;
+    return choice;
 
 }
 Shuriken_beam.prototype.findproj = function(){
@@ -853,6 +860,14 @@ Shuriken_beam.prototype.remember = function(r){
     this.memory.push(r);
     this.memory.shift();
     //imagine having a memory like that! how bad could it be!!!
+    
+}
+Shuriken_beam.prototype.dmgup = function(){
+    if(this.dmg < 10){
+        this.dmg = 18;
+    }else if(this.dmg < 36){
+        this.dmg+=2;
+    }
 }
 Shuriken_beam.prototype.exist = function(){
     if(this.bounces > 0){
@@ -866,9 +881,13 @@ Shuriken_beam.prototype.exist = function(){
                 //only target 1 enemy, then a projectile, unless there's no projectile available
                 console.log(enemy != false)
                 playerattack = this.name
-                enemy.hit(18, ["magic", "slashing", "proj"]);
+                enemy.hit(this.dmg + player.dmgboost, ["magic", "slashing", "proj"]);
+                if(enemy.knockback == "legacy"){
+                    enemy.hitstun = 30;
+                }
+                this.dmgup();
                 this.remember(enemy);
-                this.bounces--;
+                //this.bounces--;
                 this.delay = 3;
                 this.endpoint = [enemy.x - enemy.shift[0], enemy.y - enemy.shift[1]];
                 
@@ -880,9 +899,10 @@ Shuriken_beam.prototype.exist = function(){
                 this.delay = 3;
                 this.endpoint = [proj.x - proj.shift[0], proj.y - proj.shift[1]];
                 this.remember(null);
+                 this.dmgup();
             }else if(player.showchuck > 0){
                 //Magna will just do it himself!               
-                this.bounces = 0;
+                this.bounces = 0.5;
                 this.delay = 3;
                 this.endpoint = [canvhalfx, canvhalfy];
                 this.lifetime = 0;
@@ -893,8 +913,12 @@ Shuriken_beam.prototype.exist = function(){
                 //no targets?
                 if(enemy != false){
                     playerattack = this.name
-                enemy.hit(18, ["magic", "slashing", "proj"]);
+                enemy.hit(this.dmg + player.dmgboost, ["magic", "slashing", "proj"]);
+                if(enemy.knockback == "legacy"){
+                    enemy.hitstun = 30;
+                }
                 this.remember(enemy.name);
+                 this.dmgup();
                 this.bounces--;
                 this.delay = 3;
                 this.endpoint = [enemy.x - enemy.shift[0], enemy.y - enemy.shift[1]];
@@ -911,13 +935,21 @@ Shuriken_beam.prototype.exist = function(){
             screen.strokeStyle = "#aaa";
     
             screen.moveTo(this.origin[0]+ player.px, this.origin[1]+ player.py);
-            screen.lineTo(this.endpoint[0]+ player.px, this.endpoint[1]+ player.py);
+            if(this.bounces == 0.5){
+                screen.lineTo(this.endpoint[0], this.endpoint[1]);
+            }else{
+                screen.lineTo(this.endpoint[0]+ player.px, this.endpoint[1]+ player.py);
+            }
             
             screen.stroke();
             screen.closePath();
             if(this.delay == 0){
                 this.x = this.endpoint[0] + this.shift[0];
                 this.y = this.endpoint[1] + this.shift[1];
+                this.bounces--;
+                if(this.detectionrange > 400){
+                    this.detectionrange-=50;
+                }
                 
             }
 
@@ -982,6 +1014,17 @@ ParryProj.prototype.exist = function(){
                 break;
     }
 }
+        for(let i = 0 ; i < projectiles.length ; i++){
+            //if hitting another shuriken, create a shuriken beam!
+            if(projectiles[i].name == "Shuriken" && this.hitbox.scanproj(i)){
+                projectiles.push(new Shuriken_beam(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 24));
+                projectiles[i].lifetime = 0;
+
+                this.range = i;
+                breakout = true
+                break;
+            }
+        }
         }
 if(breakout == true){
     break;

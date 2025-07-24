@@ -110,6 +110,11 @@ if(this.direction == null){
 if(this.alive){
     screen.fillStyle = "#00000080"
     circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size * 0.5);
+    //mini healthbar
+    screen.fillStyle = "#F00";
+    screen.fillRect(this.x + player.px - this.shift[0] - (this.size*0.75), this.y + player.py - this.shift[1] - this.size - 10, (this.size*0.75)*2, 4);//max hp
+    screen.fillStyle = "#0F0";
+    screen.fillRect(this.x + player.px - this.shift[0] - (this.size*0.75), this.y + player.py - this.shift[1] - this.size - 10, ((this.size*0.75)*2) * this.hp / 100 , 4);//current hp
 }
 
 this.x+= this.direction[0]*this.speedmod;

@@ -91,10 +91,18 @@ if(this.hitstun > 25){
 screen.fillStyle = this.color;
 screen.strokeStyle = "black"
 screen.lineWidth = 3;
+//the existance of thy enemy!
 circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size, false, false);
 if(this.alive){
     screen.fillStyle = "#33333380"
     circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size * 0.5);
+
+    //mini healthbar
+    screen.fillStyle = "#F00";
+    screen.fillRect(this.x + player.px - this.shift[0] - (this.size*0.75), this.y + player.py - this.shift[1] - this.size - 10, (this.size*0.75)*2, 4);//max hp
+    screen.fillStyle = "#0F0";
+    screen.fillRect(this.x + player.px - this.shift[0] - (this.size*0.75), this.y + player.py - this.shift[1] - this.size - 10, ((this.size*0.75)*2) * this.hp / 100 , 4);//current hp
+
 }
 screen.lineWidth = 1;
 this.aura.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
