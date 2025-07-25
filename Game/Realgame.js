@@ -22,7 +22,7 @@ movingpart.prototype.exist = function () {
         return "delete";
     }
 }
-function enemyproj(name, x, y, size, mx, my, color, dmg, lifetime, dmgtype = ["true"], knockback = [0, 0], hitstun = 0){
+function enemyproj(name, x, y, size, mx, my, color, dmg, lifetime, dmgtype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
     this.name = name;
     this.x = x;
     this.y = y;
@@ -38,6 +38,7 @@ function enemyproj(name, x, y, size, mx, my, color, dmg, lifetime, dmgtype = ["t
     this.dmgtype = dmgtype;
     this.knockback = knockback;
     this.hitstun = hitstun;
+    this.DImod = DImod
 }
 enemyproj.prototype.exist = function(){
     if(typeof this.lifetime == "number"){
@@ -52,7 +53,7 @@ enemyproj.prototype.exist = function(){
     this.y+=this.my;
 
     this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
-    console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
+    //console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
     //console.log(arena.leavedir(this.x, this.y, this.size))
     if(this.lifetime < 0){
         return "delete";
@@ -60,7 +61,70 @@ enemyproj.prototype.exist = function(){
     //hitting the player
     //console.log(en);
     if(this.hitbox.hitplayer()){
-        player.hit(this.dmg, this.dmgtype, this.knockback, this.hitstun);
+        player.hit(this.dmg, this.dmgtype, this.knockback, this.hitstun, this.DImod);
+        return "delete";
+    }
+}
+
+function enemyhomeproj(name, x, y, size, mx, my, color, dmg, lifetime, speed, rate = 0.05, dmgtype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
+    this.name = name;
+    this.x = x;
+    this.y = y;
+    this.shift = [player.px, player.py];
+    this.size = size
+    this.mx = mx;
+    this.my = my;
+    this.color = color;
+    this.hitbox = new hitbox(x, y, 2, size/2, size);
+    this.hitbox.disable();
+    this.lifetime = lifetime;
+    this.dmg = dmg
+    this.dmgtype = dmgtype;
+    this.knockback = knockback;
+    this.hitstun = hitstun;
+    this.DImod = DImod
+    this.rate = rate
+    this.speed = speed;
+}
+enemyhomeproj.prototype.exist = function(){
+    if(typeof this.lifetime == "number"){
+    //no subtracting null!
+    this.lifetime--;
+    }
+    this.hitbox.enable();
+
+    screen.fillStyle = this.color;
+    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
+    //home
+    let dx = canvhalfx - (this.x + player.px - this.shift[0]);
+    let dy = canvhalfy - (this.y + player.py - this.shift[1]);
+    let dist = Math.hypot(dx, dy);
+
+    // Normalize direction vector
+    //let dirX = dx / dist;
+    //let dirY = dy / dist;
+
+    // Apply speed
+    let desiredVx = dx / dist * this.speed;
+    let desiredVy = dy / dist * this.speed;
+
+// Smoothly adjust velocity
+    this.mx += (desiredVx - this.mx) * this.rate;
+    this.my += (desiredVy - this.my) * this.rate;
+    
+    this.x+=this.mx;
+    this.y+=this.my;
+
+    this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    //console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
+    //console.log(arena.leavedir(this.x, this.y, this.size))
+    if(this.lifetime < 0){
+        return "delete";
+    }
+    //hitting the player
+    //console.log(en);
+    if(this.hitbox.hitplayer()){
+        player.hit(this.dmg, this.dmgtype, this.knockback, this.hitstun, this.DImod);
         return "delete";
     }
 }
@@ -80,6 +144,7 @@ function playerproj(name, x, y, size, mx, my, color, dmg, lifetime, dmgtype = ["
     this.dmgtype = dmgtype;
     this.knockback = knockback;
     this.hitstun = hitstun;
+    
 }
 playerproj.prototype.exist = function(){
     
@@ -241,7 +306,7 @@ var player;
 var projectiles = [];
 var enemies = [];
 var summons = [];
-var level = 0;
+var level = 4;
 var rest = 100;
 var resttimer = 0;
 var pauseselection = 0;
@@ -1241,6 +1306,25 @@ var gametime = function(){
         
 
         level +=0.5;
+    }else if(level == 4){
+        bossbar = [];
+    projectiles = [];
+    enemies = [];
+    player.inst(100, 0);
+    if(enemyezmode()){
+    bosses[5].inst(4);
+    bossbarmode = 2;
+    }else{
+    bossbarmode = 2;
+    bosses[5].inst(8);
+    }
+
+    bossbar.push(enemies[0]);
+        boss_title = "H.A.R.P"
+        arena.w = canvhalfx * 2;
+        arena.h = canvhalfy * 2;
+
+    level +=0.5
     }
     }
 

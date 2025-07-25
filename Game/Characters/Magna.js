@@ -372,7 +372,12 @@ this.showchuck = -5;
     }
 //lower all cooldowns
 for(let i = 0; i < this.cooldowns.length ; i++){
+    if(this.blocking > -1){
+        //you can still use your abilities, just not as fast
+        this.cooldowns[i]-=0.5;
+    }else{
     this.cooldowns[i]--;
+    }
 }
 //attacks
 

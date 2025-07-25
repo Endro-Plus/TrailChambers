@@ -103,6 +103,9 @@ screen.fillText("*Stares cutely*", this.x + player.px, this.y-+ 50 + player.py)
   }else{
   screen.fillText("*Bows*", this.x + player.px, this.y-+ 50 + player.py);
   }
+  if(this.hitbox.scanplayer()){
+    player.hit(0, ['contact', this.enemyID])
+  }
 }else{
 //this.chuckbox.showbox();
 if(this.phase[0] == 0){
