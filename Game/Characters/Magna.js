@@ -352,17 +352,18 @@ this.showchuck = -5;
         }
     } else if (this.sway == 0) {
         //when sliding
+        this.height = 2;
+        if(arena.pleave()){
+            this.sliding = false;
+            //no sliding through the border!
+        }else{
         this.px -= (this.speedmax + this.speedbonus) * this.facing[0] * 2;
         this.py -= (this.speedmax + this.speedbonus) * this.facing[1] * 2;
         this.adrenaline += 1;//essentially double adrenaline gain
         if (timeplayed % 7 == 0) {
             projectiles.push(new Slidedust(canvhalfx + this.playershift[0] + random(-this.size, this.size), canvhalfy + this.playershift[1] + random(-this.size, this.size)))
         }
-        this.height = 2;
-        if(arena.pleave()){
-            this.sliding = false;
-            //no sliding through the border!
-        }
+    }
 
     } else {
         //backsway movement

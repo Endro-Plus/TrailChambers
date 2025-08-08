@@ -66,7 +66,7 @@ enemyproj.prototype.exist = function(){
     }
 }
 
-function enemyhomeproj(name, x, y, size, mx, my, color, dmg, lifetime, speed, rate = 0.05, dmgtype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
+function enemyhomeproj(name, x, y, size, mx, my, color, dmg, lifetime, speed, delay, stop, rate = 0.05, dmgtype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
     this.name = name;
     this.x = x;
     this.y = y;
@@ -78,6 +78,8 @@ function enemyhomeproj(name, x, y, size, mx, my, color, dmg, lifetime, speed, ra
     this.hitbox = new hitbox(x, y, 2, size/2, size);
     this.hitbox.disable();
     this.lifetime = lifetime;
+    this.delay = delay;
+    this.stop = stop;//make this null for infinite homing
     this.dmg = dmg
     this.dmgtype = dmgtype;
     this.knockback = knockback;
@@ -94,8 +96,22 @@ enemyhomeproj.prototype.exist = function(){
     this.hitbox.enable();
 
     screen.fillStyle = this.color;
-    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
+    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size);
+    this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    if(this.delay > 0){
+        //do not home, simply be a harmless projectile that slows to a stop;
+        this.x+=this.mx;
+        this.y+=this.my;
+        this.mx*=0.9;
+        this.my*=0.9;
+        this.delay--;
+    }else{
     //home
+    if(this.stop == null || this.stop > 0){
+        //only home if stop is larger than 0
+        if(this.stop!=null){
+        this.stop--;
+        }
     let dx = canvhalfx - (this.x + player.px - this.shift[0]);
     let dy = canvhalfy - (this.y + player.py - this.shift[1]);
     let dist = Math.hypot(dx, dy);
@@ -111,20 +127,23 @@ enemyhomeproj.prototype.exist = function(){
 // Smoothly adjust velocity
     this.mx += (desiredVx - this.mx) * this.rate;
     this.my += (desiredVy - this.my) * this.rate;
-    
+    }
     this.x+=this.mx;
     this.y+=this.my;
 
     this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
     //console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
     //console.log(arena.leavedir(this.x, this.y, this.size))
-    if(this.lifetime < 0){
-        return "delete";
-    }
+    
     //hitting the player
     //console.log(en);
     if(this.hitbox.hitplayer()){
         player.hit(this.dmg, this.dmgtype, this.knockback, this.hitstun, this.DImod);
+        return "delete";
+    }
+}
+
+if(this.lifetime < 0){
         return "delete";
     }
 }
@@ -306,8 +325,8 @@ var player;
 var projectiles = [];
 var enemies = [];
 var summons = [];
-var level = 4;
-var rest = 100;
+var level = 0;
+var rest = 60;
 var resttimer = 0;
 var pauseselection = 0;
 
@@ -622,7 +641,7 @@ var charSelect = function(){
     }
 
     screen.fillStyle = "#900";
-    screen.fillRect(0, canvhalfy + 50, 999, 999);
+    screen.fillRect(0, canvhalfy + 50, 9999, 999);
     screen.fillStyle = "#000";
     screen.textAlign = "left";
     screen.font = "15px Times New Roman";
@@ -1020,13 +1039,13 @@ var gametime = function(){
         projectiles = [];
         bossbar = [];
     enemies = [];
-    player.inst(100, 0);
+    player.inst(0, 0);
     arena.w = canvhalfx + 40;
     arena.h = canvhalfy + 40;
     //This boss gets significatly harder out of normal or player mode
     boss_title = "Magna's Lorem Machinam"
     bossbarmode = 2;
-    bosses[0].inst(9);
+    bosses[0].inst(9,  canvhalfx + 200, canvhalfy);
     bossbar.push(enemies[0]);
     level += 0.5;
     }else if (level == 0){
@@ -1036,7 +1055,7 @@ var gametime = function(){
     player.inst(0, 0);
     boss_title = "Tutorial Bot"
     bossbarmode = 1;
-    bosses[0].inst();
+    bosses[0].inst(0, canvhalfx + 200, canvhalfy);
     bossbar.push(enemies[0]);
     level += 0.5;
     }
@@ -1241,11 +1260,11 @@ var gametime = function(){
     enemies = [];
     player.inst(100, 0);
     if(enemyezmode()){
-    bosses[1].inst(4);
+    bosses[1].inst(4, canvhalfx + 200, canvhalfy);
     bossbarmode = 1;
     }else{
     bossbarmode = 2;
-    bosses[1].inst(7);
+    bosses[1].inst(7, canvhalfx + 200, canvhalfy);
     }
 
     bossbar.push(enemies[0]);
@@ -1262,7 +1281,7 @@ var gametime = function(){
             bosses[2].inst(2, canvhalfx, canvhalfy - 100);
             bossbarmode = 2;
         }else{
-            bosses[2].inst(6, canvhalfx, canvhalfx - 100);
+            bosses[2].inst(6, canvhalfx, canvhalfy - 100);
             bossbarmode = 2;
         }
 
@@ -1312,11 +1331,11 @@ var gametime = function(){
     enemies = [];
     player.inst(100, 0);
     if(enemyezmode()){
-    bosses[5].inst(4);
+    bosses[5].inst(4, canvhalfx, canvhalfy);
     bossbarmode = 2;
     }else{
     bossbarmode = 2;
-    bosses[5].inst(8);
+    bosses[5].inst(8, canvhalfx, canvhalfy);
     }
 
     bossbar.push(enemies[0]);

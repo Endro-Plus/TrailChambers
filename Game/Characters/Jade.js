@@ -932,22 +932,28 @@ Abraxas.prototype.exist = function(){
         if(inputs.includes(controls[3])){
             this.my+=1;
         }
-        if(arena.leavedir(this.x - this.shift[0], this.y - this.shift[1], this.size).includes('l')){
-            this.x -= this.size + 5 + this.mx;
-            this.mx*=-1;
+        //out of bounds
+        if(this.x - this.shift[0] - this.size < canvhalfx - arena.w){
+        //bounce right
+
+        this.mx = Math.abs(this.mx)
+
+        }else if(this.x - this.shift[0] + this.size > canvhalfx - arena.w + arena.w*2){
+        //bounce left
+
+         this.mx = Math.abs(this.mx) * -1
+
         }
-        else if(arena.leavedir(this.x - this.shift[0], this.y - this.shift[1], this.size).includes('r')){
-            this.x +=this.size + 5 + this.mx;
-            this.mx*=-1;
+        if(this.y - this.shift[1]  - this.size< canvhalfy - arena.h){
+        //bounce down
+
+         this.my = Math.abs(this.my)
+
+        }else if(this.y - this.shift[1]  + this.size> canvhalfy - arena.h + arena.h*2){
+        //bounce up
+
+        this.my = Math.abs(this.my) * -1
         }
-        if(arena.leavedir(this.x - this.shift[0], this.y - this.shift[1], this.size).includes('u')){
-                    this.y -= this.size + 5 + this.my;
-                    this.my*=-1;
-                }
-        else if(arena.leavedir(this.x - this.shift[0], this.y - this.shift[1], this.size).includes('d')){
-                    this.y += this.size + 5 + this.my;
-                    this.my*=-1;
-                }
         if(inputs.includes(controls[6]) && this.autofire < this.maxautofire - 30 || this.autofire < 0){
             this.stage = 1;
             player.cooldowns[2] = this.maxautofire;
@@ -974,22 +980,29 @@ Abraxas.prototype.exist = function(){
                 projectiles.push(new Light_Spark(this.x + player.px - this.shift[0] + random(-this.size, this.size), this.y + player.py - this.shift[1] + random(-this.size, this.size), this.size*0.25, random(-4, 4), random(-4, 4)));
             }
         }
-        if(arena.leavedir(this.x - this.shift[0], this.y - this.shift[1], this.size).includes('l')){
-                    this.x = (canvhalfx - arena.w) + arena.w*2 - this.size*3
-                    this.mx*=-1;
-                }
-        else if(arena.leavedir(this.x - this.shift[0], this.y - this.shift[1], this.size).includes('r')){
-                    this.x = canvhalfx - arena.w + this.size;
-                    this.mx*=-1;
-                }
-        if(arena.leavedir(this.x - this.shift[0], this.y - this.shift[1], this.size).includes('u')){
-                            this.y = (canvhalfy - arena.h) + arena.h*2 - this.size*3;
-                            this.my*=-1;
-                        }
-        else if(arena.leavedir(this.x - this.shift[0], this.y - this.shift[1], this.size).includes('d')){
-                            this.y = canvhalfy - arena.h + this.size;
-                            this.my*=-1;
-                        }
+        //out of bounds
+        if(this.x - this.shift[0] - this.size < canvhalfx - arena.w){
+        //bounce right
+
+        this.mx = Math.abs(this.mx)
+
+        }else if(this.x - this.shift[0] + this.size > canvhalfx - arena.w + arena.w*2){
+        //bounce left
+
+         this.mx = Math.abs(this.mx) * -1
+
+        }
+        if(this.y - this.shift[1]  - this.size< canvhalfy - arena.h){
+        //bounce down
+
+         this.my = Math.abs(this.my)
+
+        }else if(this.y - this.shift[1]  + this.size> canvhalfy - arena.h + arena.h*2){
+        //bounce up
+
+        this.my = Math.abs(this.my) * -1
+        }
+
         this.autofire++;
         if(this.size < 5 || this.lifetime < 1){
             return "delete";

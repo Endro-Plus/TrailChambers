@@ -133,9 +133,9 @@ if(this.cooldown < 1){
         this.shots = this.shots.toFixed(1)
         }else{
              this.face();
-             this.velocityX = random(-15, 15);
-             this.velocityY = random(-15, 15)
-            projectiles.push(new enemyhomeproj("Homing", this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 15 + (this.lvl), this.velocityX, this.velocityY, "rgba(251, 255, 0, 1)", 10+this.lvl, 120, this.speed * 1, 0.05, ["magic", "proj", "bludgeoning"]))
+             this.velocityX = random(-30, 30);
+             this.velocityY = random(-30, 30);
+            projectiles.push(new enemyhomeproj("Homing", this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 15 + (this.lvl), this.velocityX, this.velocityY, "rgba(251, 255, 0, 1)", 10+this.lvl, 210, this.speed * 6, 60, 30, 0.05, ["magic", "proj", "bludgeoning"]))
             this.shots++;
             
 
