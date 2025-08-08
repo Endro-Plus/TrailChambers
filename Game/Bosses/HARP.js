@@ -135,7 +135,7 @@ if(this.cooldown < 1){
              this.face();
              this.velocityX = random(-15, 15);
              this.velocityY = random(-15, 15)
-            projectiles.push(new enemyhomeproj("Homing", this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 15 + (this.lvl), this.velocityX, this.velocityY, "rgba(251, 255, 0, 1)", 10+this.lvl, 120, this.speed * 3, 0.05, ["magic", "proj", "bludgeoning"]))
+            projectiles.push(new enemyhomeproj("Homing", this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 15 + (this.lvl), this.velocityX, this.velocityY, "rgba(251, 255, 0, 1)", 10+this.lvl, 120, this.speed * 1, 0.05, ["magic", "proj", "bludgeoning"]))
             this.shots++;
             
 
@@ -152,7 +152,7 @@ if(this.cooldown < 1){
         //cooldown for shooting
         
     }else{
-        this.cooldown = random(10/(100/this.hp + (10 - this.lvl)), 30/(100/this.hp + (10 - this.lvl)), false)//based on hp the cooldown between shots is reduced. level is also a factor!
+        this.cooldown = random(20/(100/this.hp + (10 - this.lvl)), 40/(100/this.hp + (10 - this.lvl)), false)//based on hp the cooldown between shots is reduced. level is also a factor!
         while(this.shots == 0){
             
             this.shots = random(-this.lvl, this.lvl, false);
