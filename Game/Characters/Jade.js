@@ -14,7 +14,7 @@ this.size = size; //no she is NOT fat
 //card info
 this.postColor = "#FFFF00";
 this.color = "#9E9D27"
-this.desc = ["This is the main character! Beware her tenacity!", "1. Radiant Echo/Slash: Shoots a basic projectile that heals on hit while in magic stance. Can be charged to summon trailing projectiles that follow it around!", "    Slash with a sword in sword stance. Does more damage, and less cooldown, but no healing.", "2. Luminous Burst/Radiant Spin: In magic stance, shoot a large projectile that detonates, healing on hit, and leaves a lingering area of effect!", "    Perform a spin attack in Sword mode, heals on hit, and is a multihit!", "    Both attacks can be charged for more range and overal damage!", "3. Celestial Beam/Defend: In magic stance, aim and fire a hyperlaser from the heavens! Hitting yourself powers up your next move.", "    In sword stance, parry an incoming attack, and leave light sparks that trail Radiant Echo. There are 15 parry frames!", "    Whiffing a parry inflicts 15 additonal vulnerability frames, leaving you completely inactionable", "4. Stance Change: Dash forwards, evading attacks! By the end of this move, you swap stances."];
+this.desc = ["This is the main character! Beware her tenacity!", "1. Radiant Echo/Slash: Shoots a basic projectile that heals on hit while in magic stance. Can be charged to summon trailing projectiles that follow it around!", "    Slash with a sword in sword stance. Does more damage, and less cooldown, but no healing.", "2. Luminous Burst/Radiant Spin: In magic stance, shoot a large projectile that detonates, healing on hit, and leaves a lingering area of effect!", "    Perform a spin attack in Sword mode, heals on hit, and is a multihit!", "    Both attacks can be charged for more range and overal damage!", "3. Celestial Beam/Defend: In magic stance, aim and fire a hyperlaser from the heavens! Hitting yourself powers up your next move.", "You cannot move while aiming, use the button again to fire the hyperlaser.", "    In sword stance, parry an incoming attack, and leave light sparks that trail Radiant Echo. There are 15 parry frames!", "    Whiffing a parry inflicts 15 additonal vulnerability frames, leaving you completely inactionable", "4. Stance Change: Dash forwards, evading attacks! By the end of this move, you swap stances."];
 //not me changing some of the move's names so I don't get hit with the copyright strike.
 //game stats
 this.playershift = [0, 0];//shift the position of the player
@@ -336,6 +336,10 @@ if(!inputs.includes(controls[0]) && !inputs.includes(controls[1])){
     this.facing[0] = 0;
 }
 }
+}else{
+    //now show that abraxas is being used
+    screen.fillStyle = "#ff07";
+        circle(canvhalfx, canvhalfy, this.size+8)
 }
 //lower all cooldowns
 for(let i = 0; i < this.cooldowns.length ; i++){
@@ -344,12 +348,26 @@ for(let i = 0; i < this.cooldowns.length ; i++){
     //determine if abraxus is ready
     if(this.stance == "magic"){
         //make it known!
+        screen.fillStyle = "#ff0";
+        circle(canvhalfx, canvhalfy, this.size/3)
         this.abraxusind = 9;
     }else{
         //parry is less known
+        screen.fillStyle = "#fff";
+        circle(canvhalfx, canvhalfy, this.size/3)
         this.abraxusind = 5;
     }
     this.cooldowns[2] = -1;
+    }else if (this.cooldowns[2] < 0){
+        if(this.stance == "magic"){
+        //revol- I meant abrax- I meant celestrial beam is now ready!
+        screen.fillStyle = "#ff04";
+        circle(canvhalfx, canvhalfy, this.size * .75)
+    }else{
+        //permanent visual "I CAN PARRY" indicator (also an extra abra- I meant celestrial beam indicator)
+        screen.fillStyle = "#fff";
+        circle(canvhalfx, canvhalfy, this.size/2)
+    }
     }
 
 }

@@ -325,7 +325,7 @@ var player;
 var projectiles = [];
 var enemies = [];
 var summons = [];
-var level = 0;
+var level = 4;
 var rest = 60;
 var resttimer = 0;
 var pauseselection = 0;

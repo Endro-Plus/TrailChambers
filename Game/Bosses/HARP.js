@@ -114,7 +114,7 @@ if(this.cooldown < 1){
             this.velocityY += random(-1, 1);
             }
             
-            projectiles.push(new enemyproj("Nail", this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 4, this.velocityX, this.velocityY, "rgb(128, 128, 128)", 4, 90, ["physical", "proj", "piercing"], [this.velocityX * -0.5, this.velocityY * -0.5], 6, 3))
+            projectiles.push(new enemyproj("Nail", this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 4, this.velocityX, this.velocityY, "rgb(128, 128, 128)", 1, 90, ["physical", "proj", "piercing"], [this.velocityX * -0.5, this.velocityY * -0.5], 6, 5))
            
             if(this.hp < 50){
             //lower cooldown between shots at less than 50%
@@ -139,11 +139,20 @@ if(this.cooldown < 1){
             this.shots++;
             
 
-            if(this.hp < 50){
+            if(this.hp < 50 && !enemyezmode()){
             //lower cooldown between shots at less than 50%
-            this.cooldown = random(3, 5, false);
+            //this.cooldown = random(3, 5, false);
+            if(enemyezmode()){
+                this.cooldown = 7;
+            }else{
+                this.cooldown = random(3, 5, false);
+            }
         }else{
-        this.cooldown = random(5, 8, false);
+            if(enemyezmode()){
+                this.cooldown = 10;
+            }else{
+                this.cooldown = random(5, 8, false);
+            }
         }
         }
 
@@ -152,7 +161,12 @@ if(this.cooldown < 1){
         //cooldown for shooting
         
     }else{
-        this.cooldown = random(20/(100/this.hp + (10 - this.lvl)), 40/(100/this.hp + (10 - this.lvl)), false)//based on hp the cooldown between shots is reduced. level is also a factor!
+        if(enemyezmode()){
+            this.cooldown = random(10, 25, false);
+        }else{
+            this.cooldown = random(20/(100/this.hp + (10 - this.lvl)), 40/(100/this.hp + (10 - this.lvl)), false)//based on hp the cooldown between shots is reduced. level is also a factor!
+        }
+        
         while(this.shots == 0){
             
             this.shots = random(-this.lvl, this.lvl, false);
