@@ -25,8 +25,8 @@ this.speedcause = [];
 this.hitstunmod = 1; //POV: weak ass boss who isn't immune to hitstun
 this.knockbackmod = 1; //POV: weak ass boss who isn't immune to knockback
 this.knockback = [0, 0];//x and y position of knockback
-
-
+this.talking = false;//basically an indicator of whether or not summons should target this boss
+this.showimmunity = false;
 //extras
 this.tutorial = 0;
 this.turnRate = 0.05;
@@ -77,7 +77,7 @@ this.hitbox.enable();
 this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
 //The character exists in my plane of existance!
 screen.fillStyle = this.color;
-circle(this.x + player.px, this.y + player.py, this.size);
+circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
 
 
 
@@ -87,7 +87,7 @@ circle(this.x + player.px, this.y + player.py, this.size);
 Blueboss.prototype.move = function(){
         if(this.hitstun > 0){
         this.hurt();
-        this.hitbox.reassign(this.x + player.px, this.y + player.px, this.z, 8, this.size);
+        this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
         return;
         }
         // really basic following script (yes I just copied the tutorial boss)
@@ -106,7 +106,7 @@ Blueboss.prototype.move = function(){
             this.facing = [0, -1];
         }
 
-        this.hitbox.reassign(this.x + player.px, this.y + player.py, this.z, 8, this.size);
+        this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
 
         if(this.hitbox.hitplayer()){
         console.log("hit")

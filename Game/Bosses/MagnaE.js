@@ -27,7 +27,7 @@ this.speedcause = [];
 this.hitstunmod = 0.1; //POV: weak ass boss who isn't immune to hitstun
 this.knockbackmod = 2.5; //POV: weak ass boss who isn't immune to knockback
 this.knockback = [0, 0];//x and y position of knockback
-
+this.talking = true;
 
 //extras
 this.phase = (this.lvl > 5)? [0, 1]:[1, 30]; // zoning, attacking, hyperspeed
@@ -41,6 +41,7 @@ this.showchuck = 0;
 this.chuckdown = 0;
 this.shurikenspeed = this.lvl*2;
 this.dashlocale = []
+this.combotimer = 0;//can only deal full damage with strong moves without setup!
 }
 MagnaE.prototype.listname = function(){
 //to help position the characters correctly
@@ -107,6 +108,8 @@ screen.fillText("*Stares cutely*", this.x + player.px, this.y-+ 50 + player.py)
     player.hit(0, ['contact', this.enemyID])
   }
 }else{
+    this.talking = false;
+    this.combotimer--;
 //this.chuckbox.showbox();
 if(this.phase[0] == 0){
 this.zone();
@@ -246,8 +249,9 @@ MagnaE.prototype.move = function(){
             
             if(this.chuckbox.hitplayer()){
                 //a little less damage for easy mode
-                player.hit((enemyezmode())? 4:8, ["bludgeoning", "physical"], [-12 * this.facing[0], -12 * this.facing[1]], 5);
-                phase[1]-=10;//these comboes are too long...
+                player.hit((enemyezmode())? 4:8, ["bludgeoning", "physical"], [-12 * this.facing[0], -12 * this.facing[1]], 5, 3);
+                this.phase[1]-=10;//these comboes are too long...
+                this.combotimer = 15;
             }
             
             this.chuckbox.grantimmunity(player.listname());
@@ -374,10 +378,10 @@ MagnaE.prototype.VROOOM = function(speedx, speedy){
         if(this.hitbox.hitplayer()){
         console.log("hit")
         //the love tap (now does less damage in comboes, because magna just LOVES comboing into it)
-            player.hit((player.hitstun > 0)? 25:69, ["contact", "physical", 0], [speedx * 10, 40 * speedy * 10], 30);
+            player.hit((player.hitstun > 0 || this.combotimer > 0)? 25:69, ["contact", "physical", 0], [speedx * 10, 40 * speedy * 10], 30);
             this.hitstun = 45;
             this.phase[1] = 0;
-            
+            this.combotimer = 120;//yes, get unlucky enough and you too will suffer the wrath of lovetap > lovetap > lovetap > lovetap ...
             this.hitbox.grantimmunity(player.listname());
         }
 

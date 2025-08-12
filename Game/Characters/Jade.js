@@ -715,7 +715,7 @@ function Seraphim(x, y, size, mx, my, charge){
     this.chargetime = charge;
     this.hitbox = new hitbox(x, y, 2, size/2, size);
     this.hitbox.disable();
-    this.lifetime = 700;//this is universal to all projectiles!
+    this.lifetime = 150;//this is universal to all projectiles!
 }
 Seraphim.prototype.exist = function(){
     //First existing projectile!
@@ -757,7 +757,7 @@ Seraphim.prototype.exist = function(){
     //console.log(en);
     if(typeof en != "boolean"){
         playerattack = this.name;
-        enemies[en].hit(this.size / 2, ["light", "magic"]);
+        enemies[en].hit(this.size / 2, ["light", "magic", "proj"]);
         if(charezmode() || player.hp < 110){
         player.hp += this.size / 5;
         }
@@ -846,7 +846,7 @@ Nosferatu.prototype.exist = function(){
         //console.log(en);
         if(typeof en != "boolean"){
             playerattack = this.name;
-            enemies[en].hit(this.size / 4, ["light", "magic"], [this.mx * this.size, this.my * this.size], this.size * 5);
+            enemies[en].hit(this.size / 4, ["light", "magic", "proj"], [this.mx * this.size, this.my * this.size], this.size * 5);
             for(let i = 0 ; i < 40+this.size; i++){
                     if(this.size>=90 && random(0,1,false)){
                         projectiles.push(new Light_Spark(this.x, this.y, random(2,8), random(-this.size/4, this.size/4), random(-this.size/4, this.size/4)))
@@ -1030,7 +1030,7 @@ Abraxas.prototype.exist = function(){
             //console.log(en);
             if(this.hitbox.checkenemy(en)){
                 playerattack = this.name;
-                enemies[en].hit(30, ["light", "magic"]);
+                enemies[en].hit(30, ["light", "magic", "proj"]);
                 player.hp+=5;
                 this.hitbox.grantimmunity(en);
 
@@ -1140,7 +1140,7 @@ Light_Spark.prototype.exist = function(){
         for(let en = 0 ; en < enemies.length ; en++){
         //console.log(en);
         if(this.hitbox.checkenemy(en)){
-            enemies[en].hit(this.size, ["light", "magic"]);
+            enemies[en].hit(this.size, ["light", "magic", "proj"]);
             playerattack = this.name;
             if(charezmode() || player.hp < 110){
             player.hp+=this.size/2

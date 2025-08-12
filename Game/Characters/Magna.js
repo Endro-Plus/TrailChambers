@@ -1011,7 +1011,7 @@ ParryProj.prototype.exist = function(){
             if(this.hitbox.checkenemy(sti)){
                 playerattack = this.name;
                 
-                enemies[sti].hit(24+player.dmgboost, ["magic"], [this.mx * 2, this.my * 2], 15);
+                enemies[sti].hit(24+player.dmgboost, ["magic", "proj", "hitscan"], [this.mx * 2, this.my * 2], 15);
                 if(this.parried == "hitscan"){
                     enemies[sti].hit(100+player.dmgboost, ["CRITICAL"], [this.mx * 2, this.my * 2], 15);
                 }

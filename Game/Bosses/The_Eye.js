@@ -25,7 +25,7 @@ this.speedcause = [];
 this.hitstunmod = 0.0; //POV: regular boss
 this.knockbackmod = 0 //POV: no knockback?
 this.knockback = [0, 0];//x and y position of knockback
-
+this.talking = false;
 
 //extras
 this.phase = (lvl < 5)? -1:0;
@@ -282,7 +282,7 @@ function Eye(x, y, z, speed, acc, ID = 99){
     this.hitstunmod = 1;
     this.knockbackmod = 1;
     this.knockback = [0, 0];//x and y position of knockback
-
+    this.talking = false;
 }
 Eye.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
     var dmg = damage * this.damagemod;

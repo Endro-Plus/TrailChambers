@@ -726,7 +726,7 @@ skatebeam.prototype.exist = function(){
         if(enemies[i].knockback == "legacy"){
                 enemies[i].hit(0, [], [], 45);
             }
-        enemies[i].hit(5 + this.esist + player.repetitivebonus,  ["magic", "slashing"], [12 * this.facing[0], 12 * this.facing[1]], 5);
+        enemies[i].hit(5 + this.esist + player.repetitivebonus,  ["magic", "slashing", "proj"], [12 * this.facing[0], 12 * this.facing[1]], 5);
         player.repetitivebonus+= 1 * (this.esist/10)
         this.esist+=10;
         this.hitbox.grantimmunity(i);

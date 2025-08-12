@@ -25,7 +25,7 @@ this.speedcause = [];
 this.hitstunmod = (this.lvl > 5)? 0.1:0.2; //POV: weak ass boss who isn't immune to hitstun
 this.knockbackmod = (this.lvl > 5)? 0.1:0.2; //POV: weak ass boss who isn't immune to knockback
 this.knockback = [0, 0];//x and y position of knockback
-
+this.talking = (lvl > 5)? false:true;
 
 //extras
 this.tutorial = 0;
@@ -144,6 +144,7 @@ this.tutorial+=0.01;
     screen.fillText("For future reference, you can skip this whole tutorial by just defeating me", canvhalfx, 140)
     this.tutorial+=0.01;
  }else{
+    this.talking = false;
 this.move();
  }
  if(this.tutorial < 18){
@@ -157,6 +158,7 @@ this.move();
 //this.move();
 
 }else{
+    this.talking = false;
 if(this.tutorial < 2){
  screen.fillStyle = this.color;
     screen.textAlign = "center";
@@ -200,7 +202,7 @@ Tutorial_Bot.prototype.move = function(){
             this.y+=2*this.speed*this.speedmod*this.facing[1];
             }else{
                 //bro comboed too good using easy mode stats
-                player.hit(4, ["contact", "physical", 0], [-(this.speed + 3)  * this.facing[0], -(this.speed + 3) * this.facing[1]], 10, 3);
+                player.hit(4, ["contact", "physical", 0], [-(this.speed + 3)  * this.facing[0], -(this.speed + 3) * this.facing[1]], 10, 5);
                 this.x+=this.speed*this.speedmod*this.facing[0];
                 this.y+=this.speed*this.speedmod*this.facing[1];
             }

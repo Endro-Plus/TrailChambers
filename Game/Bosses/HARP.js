@@ -26,6 +26,7 @@ this.speedcause = [];
 this.hitstunmod = 0; //POV: weak ass boss who isn't immune to hitstun
 this.knockbackmod = 0; //POV: weak ass boss who isn't immune to knockback
 this.knockback = [0, 0];//x and y position of knockback
+this.talking = false;
 //extras
 this.shots = lvl;
 this.cooldown = 60;
@@ -186,7 +187,7 @@ if(this.hp < 50 && this.phase == -1){
     this.phase = this.lvl * 5;
 }
 if(this.phase > 0 && this.phase % 5 == 0){
-    bosses[6].inst(false, 12, this.lvl/2,this.x - this.shift[0], this.y - this.shift[1], 24);
+    bossobject["Homing"].inst(false, 12, this.lvl/2,this.x - this.shift[0], this.y - this.shift[1], 24);
     //console.log("hi")
 }
 if(this.phase > 0){

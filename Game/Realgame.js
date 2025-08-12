@@ -147,6 +147,53 @@ if(this.lifetime < 0){
         return "delete";
     }
 }
+function enemyhitscan(name, x, y, size, mx, my, color, dmg, lifetime, jumps, dmgtype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
+    this.name = name;
+    this.x = x;
+    this.y = y;
+    this.shift = [player.px, player.py];
+    this.size = size
+    this.mx = mx;
+    this.my = my;
+    this.color = color;
+    this.hitbox = new hitbox(x, y, 2, size/2, size);
+    this.hitbox.disable();
+    this.lifetime = lifetime;
+    this.dmg = dmg
+    this.dmgtype = dmgtype;
+    this.knockback = knockback;
+    this.hitstun = hitstun;
+    this.DImod = DImod
+    this.jumps = jumps;
+    this.canhit = true;
+}
+enemyhitscan.prototype.exist = function(){
+    
+    screen.strokeStyle = this.color;
+    this.hitbox.enable();
+    
+
+
+     screen.beginPath();
+    screen.lineWidth = this.size;
+    
+    screen.moveTo(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    for(let i = 0 ; i < this.jumps ; i++){
+        this.x += this.mx;
+        this.y += this.my;
+        this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1])
+        if(this.canhit == true && this.hitbox.hitplayer()){
+            player.hit(this.dmg, this.dmgtype, this.knockback, this.hitstun, this.DImod);
+            this.canhit = false;
+        }
+        
+    }
+    screen.lineTo(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+  
+    screen.stroke();
+    screen.closePath();
+    screen.lineWidth = 1;
+}
 function playerproj(name, x, y, size, mx, my, color, dmg, lifetime, dmgtype = ["true"], knockback = [0, 0], hitstun = 0){
     this.name = name;
     this.x = x;
@@ -194,7 +241,15 @@ playerproj.prototype.exist = function(){
         }
         }
     }
-
+//functions
+var aim = function(x, y, x2, y2, speed){
+    let dx = x - x2;
+        let dy = y - y2;
+        let magnitude = Math.sqrt(dx * dx + dy * dy);
+        velocityX = (dx / magnitude) * speed;
+        velocityY = (dy / magnitude) * speed;
+        return [velocityX, velocityY];
+}
 //vars
 
 var arena = {
@@ -325,7 +380,7 @@ var player;
 var projectiles = [];
 var enemies = [];
 var summons = [];
-var level = 4;
+var level = 5;
 var rest = 60;
 var resttimer = 0;
 var pauseselection = 0;
@@ -993,7 +1048,6 @@ var gametime = function(){
         screen.fillRect(30, 10, canvas.width - 60, 40);
         screen.strokeRect(30, 10, canvas.width - 60, 40);
         //screen.lineWidth = 1
-
         screen.fillStyle = "#559900";
         {//calculating total boss hp
             var currentbosshp = 0;
@@ -1331,17 +1385,36 @@ var gametime = function(){
     enemies = [];
     player.inst(100, 0);
     if(enemyezmode()){
-    bosses[5].inst(4, canvhalfx, canvhalfy);
+    bossobject["HARP"].inst(4, canvhalfx, canvhalfy);
     bossbarmode = 2;
     }else{
     bossbarmode = 2;
-    bosses[5].inst(8, canvhalfx, canvhalfy);
+    bossobject["HARP"].inst(8, canvhalfx, canvhalfy);
     }
 
     bossbar.push(enemies[0]);
         boss_title = "H.A.R.P"
         arena.w = canvhalfx * 2;
         arena.h = canvhalfy * 2;
+
+    level +=0.5
+    }else if(level == 5){
+        bossbar = [];
+    projectiles = [];
+    enemies = [];
+    player.inst(100, 0);
+    if(enemyezmode()){
+    bossobject["PL999"].inst(1, canvhalfx + 100, canvhalfy);
+    bossbarmode = 2;
+    }else{
+    bossbarmode = 2;
+    bossobject["PL999"].inst(4, canvhalfx + 100, canvhalfy);
+    }
+
+    bossbar.push(enemies[0]);
+        boss_title = "Pistol Lover"
+        arena.w = 2000;
+        arena.h = 2000;
 
     level +=0.5
     }
@@ -1548,7 +1621,11 @@ document.body.onload = function(){
 
         }
         bosses = truepos;
-
+        for(let i = 0 ; i < bosses.length ; i++){
+            //add all the bosses to the boss object
+            bossobject[bosses[i].listname()] = bosses[i];
+            
+        }
 
     }
     //console.log(chars);

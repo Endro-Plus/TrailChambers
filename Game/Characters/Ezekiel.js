@@ -374,8 +374,9 @@ if(this.stance == "ATTACK" && this.Timshots != 0 && this.Timshots % 50 == 0 && e
         velocityX = (dx / magnitude) * 18;
         velocityY = (dy / magnitude) * 18;
     }
-
-    projectiles.push(new playerproj("chaos sphere", this.Timstats[0] + this.px, this.Timstats[1] + this.py, 15, velocityX * -1, velocityY * -1, "purple", damage, 200, ["magic"]));
+    if(typeof this.marked != "number" && enemies[0].talking == false || typeof this.marked == "number" && enemies[this.marked].talking == false){
+        projectiles.push(new playerproj("chaos sphere", this.Timstats[0] + this.px, this.Timstats[1] + this.py, 15, velocityX * -1, velocityY * -1, "purple", damage, 200, ["magic", "proj"]));
+    }
 }else if(this.stance == "PANIC" && this.Timshots != 0){
     //show defense aura
     if( this.Timshots % 10 == 0){
@@ -495,14 +496,14 @@ Ezekiel.prototype.DIE = function(orb){
      this.deathshift[orb][1] = this.py;
         return
     }
-       if(this.deathphase[orb] % 25 == 0){
+       if(this.deathphase[orb] % 25 == 0 && enemies[this.targetting[orb]].talking == false){
         //fire!
         let dx = (this.deathorbs[orb].x + player.px - this.deathshift[orb][0]) - (enemies[this.targetting[orb]].x + this.px);
         let dy = (this.deathorbs[orb].y + player.py - this.deathshift[orb][1]) - (enemies[this.targetting[orb]].y + this.py);
         let magnitude = Math.sqrt(dx * dx + dy * dy);
         velocityX = (dx / magnitude) * 15;
         velocityY = (dy / magnitude) * 15;
-        projectiles.push(new playerproj("death orb", this.deathorbs[orb].x + this.px - this.deathshift[orb][0], this.deathorbs[orb].y + this.py - this.deathshift[orb][1], this.deathorbs[orb].size, velocityX * -1, velocityY * -1, "black", (charezmode())? 15: 8, 45, ["magic"]));
+        projectiles.push(new playerproj("death orb", this.deathorbs[orb].x + this.px - this.deathshift[orb][0], this.deathorbs[orb].y + this.py - this.deathshift[orb][1], this.deathorbs[orb].size, velocityX * -1, velocityY * -1, "black", (charezmode())? 15: 8, 45, ["magic", "proj"]));
        }
 
         this.deathphase[orb]--;
@@ -555,9 +556,9 @@ Ezekiel.prototype.DIE = function(orb){
      }
      //damage enemies
      for(let i = 0 ; i < enemies.length ; i++){
-        if(this.deathorbs[orb].checkenemy(i)){
+        if(this.deathorbs[orb].checkenemy(i) && enemies[i].talking == false){
             playerattack = "deathorb melee"
-            enemies[i].hit(32, ["physical", "slashing"]);
+            enemies[i].hit(32, ["physical", "slashing", "bludgeoning"]);
             if(enemies[i].knockback == "legacy"){
                 enemies[i].hitstun = 10;
             }

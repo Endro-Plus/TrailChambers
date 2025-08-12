@@ -476,11 +476,11 @@ chain_lightning.prototype.exist = function(){
         if(this.hitbox.checkenemy(i)){
             playerattack = this.name;
             if(player.defenemies.includes(enemies[i])){
-            enemies[i].hit(this.size + enemies[i].growingdarknessdebuff/player.defdiv, ["electric", "magic"]);
+            enemies[i].hit(this.size + enemies[i].growingdarknessdebuff/player.defdiv, ["electric", "magic", "hitscan", "proj"]);
             enemies[i].growingdarknessdebuff += this.size + enemies[i].growingdarknessdebuff/player.defdiv
              enemies[i].GDdetonationtime = 100;
         }else{
-            enemies[i].hit(this.size, ["electric", "magic"]);
+            enemies[i].hit(this.size,  ["electric", "magic", "hitscan", "proj"]);
             enemies[i].growingdarknessdebuff = this.size
             enemies[i].GDdetonationtime = 100;
             player.defenemies.push(enemies[i]);
@@ -562,11 +562,11 @@ chain_lightning.prototype.exist = function(){
     
         screen.moveTo(this.x, this.y);
         if(player.defenemies.includes(enemies[i])){
-            enemies[i].hit(8 + enemies[i].growingdarknessdebuff/24, ["electric", "magic"]);
+            enemies[i].hit(8 + enemies[i].growingdarknessdebuff/24,  ["electric", "magic", "hitscan", "proj"]);
             enemies[i].growingdarknessdebuff += 8 + enemies[i].growingdarknessdebuff/player.defdiv
              enemies[i].GDdetonationtime = 100;
         }else{
-            enemies[i].hit(8, ["electric", "magic"]);
+            enemies[i].hit(8,  ["electric", "magic", "hitscan", "proj"]);
             enemies[i].growingdarknessdebuff = 8
              enemies[i].GDdetonationtime = 100;
             player.defenemies.push(enemies[i]);
@@ -667,7 +667,7 @@ Darkblast.prototype.exist = function(){
     for(let i = 0 ; i < enemies.length ; i++){
         if(this.hitbox.checkenemy(i)){
             playerattack = this.name;
-            enemies[i].hit(this.dmg, ["dark", "magic"]);
+            enemies[i].hit(this.dmg, ["dark", "magic", "bludgeoning"]);
             this.hitbox.grantimmunity(i);
         }
     }
@@ -732,7 +732,7 @@ Pyromine.prototype.exist = function(){
                 for(let x = 0 ; x < projectiles.length ; x++){
                     //if electrified, do bonus damage!
                     if(projectiles[x].name == "chain lightning" && this.hitbox.scanproj(x)){
-                        enemies[i].hit(((charezmode())? 60:30) + enemies[i].growingdarknessdebuff/player.defdiv, ["CRITICAL", "electric"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
+                        enemies[i].hit(((charezmode())? 60:30) + enemies[i].growingdarknessdebuff/player.defdiv, ["CRITICAL", "electric", "magic"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
 
                         //electrify the enemy
                         projectiles.push(new chain_lightning(0, 0, 0, [0, 0]));
@@ -749,7 +749,7 @@ Pyromine.prototype.exist = function(){
                 for(let x = 0 ; x < projectiles.length ; x++){
                     //if electrified, do bonus damage!
                     if(projectiles[x].name == "chain lightning" && this.hitbox.scanproj(x)){
-                        enemies[i].hit(((charezmode())? 60:30), ["CRITICAL", "electric"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
+                        enemies[i].hit(((charezmode())? 60:30), ["CRITICAL", "electric", "magic"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
                         crit++;
                         //electrify the enemy
                         projectiles.push(new chain_lightning(0, 0, 0, [0, 0]));
@@ -840,11 +840,11 @@ Cutting_Gale.prototype.exist = function(){
     if(this.hitbox.checkenemy(i)){
             if(player.defenemies.includes(enemies[i])){
                 
-            enemies[i].hit(24 + enemies[i].growingdarknessdebuff/player.defdiv, ["wind", "magic", "slashing"]);
+            enemies[i].hit(24 + enemies[i].growingdarknessdebuff/player.defdiv, ["wind", "magic", "slashing", "proj"]);
             enemies[i].growingdarknessdebuff += 24 + enemies[i].growingdarknessdebuff/player.defdiv
              enemies[i].GDdetonationtime = 100;
         }else{
-           enemies[i].hit(24, ["wind", "magic", "slashing"]);
+           enemies[i].hit(24, ["wind", "magic", "slashing", "proj"]);
             enemies[i].growingdarknessdebuff = 24
             enemies[i].GDdetonationtime = 100;
             player.defenemies.push(enemies[i]);
@@ -891,7 +891,7 @@ Miasma.prototype.exist = function(){
         this.hitbox.move(this.x, this.y)
         this.hitbox.disable();
         this.hitbox.resize(this.size)
-        this.size-=1.5;
+        this.size-=1;
         circle(this.x, this.y, this.size)
     }
    
@@ -908,16 +908,16 @@ Miasma.prototype.exist = function(){
         playerattack = this.name;
             
              if(player.defenemies.includes(enemies[i])){
-            enemies[i].hit(30 + enemies[i].growingdarknessdebuff/24, ["magic", "dark"]);
+            enemies[i].hit(30 + enemies[i].growingdarknessdebuff/24, ["magic", "dark", "proj"]);
             enemies[i].growingdarknessdebuff += 30 + enemies[i].growingdarknessdebuff/24
              enemies[i].GDdetonationtime = 100;
         }else{
-           enemies[i].hit(30, ["magic", "dark"]);
+           enemies[i].hit(30, ["magic", "dark", "proj"]);
             enemies[i].growingdarknessdebuff = 30
             enemies[i].GDdetonationtime = 100;
             player.defenemies.push(enemies[i]);
         }
-            this.size = enemies[i].size + 100;
+            this.size = enemies[i].size * 2 + 100;
             this.lifetime = null;//unparriable now!
             this.follow = enemies[i]
             this.phase = 1
@@ -927,7 +927,7 @@ Miasma.prototype.exist = function(){
             if(player.defenemies.includes(enemies[i])){
                 enemies[i].growingdarknessdebuff += (charezmode())? 4: 0;
             }
-            this.size+=0.5
+            //this.size+=0.5
         }
         }
         }
