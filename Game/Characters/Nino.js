@@ -667,7 +667,7 @@ Darkblast.prototype.exist = function(){
     for(let i = 0 ; i < enemies.length ; i++){
         if(this.hitbox.checkenemy(i)){
             playerattack = this.name;
-            enemies[i].hit(this.dmg, ["dark", "magic", "bludgeoning"]);
+            enemies[i].hit(this.dmg, ["dark", "magic", "bludgeoning", "proj"]);
             this.hitbox.grantimmunity(i);
         }
     }

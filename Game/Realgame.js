@@ -188,11 +188,15 @@ enemyhitscan.prototype.exist = function(){
         }
         
     }
+   this.lifetime--;
     screen.lineTo(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
   
     screen.stroke();
     screen.closePath();
     screen.lineWidth = 1;
+    if(this.lifetime < 0){
+        return "delete"
+    }
 }
 function playerproj(name, x, y, size, mx, my, color, dmg, lifetime, dmgtype = ["true"], knockback = [0, 0], hitstun = 0){
     this.name = name;
@@ -249,6 +253,15 @@ var aim = function(x, y, x2, y2, speed){
         velocityX = (dx / magnitude) * speed;
         velocityY = (dy / magnitude) * speed;
         return [velocityX, velocityY];
+}
+function distance(x1, y1, x2, y2, abs = false) {
+    let dx = x2 - x1;
+    let dy = y2 - y1;
+    if(abs){
+    return Math.abs(Math.sqrt(dx * dx + dy * dy))
+    }else{
+    return Math.sqrt(dx * dx + dy * dy);
+    }
 }
 //vars
 

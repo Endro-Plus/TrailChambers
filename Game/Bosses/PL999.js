@@ -18,13 +18,13 @@ this.lvl = lvl; //difficulty of boss (0 for no dif, 10 for DOOM). You can go ove
 this.damagetypemod = [["proj", 0.5], ["magic", 0.5]];//POV: Nino counter
 this.hp = 100; //EVEN THE FUCKING BOSSES GET 100!!!!!!
 this.facing = [-1, 0];
-this.damagemod = 0.2;
+this.damagemod = 0.25;
 this.speed = 8 + lvl/2; //base speed
 this.speedmod = 1;//modifies speed, multiplicately
 this.speedcause = [];
-this.hitstunmod = 0.5; //POV: weak ass boss who isn't immune to hitstun
+this.hitstunmod = 1; //POV: weak ass boss who isn't immune to hitstun
 this.hitstun = 0;
-this.knockbackmod = 0.6; //POV: weak ass boss who isn't immune to knockback
+this.knockbackmod = 1; //POV: weak ass boss who isn't immune to knockback
 this.knockback = [0, 0];//x and y position of knockback
 this.talking = true;//basically an indicator of whether or not summons should target this boss
 //extras
@@ -70,10 +70,17 @@ this.closing_statement = [
 this.gosomewhereelse = 0;//at 0, go somewhere else... bottom text
 this.goto = [0, 0];
 this.combolimit = 0;//at a high enough number, escape a combo
-this.luckydodge = 50;//chances that pl999 decides that damage is gay
+this.luckydodge = 0;//chances that pl999 decides that damage is gay
 this.boost = 0;
-this.chamber = 0;
-this.revolver_cooldown = 30;
+this.chamber = 1;
+this.revolver_cooldown = 1;
+this.leadingshot = 0;//on easy mode, it's predictable, on hard mode, it's rng
+this.shotgunchamber = 2;
+this.shotgun_cooldown = 3900
+this.shotgun_spread = 45;
+this.snipercooldown = 2;
+this.aim = 0;
+this.targetshift = [];//hard mode only... the sniper rifle will autolock onto the player at a certain point.
 PL999.prototype.listname = function(){
 //to help position the characters correctly
 return "PL999";
@@ -86,15 +93,12 @@ PL999.prototype.exist = function(){
     //speedmod is ALWAYS 1 to begin with (here anyways)
     this.speedmod = 1 + this.boost;
     //dodgeboost update
-    if(this.boost > 0){
-        this.boost-=0.5;
+    if(this.boost > 0 ){
+        this.boost-=1;
     }else{
         this.boost = 0;
     }
-    //lucky bastard... I meant lucky dodge update!
-    if(this.luckydodge < 100){
-        this.luckydodge+=0.1;
-    }
+    
     this.speedcause.sort();//sorting it makes it easier to check for duplicated
     for(let i = 0 ; i < this.speedcause.length ; i++){
         //for every non-stacking buff, delete any duplicates
@@ -131,7 +135,7 @@ this.hitbox.enable();
 this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
 //The character exists in my plane of existance!
 screen.fillStyle = this.color;
-circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size);
+circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size + this.z);
 if(this.hitbox.hitplayer()){
            //um... run?
             player.hit(0, ["contact", this.enemyID]);
@@ -143,6 +147,11 @@ if(this.hitbox.hitplayer()){
 
 //boss AI goes here
 //a bit of conversation... if you can call it that
+if(this.hitstun > 0){
+        this.hurt();
+        this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
+        return;
+        }
 if(this.convo < 60){
     this.convo++;
     this.modelnumber = random(100, 998, false)
@@ -188,32 +197,60 @@ screen.fillStyle = this.color;
   screen.fillText((this.modelnumber%2 == 0)? "DRAW!":"*BANG*", this.x + player.px, this.y-+ 50 + player.py);
 }else{
     //the battle begins!
+    //lucky bastard... I meant lucky dodge update!
+    if(this.luckydodge < 50){
+        this.luckydodge+=0.1;
+    }
     this.talking = false;
     if(this.gosomewhereelse <= 0){
-        this.goto[0] = random(canvhalfx - 400, canvhalfx + 400);
-        this.goto[1] = random(canvhalfy - 400, canvhalfy + 400 );
+        this.goto[0] = random(canvhalfx - 300, canvhalfx + 300);
+        this.goto[1] = random(canvhalfy - 300, canvhalfy + 300 );
         this.gosomewhereelse = random(60, 150, false);//always be moving somewhere! usually near to player, but no obligation to be touching all the time
-        if(random(0, 100, false) < this.luckydodge/2){
-            this.boost = 3;//autododge, lmao. Though fatigue does set in for lucky dodging too much!
+        if(random(0, 100, false) < this.luckydodge*2){
+            this.boost = 2;//autododge, lmao. Though fatigue does set in for lucky dodging too much!
+            this.luckydodge-=10;
         }
     }else{
         this.gosomewhereelse--;
     }
     //update combolimit
     if(this.combolimit > 0){
-        this.combolimit-=0.5;
+        this.combolimit-=0.2;
     }else{
         this.combolimit+=0.2
     }
-    this.move(this.goto[0], this.goto[1])
+    
 
     //actually attacking
     if(this.revolver_cooldown < 0){
         //FIRE!
-        let vx = aim(canvhalfx, canvhalfy, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 10)[0];
-        let vy = aim(canvhalfx, canvhalfy, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 10)[1]
-        projectiles.push(new enemyhitscan("bullet", this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 7, vx, vy, "#ffee00ff", 7, 100, 3 + this.lvl, ["hitscan", "piercing", "proj", "physical"], [vx * -3, vy * -3], 10, 4));
+        if(enemyezmode() && this.leadingshot >= 5 || notenemyezmode() && this.leadingshot <= random(0, 5, false)){
+            //every sixth shot is aimed where the player is going to be... on hard mode, it may be done early, with the chance increasing with every shot
+            var accountx = 0;
+            var accounty = 0;
+            this.leadingshot = 0;
+            if(enemyezmode()){
+                this.chamber = 1;//on easy mode, this is always the last shot.
+            }
+            if(inputs.includes(controls[0]) || inputs.includes(controls[1])){
+                //take facing[0] into account
+                accountx = player.speed * player.facing[0] * distance(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], canvhalfx, canvhalfy, true)/(10 * 4+this.lvl) 
+            }
+             if(inputs.includes(controls[2]) || inputs.includes(controls[3])){
+                //take facing[0] into account
+                accounty = player.speed * player.facing[1] * distance(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], canvhalfx, canvhalfy, true)/(10 * 4+this.lvl) 
+            }
+
+                var vx = aim(canvhalfx + accountx, canvhalfy + accounty, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 10)[0];
+                var vy = aim(canvhalfx + accountx, canvhalfy + accounty, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 10)[1];
+        }else{
+        var vx = aim(canvhalfx, canvhalfy, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 10)[0];
+        var vy = aim(canvhalfx, canvhalfy, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 10)[1];
+        }
+        projectiles.push(new enemyhitscan("bullet", this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 7, vx, vy, "#ffee00ff", 7, 50, 4 + this.lvl, ["hitscan", "piercing", "proj", "physical"], [vx * -3, vy * -3], 10, 4));
         this.chamber--;
+        this.leadingshot++;
+        this.shotgun_cooldown+=6;
         console.log("shots  " + this.chamber)
         if(this.chamber < 1){
             this.revolver_cooldown = random(60, 120, false);
@@ -227,15 +264,104 @@ screen.fillStyle = this.color;
         this.chamber++;
         }
     }
+    if(this.shotgun_cooldown < 0){
+        //FIRE!!!!!!!!!
+        for(let i = 0 ; i < 10 ; i++){
+            //fire several shots
+        let vx = aim(canvhalfx + random(-this.shotgun_spread, this.shotgun_spread), canvhalfy + random(-this.shotgun_spread, this.shotgun_spread), this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 5)[0];
+        let vy = aim(canvhalfx + random(-this.shotgun_spread, this.shotgun_spread), canvhalfy + random(-this.shotgun_spread, this.shotgun_spread), this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 5)[1];
+        
+        projectiles.push(new enemyhitscan("bullet", this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 7, vx, vy, "#ffae00ff", 3, 30, 4 + this.lvl, ["hitscan", "piercing", "proj", "physical"], [vx * -6, vy * -6], 5, 4));
+        }
+        this.shotgunchamber--;
+        this.revolver_cooldown+=6;
+        console.log("shots  " + this.chamber)
+        if(this.shotgunchamber < 1){
+            this.shotgun_cooldown = random(150, 250, false);
+        }else{
+            this.shotgun_cooldown = 10;
+        }
+
+    }else{
+        this.shotgun_cooldown--;
+        if(this.shotgunchamber <2 && this.shotgunchamber%100 == 0 && this.shotgunchamber!= 0){
+            
+        this.chamber++;
+        }
+    }
+    if(this.revolver_cooldown > 10 && this.shotgun_cooldown > 10 && this.snipercooldown < 1){
+        //ULTIMATE TIME BABY!
+        //making sure they don't change courses mid jump
+        if(this.snipercooldown == 0){
+            
+            this.aim = random(0, 300);//randomize aim
+        }
+        
+            
+        this.shotgun_cooldown = random(30, 99);
+        this.revolver_cooldown = 12;
+        if(Math.abs(this.goto[0]) < 5000){
+        this.goto[0] = 9999 * this.facing[0];
+        }
+        if(Math.abs(this.goto[1]) < 5000){
+        this.goto[1] = 9999 * this.facing[1];
+        }
+        this.gosomewhereelse = 5;
+        this.z = (Math.sin(Math.abs(this.snipercooldown/5)))*20;//jump arc
+        console.log(this.snipercooldown);
+        if(enemyezmode()){
+            var x = this.x + player.px - this.shift[0] + (this.size + this.z + 30) * Math.cos(this.aim/2);
+            var y = this.y + player.py - this.shift[1] + (this.size + this.z + 30) * Math.sin(this.aim/2);
+        }else{
+            var x = this.x + player.px - this.shift[0] + (this.size + this.z + 30) * Math.cos(this.aim);
+            var y = this.y + player.py - this.shift[1] + (this.size + this.z + 30) * Math.sin(this.aim);
+            if(Math.abs(this.snipercooldown) == 10){
+                this.targetshift = [player.px, player.py]
+            }
+        }
+
+        
+        this.aim++;
+
+         screen.beginPath();
+        screen.lineWidth = 20;
+        screen.strokeStyle = "#444"
+    
+    screen.moveTo(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    screen.lineCap = "round"
+    screen.lineTo(x, y);
+  
+    screen.stroke();
+    screen.lineCap = "butt"
+    screen.closePath();
+    screen.lineWidth = 1;
+    screen.fillStyle = this.color;
+    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size + this.z);
+        if(this.z < 0){
+            this.z = 0;
+            this.snipercooldown = 300;
+            if(enemyezmode()){
+            var vx = aim(x, y, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 20)[0];
+            var vy = aim(x, y, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 20)[1];
+            }else{
+                var vx = aim(canvhalfx + player.px - this.targetshift[0], canvhalfy + player.py - this.targetshift[1], this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 20)[0];
+                var vy = aim(canvhalfx + player.px- this.targetshift[0], canvhalfy + player.py - this.targetshift[1], this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 20)[1];
+            }
+        }
+        projectiles.push(new enemyhitscan("bullet", this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 10, vx, vy, "#fff9a1ff", 100, 4, 20, ["hitscan", "piercing", "proj", "physical"], [vx * -1, vy * -1], 3, 0));
+        this.snipercooldown--;
+        
+    }
+    if(this.snipercooldown > 0){
+        this.snipercooldown--;
+    }
+    
+this.move(this.goto[0], this.goto[1])
 }
 
 }
 PL999.prototype.move = function(x, y){
-        if(this.hitstun > 0){
-        this.hurt();
-        this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
-        return;
-        }
+        
         // really basic following script (yes I just copied the tutorial boss)
         this.hitbox.updateimmunity();
         if(this.x + player.px > x + 40){
@@ -319,26 +445,31 @@ if(arena.leavedir(0, this.y - this.shift[1], this.size).includes('u')){
 PL999.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
     if(this.talking == true){
         this.convo = 999;//instantly skip the yapping
-        this.luckydodge = 100;//saw that comin'!
-        this.revolver_cooldown = 5;
+        //this.luckydodge = 100;//saw that comin'!
+        //this.revolver_cooldown = 5;
         this.chamber = 2
     }
     console.log(`limit: ${this.combolimit}  lucky: ${this.luckydodge}`)
     if(this.combolimit > 30){
         //dodge out of a combo... like a bi-
-        this.boost = 4;
+        this.boost = 6;
         this.combolimit = -30;
         this.hitstun = -10;
         this.goto = [(this.x + player.px - this.shift[0] < canvhalfx)? -9999: 9999, (this.y + player.py - this.shift[1] < canvhalfy)? -9999 : 9999];
         this.gosomewhereelse = 30;
+        if(this.shotgunchamber > 0){
+            //use the shotgun as a get off me tool... because of course that clanker would do that!
+            this.shotgun_cooldown = 5;
+            
+        }
         this.revolver_cooldown = 5;
         this.chamber = 1
         return;
     }
     if(this.hitstun == 0 && random(0 , 100 , false) < this.luckydodge){
         //just dodge instead lol
-        this.boost = 3;
-        this.luckydodge-=10;
+        this.boost = 2;
+        this.luckydodge-=20;
         if(this.luckydodge < -10){
             this.luckydodge = -10;//there's a chance bro just can't dodge... this is for me!
         }
@@ -347,6 +478,10 @@ PL999.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
     if(this.boost > 0){
         //literally immune to damage
         return;
+    }
+    if(this.snipercooldown < 0){
+        this.snipercooldown = 300;//imagine getting knocked out of your super, couldn't be me!
+        this.z = 0;
     }
     var dmg = damage * this.damagemod;
     for(let i = 0 ; i < this.damagetypemod.length ; i++){
