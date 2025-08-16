@@ -76,11 +76,12 @@ this.chamber = 1;
 this.revolver_cooldown = 1;
 this.leadingshot = 0;//on easy mode, it's predictable, on hard mode, it's rng
 this.shotgunchamber = 2;
-this.shotgun_cooldown = 3900
+this.shotgun_cooldown = 300
 this.shotgun_spread = 45;
-this.snipercooldown = 2;
+this.snipercooldown = 150;
 this.aim = 0;
 this.targetshift = [];//hard mode only... the sniper rifle will autolock onto the player at a certain point.
+this.mercysniper = 0;//shotgun into sniper rifle is no longer a 0 to death combo
 PL999.prototype.listname = function(){
 //to help position the characters correctly
 return "PL999";
@@ -150,6 +151,9 @@ if(this.hitbox.hitplayer()){
 if(this.hitstun > 0){
         this.hurt();
         this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
+        if(this.hitstun > 45){
+            this.hitstun = 45;
+        }
         return;
         }
 if(this.convo < 60){
@@ -201,6 +205,19 @@ screen.fillStyle = this.color;
     if(this.luckydodge < 50){
         this.luckydodge+=0.1;
     }
+
+    //combo detection (reduces both damage from revolver and sniper rifle)
+    if(player.hitstun > 1){
+        if(this.mercysniper < player.hitstun){
+            this.mercysniper = player.hitstun;
+        }
+    }else{
+        this.mercysniper--;
+        if(this,this.mercysniper > 30){
+            this.mercysniper= 30
+        }
+    }
+    //console.log(this.mercysniper + "mer")
     this.talking = false;
     if(this.gosomewhereelse <= 0){
         this.goto[0] = random(canvhalfx - 300, canvhalfx + 300);
@@ -247,7 +264,7 @@ screen.fillStyle = this.color;
         var vx = aim(canvhalfx, canvhalfy, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 10)[0];
         var vy = aim(canvhalfx, canvhalfy, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 10)[1];
         }
-        projectiles.push(new enemyhitscan("bullet", this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 7, vx, vy, "#ffee00ff", 7, 50, 4 + this.lvl, ["hitscan", "piercing", "proj", "physical"], [vx * -3, vy * -3], 10, 4));
+        projectiles.push(new enemyhitscan("bullet", this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 7, vx, vy, "#ffee00ff", (this.mercysniper > 0)? 3:10, 50, 3 + this.lvl, ["hitscan", "piercing", "proj", "physical"], [vx * -3, vy * -3], 10, 4));
         this.chamber--;
         this.leadingshot++;
         this.shotgun_cooldown+=6;
@@ -289,7 +306,7 @@ screen.fillStyle = this.color;
         this.chamber++;
         }
     }
-    if(this.revolver_cooldown > 10 && this.shotgun_cooldown > 10 && this.snipercooldown < 1){
+    if(this.snipercooldown < 0){
         //ULTIMATE TIME BABY!
         //making sure they don't change courses mid jump
         if(this.snipercooldown == 0){
@@ -307,8 +324,9 @@ screen.fillStyle = this.color;
         this.goto[1] = 9999 * this.facing[1];
         }
         this.gosomewhereelse = 5;
-        this.z = (Math.sin(Math.abs(this.snipercooldown/5)))*20;//jump arc
-        console.log(this.snipercooldown);
+        this.z = (Math.sin(Math.abs(this.snipercooldown/10)))*20;//jump arc
+        
+        
         if(enemyezmode()){
             var x = this.x + player.px - this.shift[0] + (this.size + this.z + 30) * Math.cos(this.aim/2);
             var y = this.y + player.py - this.shift[1] + (this.size + this.z + 30) * Math.sin(this.aim/2);
@@ -337,9 +355,10 @@ screen.fillStyle = this.color;
     screen.lineWidth = 1;
     screen.fillStyle = this.color;
     circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size + this.z);
-        if(this.z < 0){
+        if(this.z < 0 && this.snipercooldown < -10){
             this.z = 0;
             this.snipercooldown = 300;
+            //console.log(this.z + "z");
             if(enemyezmode()){
             var vx = aim(x, y, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 20)[0];
             var vy = aim(x, y, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 20)[1];
@@ -348,11 +367,11 @@ screen.fillStyle = this.color;
                 var vy = aim(canvhalfx + player.px- this.targetshift[0], canvhalfy + player.py - this.targetshift[1], this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 20)[1];
             }
         }
-        projectiles.push(new enemyhitscan("bullet", this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 10, vx, vy, "#fff9a1ff", 100, 4, 20, ["hitscan", "piercing", "proj", "physical"], [vx * -1, vy * -1], 3, 0));
+        projectiles.push(new enemyhitscan("bullet", this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 10, vx, vy, "#fff9a1ff", (this.mercysniper > 0)? 50:100, 4, 20, ["hitscan", "piercing", "proj", "physical"], [vx * -1, vy * -1], 3, 0));
         this.snipercooldown--;
         
     }
-    if(this.snipercooldown > 0){
+    if(this.snipercooldown >= 0){
         this.snipercooldown--;
     }
     
