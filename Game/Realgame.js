@@ -22,6 +22,33 @@ movingpart.prototype.exist = function () {
         return "delete";
     }
 }
+function flashpart(x, y, size, growth, color, life = 100, fade = 1) {
+    this.name = "particle";
+    this.x = x;
+    this.y = y;
+    this.growth = growth
+    this.shift = [player.px, player.py];
+    this.size = size;
+    this.color = color;
+    this.lifetime = null;
+    this.life = life;
+    this.fade = fade;
+}
+flashpart.prototype.exist = function () {
+    //all this does is flash and disappear!
+     screen.globalAlpha = this.life/100;
+    screen.fillStyle = this.color;
+    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size);
+   
+    this.life-=this.fade;
+    
+    this.size+=this.growth;
+    
+    screen.globalAlpha = "1";
+    if (this.life < 3) {
+        return "delete";
+    }
+}
 function enemyproj(name, x, y, size, mx, my, color, dmg, lifetime, dmgtype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
     this.name = name;
     this.x = x;
@@ -255,6 +282,7 @@ var aim = function(x, y, x2, y2, speed){
         return [velocityX, velocityY];
 }
 function distance(x1, y1, x2, y2, abs = false) {
+    //2 points
     let dx = x2 - x1;
     let dy = y2 - y1;
     if(abs){
@@ -262,6 +290,43 @@ function distance(x1, y1, x2, y2, abs = false) {
     }else{
     return Math.sqrt(dx * dx + dy * dy);
     }
+}
+function distance2(x1, y1, fp, abs = false) {
+    //fp is for find position... makes this a bit quicker
+    let x2 = fp[0];
+    let y2 = fp[1];
+    let dx = x2 - x1;
+    let dy = y2 - y1;
+    if(abs){
+    return Math.abs(Math.sqrt(dx * dx + dy * dy))
+    }else{
+    return Math.sqrt(dx * dx + dy * dy);
+    }
+}
+function findposition(enemyclass){
+    //used to be for enemies, but this can be used for projectiles too. For the most part, it's the same formula
+    return [enemyclass.x + player.px - enemyclass.shift[0], enemyclass.y + player.py - enemyclass.shift[1]];
+}
+function slopeintercept(x1, y1, x2, y2){
+    // Calculate slope... because yeah, math is apparantly what I needed
+    let m = (y2 - y1) / (x2 - x1)
+    
+    //Calculate intercept... trust me this function is used
+    let b = y1 - m * x1
+    
+    return [m, b]
+}
+function slopeintercept2(x1, y1, fp){
+    //more used than the other one!
+    // Calculate slope... because yeah, math is apparantly what I needed
+    let x2 = fp[0];
+    let y2 = fp[1];
+    let m = (y2 - y1) / (x2 - x1)
+    
+    //Calculate intercept... trust me this function is used
+    let b = y1 - m * x1
+    
+    return [m, b]
 }
 //vars
 

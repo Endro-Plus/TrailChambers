@@ -511,7 +511,7 @@ Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
             return;
         }
         //on parry
-        if(this.blocking < 8 && this.blocking != -1){
+        if(this.blocking < 8 && this.blocking != -1 && !damagetype.includes("softblock")){
             //PARRIED!
             parried = true;
             this.adrenaline+=150;//5 seconds of adrenaline
@@ -523,12 +523,17 @@ Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
             return;
 
 
-        }else if(this.blocking > 7){
-            //only a defense...
+        }else if(this.blocking > 7 && !damagetype.includes("softblock") || this.blocking < 8 && this.blocking != -1 && damagetype.includes("softblock")){
+            //only a defense... "softblock" guardbreaks here! parried softblock moves lead to only blocks 
             this.blocking+=Math.round(hitstun/2);
+            if(damagetype.includes("softblock")){
+                this.blocking+=20;
+                damage = 0;//no damage at least!
+            }
             if(this.blocking > 60){
                 this.blocking = 60;
             }
+            
             this.hitstun = 0;
             hitstun = 0;
             //knockback[0]*=2;

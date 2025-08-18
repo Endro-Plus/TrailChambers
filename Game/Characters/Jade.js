@@ -542,7 +542,7 @@ Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
             this.cooldowns[2] = 15;//no parry cheesing!
         }
         
-        if(this.parry >= 0){
+        if(this.parry >= 0 && !damagetype.includes("softblock")){
             parried++;
             if(this.powerup < 1){
                 this.powerup = 0;
@@ -571,6 +571,15 @@ Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
             this.parryiframes = 15;//HURRY UP!!!
             }
             return;
+        }
+        if(this.parry >= 0 && damagetype.includes("softblock")){
+            //no damage at least...
+            damage = 0;
+            hitstun*=2;
+            this.parry = 0;
+            for(let i = 0 ; i < 10 ; i++){
+                projectiles.push(new movingpart(canvhalfx, canvhalfy, random(-10, 10), random(-10, 10), 9, "grey", 10));
+            }
         }
         var dmg = damage * this.damagemod;
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
