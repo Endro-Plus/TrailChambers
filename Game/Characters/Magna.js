@@ -35,6 +35,7 @@ this.facing = [1, 0, -Math.PI/2];//facing x, facing right, facing orientation.
 this.iframe = false;
 this.hitstun = 0;
 this.knockback = [];
+this.won = false;
 //special abilities!
 this.adrenaline = 0;
 this.dmgboost = 0;
@@ -74,10 +75,10 @@ if(this.hp > 100){
         //yes, I'm aware this is effectively a free defense
     }
 
-}else if(this.hp <=0 ){
+}else if(this.hp <=0 || this.won == true){
     //play the death anmiation, then call off
     
-
+if(this.won == false){
 for(;this.adrenaline > 9000;this.adrenaline-=1800){
     //you fought a boss for 5 minutes... honestly impressive
     //lose 1 minute worth of adrenaline stats for every hp below 0
@@ -87,11 +88,15 @@ for(;this.adrenaline > 9000;this.adrenaline-=1800){
     }
 
 }
-
+}
 
     
-    if(this.hp <= 0){
-    this.death();
+    if(this.hp <= 0|| this.won == true){
+    if(this.won == false){
+        this.death();
+    }else{
+        this.win()
+    }
     }
     return;
 }else{
@@ -557,7 +562,7 @@ Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
         }
         //immunity to hitscans if you would've parried it
         if(damagetype.includes("hitscan") && this.showchuck > 0){
-            this.immunityframes = 45;
+            this.immunityframes = 50;
             this.adrenaline+=900;//+30 seconds for absolutely shredding that!
             this.hp+=10;//ngl, you deserve that!
             return;
@@ -654,6 +659,50 @@ screen.fillText("Press the space bar to go back", canvhalfx, canvas.height - 30)
 
 if(input == " "){
 //ggwp
+player = null;
+clearInterval(setup);
+setup = setInterval(prep, 1000/fps);
+screen.textAlign = "left";
+level = 0;
+input = '';
+bossbar = [];
+}
+
+}
+Magna.prototype.win = function(){
+//NICE!
+this.won = true;
+//draw the character, stationary
+screen.fillStyle = this.color;
+circle(canvhalfx, this.size + 40, this.size)
+
+//here is some statistics
+screen.fillStyle = "#99ff00ff";
+screen.textAlign = "center";
+screen.font = "25px Times New Roman";
+
+screen.fillText("VICTORY", canvhalfx, 20);//PROCLAIM IT!!!
+screen.fillText("Magna", canvhalfx, 40);//char name
+screen.fillText("Won on lvl: " + Math.floor(level), canvhalfx, canvhalfy - 60);//made it to what level
+screen.fillText("Was playing on " + difficulty + " mode", canvhalfx, canvhalfy - 20);//On what difficulty
+
+//get the time
+estimatedtime = Math.ceil(timeplayed/fps);//30 frames in a 30 fps game = 1 second. But it's not 100% accurate.
+//console.log(estimatedtime)
+estimatedmin = Math.floor(estimatedtime / 60); //60 seconds = 1 minute
+estimatedtime-=(estimatedmin * 60);
+if(estimatedtime < 10){
+estimatedtime = "0"+estimatedtime;
+}
+if(estimatedmin < 10){
+estimatedmin = "0"+estimatedmin;
+}
+screen.fillText("Time lived: " + estimatedmin + ":" + estimatedtime, canvhalfx, canvhalfy + 20);//time lived
+
+screen.fillText("Press the space bar to go back", canvhalfx, canvas.height - 30);//tell them how to go back
+
+if(input == " "){
+//there's a chance.
 player = null;
 clearInterval(setup);
 setup = setInterval(prep, 1000/fps);

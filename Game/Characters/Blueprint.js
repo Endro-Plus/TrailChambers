@@ -24,6 +24,7 @@ this.knockbackmod = 1; //knockback resistance, essentially.
 this.facing = [0, 0]; //what direction the player is facing
 this.height = 8;//How tall they are, if small enough, higher hitting attacks may miss! However, if too tall, that's just a hitbox extension.
 this.iframe = false;//completely ignore hits
+this.won = false;
 }
 Test.prototype.listname = function(){
 //to help position the characters correctly
@@ -43,9 +44,13 @@ screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
 screen.fillStyle = "#0F0";
 screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, this.hp / 2, 4);//current hp
 
-}else if(this.hp <=0 ){
+}else if(this.hp <=0 || this.won == true){
     //play the death anmiation, then call off
-    this.death();
+    if(this.won == false){
+        this.death();
+    }else{
+        this.win()
+    }
     return;
 }else{
 //over max
@@ -273,6 +278,50 @@ screen.fillText("Press the space bar to go back", canvhalfx, canvas.height - 30)
 
 if(input == " "){
 //ggwp
+player = null;
+clearInterval(setup);
+setup = setInterval(prep, 1000/fps);
+screen.textAlign = "left";
+level = 0;
+input = '';
+bossbar = [];
+}
+
+}
+Test.prototype.win = function(){
+//NICE!
+this.won = true;
+//draw the character, stationary
+screen.fillStyle = this.color;
+circle(canvhalfx, this.size + 40, this.size)
+
+//here is some statistics
+screen.fillStyle = "#99ff00ff";
+screen.textAlign = "center";
+screen.font = "25px Times New Roman";
+
+screen.fillText("VICTORY", canvhalfx, 20);//PROCLAIM IT!!!
+screen.fillText("Um... the test guy!", canvhalfx, 40);//char name
+screen.fillText("Won on lvl: " + Math.floor(level), canvhalfx, canvhalfy - 60);//made it to what level
+screen.fillText("Was playing on " + difficulty + " mode", canvhalfx, canvhalfy - 20);//On what difficulty
+
+//get the time
+estimatedtime = Math.ceil(timeplayed/fps);//30 frames in a 30 fps game = 1 second. But it's not 100% accurate.
+//console.log(estimatedtime)
+estimatedmin = Math.floor(estimatedtime / 60); //60 seconds = 1 minute
+estimatedtime-=(estimatedmin * 60);
+if(estimatedtime < 10){
+estimatedtime = "0"+estimatedtime;
+}
+if(estimatedmin < 10){
+estimatedmin = "0"+estimatedmin;
+}
+screen.fillText("Time lived: " + estimatedmin + ":" + estimatedtime, canvhalfx, canvhalfy + 20);//time lived
+
+screen.fillText("Press the space bar to go back", canvhalfx, canvas.height - 30);//tell them how to go back
+
+if(input == " "){
+//there's a chance.
 player = null;
 clearInterval(setup);
 setup = setInterval(prep, 1000/fps);

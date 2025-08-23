@@ -31,6 +31,7 @@ this.knockbackmod = 1;
 this.height = 8;
 this.facing = [1, 0, -Math.PI/2];//facing x, facing right, facing orientation.
 this.iframe = false;
+this.won = false;
 //character exclusive!
 this.miracle = 10; //if taken fatal damage, the amount of miracles is the chance for hp go to 1 instead of death. This also determines how long Jade can ignore death for.
 this.stance = "magic";
@@ -72,9 +73,13 @@ if(this.hp > 100){
         //yes, I'm aware this is effectively a free defense
     }
 
-}else if(this.hp <=0 || this.truemiracle > 0){
+}else if(this.hp <=0 || this.truemiracle > 0 || this.won == true){
     //play the death anmiation, then call off
-    this.death();
+    if(this.won == false){
+        this.death();
+    }else{
+        this.win()
+    }
     return "dead";
 }
 timeplayed++;
@@ -574,6 +579,7 @@ Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         }
         if(this.parry >= 0 && damagetype.includes("softblock")){
             //no damage at least...
+            this.parryiframes = 3;
             damage = 0;
             hitstun*=2;
             this.parry = 0;
@@ -701,6 +707,51 @@ screen.fillText("Time lived: " + estimatedmin + ":" + estimatedtime, canvhalfx, 
 screen.fillText("Press the space bar to go back", canvhalfx, canvas.height - 30);//tell them how to go back
 
 if(input == " " && this.hp < 1){
+//there's a chance.
+player = null;
+clearInterval(setup);
+setup = setInterval(prep, 1000/fps);
+screen.textAlign = "left";
+level = 0;
+input = '';
+bossbar = [];
+}
+
+}
+
+Jade.prototype.win = function(){
+//NICE!
+this.won = true;
+//draw the character, stationary
+screen.fillStyle = this.color;
+circle(canvhalfx, this.size + 40, this.size)
+
+//here is some statistics
+screen.fillStyle = "#99ff00ff";
+screen.textAlign = "center";
+screen.font = "25px Times New Roman";
+
+screen.fillText("VICTORY", canvhalfx, 20);//PROCLAIM IT!!!
+screen.fillText("Jade", canvhalfx, 40);//char name
+screen.fillText("Won on lvl: " + Math.floor(level), canvhalfx, canvhalfy - 60);//made it to what level
+screen.fillText("Was playing on " + difficulty + " mode", canvhalfx, canvhalfy - 20);//On what difficulty
+
+//get the time
+estimatedtime = Math.ceil(timeplayed/fps);//30 frames in a 30 fps game = 1 second. But it's not 100% accurate.
+//console.log(estimatedtime)
+estimatedmin = Math.floor(estimatedtime / 60); //60 seconds = 1 minute
+estimatedtime-=(estimatedmin * 60);
+if(estimatedtime < 10){
+estimatedtime = "0"+estimatedtime;
+}
+if(estimatedmin < 10){
+estimatedmin = "0"+estimatedmin;
+}
+screen.fillText("Time lived: " + estimatedmin + ":" + estimatedtime, canvhalfx, canvhalfy + 20);//time lived
+
+screen.fillText("Press the space bar to go back", canvhalfx, canvas.height - 30);//tell them how to go back
+
+if(input == " "){
 //there's a chance.
 player = null;
 clearInterval(setup);

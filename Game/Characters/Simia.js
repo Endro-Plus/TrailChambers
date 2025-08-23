@@ -27,6 +27,7 @@ this.height = 8;
 this.hitstun = 0;
 this.facing = [-1, 0];//because yeah, I have to be different
 this.iframe = false;//it would be a shame if I never used this!
+this.won = false;//is this even possible to make true???
 //at least I get SKILLS!!!
 this.desperation = 0;
 this.momentum = 100;
@@ -90,9 +91,13 @@ if(this.hp > 100){
         //yes, I'm aware this is effectively a free defense
     }
 
-}else if(this.hp <=0 ){
+}else if(this.hp <=0|| this.won == true ){
     //play the death anmiation, then call off
-    this.death();
+    if(this.won == false){
+        this.death();
+    }else{
+        this.win()
+    }
     return "dead";
 }
 timeplayed++;
@@ -797,6 +802,50 @@ screen.fillText("Press the space bar to go back", canvhalfx, canvas.height - 30)
 
 if(input == " "){
 //ggwp
+player = null;
+clearInterval(setup);
+setup = setInterval(prep, 1000/fps);
+screen.textAlign = "left";
+level = 0;
+input = '';
+bossbar = [];
+}
+
+}
+Simia.prototype.win = function(){
+//NICE!
+this.won = true;
+//draw the character, stationary
+screen.fillStyle = this.color;
+circle(canvhalfx, this.size + 40, this.size)
+
+//here is some statistics
+screen.fillStyle = "#99ff00ff";
+screen.textAlign = "center";
+screen.font = "25px Times New Roman";
+
+screen.fillText("YOU MADLAD, YOU DID IT!!!!!!", canvhalfx, 20);//PROCLAIM IT!!!
+screen.fillText("Simia!", canvhalfx, 40);//char name
+screen.fillText("Won on lvl: " + Math.floor(level), canvhalfx, canvhalfy - 60);//made it to what level
+screen.fillText("Was playing on " + difficulty + " mode", canvhalfx, canvhalfy - 20);//On what difficulty
+
+//get the time
+estimatedtime = Math.ceil(timeplayed/fps);//30 frames in a 30 fps game = 1 second. But it's not 100% accurate.
+//console.log(estimatedtime)
+estimatedmin = Math.floor(estimatedtime / 60); //60 seconds = 1 minute
+estimatedtime-=(estimatedmin * 60);
+if(estimatedtime < 10){
+estimatedtime = "0"+estimatedtime;
+}
+if(estimatedmin < 10){
+estimatedmin = "0"+estimatedmin;
+}
+screen.fillText("Time lived: " + estimatedmin + ":" + estimatedtime, canvhalfx, canvhalfy + 20);//time lived
+
+screen.fillText("Press the space bar to go back", canvhalfx, canvas.height - 30);//tell them how to go back
+
+if(input == " "){
+//there's a chance.
 player = null;
 clearInterval(setup);
 setup = setInterval(prep, 1000/fps);
