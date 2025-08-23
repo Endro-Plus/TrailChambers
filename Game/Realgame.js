@@ -1672,11 +1672,10 @@ var gametime = function(){
         level = 6.5;
         arena.w = 200;
         arena.h = 100;
-    }
-    if(level == 6.5){
+    }else if(level == 6.5){
         misc[1]++;
         //console.log(misc[1])
-        completedchallenges = 10;
+        //completedchallenges = 10;
         if(misc[1] > 90 && misc[1] < 180){
              screen.fillStyle = (completedchallenges < 5)? "black" : "red";
             screen.textAlign = "center";
