@@ -79,7 +79,10 @@ if(this.won == true){
     this.win();
     return "dead"
 }
-
+if(this.hp <=0){
+    this.death()
+    return "dead";
+}
 
 this.whip.updateimmunity();
 
@@ -192,14 +195,8 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             screen.fillStyle = "#0F0";
             screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, this.hp / 2, 4);//current hp
 
-            }else if(this.hp <=0 || this.won == true){
-                //play the death anmiation, then call off
-                if(this.won == false){
-        this.death();
-    }else{
-        this.win()
-    }
-                return "dead";
+            
+                
             }else{
             //over max
 
