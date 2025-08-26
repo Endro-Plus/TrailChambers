@@ -460,7 +460,7 @@ var player;
 var projectiles = [];
 var enemies = [];
 var summons = [];
-var level = 0;
+var level = 3;
 var rest = 60;
 var resttimer = 0;
 var pauseselection = 0;
@@ -1172,8 +1172,8 @@ var gametime = function(){
         bossbar = [];
     enemies = [];
     player.inst(0, 0);
-    arena.w = canvhalfx + 40;
-    arena.h = canvhalfy + 40;
+    arena.w = 375 + 40;
+    arena.h = 300 + 40;
     //This boss gets significatly harder out of normal or player mode
     boss_title = "Magna's Lorem Machinam"
     bossbarmode = 2;
@@ -1186,6 +1186,8 @@ var gametime = function(){
     bossbar = [];
     player.inst(0, 0);
     boss_title = "Tutorial Bot"
+    arena.w = 1000;
+    arena.h = 1000;
     bossbarmode = 1;
     bosses[0].inst(0, canvhalfx + 200, canvhalfy);
     bossbar.push(enemies[0]);
@@ -1561,8 +1563,8 @@ var gametime = function(){
 
     bossbar.push(enemies[0]);
     boss_title = "The Orb of Duplication"
-    arena.w = canvhalfx * 3;
-    arena.h = canvhalfy * 3;
+    arena.w = 375 * 3;
+    arena.h = 300 * 3;
 
     level +=0.5;
     }else if(level == 2){
@@ -1579,8 +1581,8 @@ var gametime = function(){
 
         bossbar.push(enemies[0]);
         boss_title = "Magna Venandi"
-        arena.w = canvhalfx * .75;
-        arena.h = canvhalfy * .75;
+        arena.w = 375 * .75;
+        arena.h = 300 * .75;
 
         level +=0.5;
         
@@ -1588,8 +1590,8 @@ var gametime = function(){
         projectiles = [];
         enemies = [];
         player.inst(0, 0);
-        arena.w = canvhalfx * 2;
-        arena.h = canvhalfy * 2;
+        arena.w = 375 * 2;
+        arena.h = 300 * 2;
         if(enemyezmode()){
             bosses[3].inst(true, 2, 4, random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 45);
             //bosses[3].inst(true, 2, 4, random(canvhalfx - arena.w,  canvhalfx - arena.w + arena.w*2), random(canvhalfy - arena.h,  canvhalfy - arena.h + arena.h*2), 45);
@@ -1632,8 +1634,8 @@ var gametime = function(){
 
     bossbar.push(enemies[0]);
         boss_title = "H.A.R.P"
-        arena.w = canvhalfx * 2;
-        arena.h = canvhalfy * 2;
+        arena.w = 375 * 2;
+        arena.h = 300 * 2;
 
     level +=0.5
     }else if(level == 5){

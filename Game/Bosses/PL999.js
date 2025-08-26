@@ -32,7 +32,7 @@ this.modelnumber = 100;//this isn't truly the original... just a cheap knockoff
 this.convo = 0;
 this.files = [
     "revolvertrick.exe",
-    "combatscenario4320",
+    "combatscenario4320.yaml",
     "720 degree spin",
     "depth_perception.java",
     "quickswap.zip",

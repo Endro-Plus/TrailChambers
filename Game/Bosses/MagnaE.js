@@ -344,7 +344,7 @@ MagnaE.prototype.zone = function(){
         velocityX = (dx / magnitude) * this.shurikenspeed;
         velocityY = (dy / magnitude) * this.shurikenspeed;
 
-            projectiles.push(new ShurikenE(this.x + player.px, this.y + player.py, 12, velocityX,velocityY));
+            projectiles.push(new enemyproj("ShurikenE", this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 12, velocityX,velocityY, "grey", 12, 150, ["physical", "slashing", "proj"]));
 
         }
     }
@@ -498,41 +498,6 @@ enemies[enemies.length - 1].shift[1] = player.py;
 //center stage and 20 size is the default, feel free to change it up!
 bosses.push(new MagnaE(canvhalfx+200, canvhalfy, 13));
 
-function ShurikenE(x, y, size, mx, my){
-    this.name = "ShurikenE";
-    this.x = x;
-    this.y = y;
-    this.shift = [player.px, player.py];
-    this.size = size
-    this.mx = mx;
-    this.my = my;
-    this.hitbox = new hitbox(x, y, 2, size/2, size);
-    this.hitbox.disable();
-    this.lifetime = 750
-}
-ShurikenE.prototype.exist = function(){
-    this.lifetime--;
-    this.hitbox.enable();
-   
-    screen.fillStyle = "#AAA";
-    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
-    this.x+=this.mx;
-    this.y+=this.my;
-
-    this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
-    console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
-    //console.log(arena.leavedir(this.x, this.y, this.size))
-    if(this.lifetime < 0){
-        return "delete";
-    }
-    //hitting the player
-    //console.log(en);
-    if(this.hitbox.hitplayer()){
-        enemyattack = this.name;
-        player.hit(12, ["physical", "slashing"]);
-        return "delete";
-    }
-}
 
 function ParryProjE(x, y, size, mx, my, delay = 0){
     this.name = "PARRIED";

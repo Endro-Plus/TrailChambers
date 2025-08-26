@@ -13,7 +13,7 @@ this.desc = ["Frail... leaving him more vulnerable to damage and hitstun. Kind o
 //game stats
 this.playershift = [0, 0];//shift the position of the player
 this.cooldowns = [0, 0, 0, 0];
-this.damagetypemod = [["sexual", 4], ["seduction", 2], ["dark", 0.8], ["light", 2], ["pain", 5], ["headpat", 999], ["magic", 0.9], ["physical", 1.2], ["psychic", 2]];//Read it and weep... I know I am.
+this.damagetypemod = [["pleasure", 4], ["seduction", 2], ["dark", 0.8], ["light", 2], ["pain", 5], ["headpat", 999], ["magic", 0.9], ["physical", 1.2], ["psychic", 2]];//Read it and weep... I know I am.
 this.hp = 100;//I was genuinely considering giving me less hp... be no, multiplication and percent math is much better :)
 this.damagemod = 1.2; //And to think this character is my self insert... yep, fuck me.
 this.speed = 15; //+5 speed so I can run the fuck away.

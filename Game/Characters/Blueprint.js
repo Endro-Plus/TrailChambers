@@ -15,6 +15,7 @@ this.cooldowns = [0, 0, 0, 0];
 this.damagetypemod = [];//some people may take more or less damage from certain sources...
 this.hp = 100; //EVERYONE GETS 100 HP! I DO NOT CARE!
 this.damagemod = 1; //Multiplicative damage multiplier
+this.maxspeed = 10;
 this.speed = 10; //base speed
 this.speedmod = 1;//modifies speed, multiplicately
 this.speedcause = [];//causes of speed buffs/nerfs [reason, duration, effect]
@@ -59,6 +60,15 @@ screen.fillStyle = "#0F0";
 screen.fillRect(canvhalfx - 25 - (this.hp - 100) * 0.25, canvhalfy - this.size - 10, this.hp / 2, 4);//current hp
 screen.fillStyle = "#00F";
 screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
+    //I'm generous enough to give you a BIT of extra power for a set time
+    this.hp-=0.15;
+    if(this.hp <= 100){
+        this.hp = 100;
+        //yes, I'm aware this is effectively a free defense
+    }
+
+
+
 }
 
 
@@ -110,9 +120,9 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             }
             //movement
             if(inputs.includes("shift")){
-                this.speed = 5;
+                this.speed = this.maxspeed/2;
             }else{
-                this.speed = 10;
+                this.speed = this.maxspeed;
             }
             if(inputs.includes(controls[0]) && !arena.pleavedir().includes('l')){
             this.px+=this.speed * this.speedmod;

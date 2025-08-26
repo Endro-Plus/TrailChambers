@@ -27,6 +27,7 @@ this.knockbackmod = 1; //POV: weak ass boss who isn't immune to knockback
 this.knockback = [0, 0];//x and y position of knockback
 this.talking = false;//basically an indicator of whether or not summons should target this boss
 this.showimmunity = false;
+this.light = false;//overrides the default weight of an enemy (which is determined by knockback mod)
 //extras
 this.tutorial = 0;
 this.turnRate = 0.05;
