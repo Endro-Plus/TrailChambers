@@ -46,6 +46,7 @@ this.stab.disable();
 this.stab.immunityframes(6);
 this.spinspeed = 0.2;
 this.chargetime = 0
+this.stabtime = [0, 0];//timer, what kind of stab
 this.lockfacing = [];
 }
 Shojo.prototype.listname = function(){
@@ -103,7 +104,10 @@ if(this.dmgcap < 20){
 }
 //update immunity frames
 this.lancespin.updateimmunity()
+if(this.stabtime[1] != 1){
+//if it is 1, enemies can be caught on the lance, and potentially damaged twice! This isn't wanted, however
 this.stab.updateimmunity();
+}
 timeplayed++;
 
 //speedmod is ALWAYS 1 to begin with
@@ -203,20 +207,25 @@ if(this.spinspeed > 0.2 && !inputs.includes(controls[4])){
     //use the skill!
     this.spinspeed = 0.2
     this.lockfacing = [...this.facing];
-    if(this.chargetime < 6990){
+    if(this.chargetime < 60){
     //melee!
     
-    this.cooldowns[0] = 7;
+    this.cooldowns[0] = 12;
+    this.stabtime = [4, 0];
+    this.chargetime = 0;
     
     }else{
+        this.stabtime = [0, 1];
+        this.cooldowns[0] = 15;
     }
 
-    this.chargetime = 0;
+    
 }
 //melee hitbox
-if(this.cooldowns[0] > 3){
+if(this.stabtime[0] > 0 && this.stabtime[1] == 0){
+    this.stabtime[0]--;
     this.stab.move(canvhalfx, canvhalfy)
-for(let i = 0 ; i < 10 ; i++){
+for(let i = 0 ; i < 9 ; i++){
     //deal damage
     this.stab.move(this.stab.x + (this.stab.size*2 * this.lockfacing[0]), this.stab.y + (this.stab.size*2 * this.lockfacing[1]))
     //this.stab.showbox();
@@ -241,6 +250,65 @@ screen.beginPath();
     screen.lineCap = "butt"
     screen.closePath();
     screen.lineWidth = 1;
+}else if(this.stabtime[1] == 1){
+    this.stabtime[0]+=0.5;
+    if(this.chargetime > 100){
+        this.chargetime = 100;//make sure no overcharge exists...
+    }
+    //throw that bitch!
+    this.cooldowns[0] = 15;
+    this.stab.move(canvhalfx, canvhalfy)
+for(let i = 0 - Math.sin(this.stabtime[0])*15 ; i <6  ; i++){
+    //deal damage
+    //since the string and lance should look different, the visuals are built in the for loop rather than the end
+    screen.beginPath();
+    if(i < 0){
+        //the string
+        screen.lineWidth = 3;
+        screen.strokeStyle = "#ffffffaa"
+    }else{
+        //the lance!
+        screen.lineWidth = 15;
+        screen.strokeStyle = "#444"
+    }
+    screen.lineCap = "round"
+    screen.moveTo(this.stab.x, this.stab.y);
+    
+    this.stab.move(this.stab.x + (this.stab.size*2 * this.lockfacing[0]), this.stab.y + (this.stab.size*2 * this.lockfacing[1]))
+    screen.lineTo(this.stab.x, this.stab.y);
+     screen.stroke();
+    screen.lineCap = "butt"
+    screen.closePath();
+    screen.lineWidth = 1;
+    //this.stab.showbox();
+    for(let cheese = 2 ; cheese < this.stabtime.length ; cheese++){
+        //NO ESCAPE NOW!!! HAHAHAHAHAHAHAHAHAHAAHA
+        this.stabtime[cheese].x = this.stab.x - player.px;
+        this.stabtime[cheese].y = this.stab.y - player.py;
+        this.stabtime[cheese].hitstun = 90;//I wasn't kidding!
+        this.stabtime[cheese].hit(0.2, ["piercing", "physical"]);
+    }
+    console.log((this.chargetime-60)/40-0.2)
+    for(let d = 0 ; d < enemies.length ; d++){
+        if(this.stab.checkenemy(d)){
+            
+            enemies[d].hit(45, ["piercing", "physical"], [this.lockfacing[0] * 6, this.lockfacing[1] * 6], 30);
+            this.stab.grantimmunity(d);
+            if(typeof enemies[d].light == "number" && (this.chargetime-60)/40-0.2 > enemies[d].light || typeof enemies[d].light != "number" && (this.chargetime-60)/40-0.2 < enemies[d].knockbackmod){
+                //a new victim to the carnaval ride!
+                console.log(typeof enemies[d].light == "number")
+                this.stabtime.push(enemies[d]);
+            }
+        }
+    }
+
+}
+
+if(Math.sin(this.stabtime[0]) < -0.5){
+    this.stabtime = [0, 0];
+    this.chargetime = 0;
+    //end the ability
+}
 }
 if(this.cooldowns[1] <= 0 && inputs.includes(controls[5])){
     this.spec2();
@@ -429,7 +497,18 @@ bossbar = [];
 Shojo.prototype.spec1 = function(){
 //abilities
     this.lancespin.move(canvhalfx + 20 * this.facing[0], canvhalfy + 20 * this.facing[1])
-    this.lancespin.showbox("#559")
+    if(this.chargetime > 60){
+        if(this.chargetime < 100){
+            this.lancespin.showbox(`rgba(85, 85, 153, ${1-(this.chargetime-60)/60})`)
+
+        }else{
+            this.lancespin.showbox("rgba(85, 85, 153, 0.3)")
+
+        }
+
+    }else{
+    this.lancespin.showbox("rgba(85, 85, 153, 1)")
+    }
     var x = (canvhalfx + 20 * this.facing[0]) + (this.size + 40) * Math.cos(this.spinspeed);
     var y =(canvhalfy + 20 * this.facing[1]) + (this.size + 40) * Math.sin(this.spinspeed);
     this.spinspeed  += 0.2 + (this.spinspeed/50)
@@ -456,6 +535,7 @@ Shojo.prototype.spec1 = function(){
                 console.log("hi")
                 if(this.spinspeed > 20){
                     this.spinspeed-= 20;
+                    this.chargetime -= (this.chargetime > 30)? 30:this.chargetime;//basically make sure chargetime goes down, but never hits below 0
                     enemies[i].hitstun = 60;
                 }
                 if(this.spinspeed > 60){

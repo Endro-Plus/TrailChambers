@@ -28,6 +28,7 @@ this.hitstun = 60;//for these enemies, hitstun is just how long they're harmless
 this.knockbackmod = 0; //knockback, what's that?
 this.knockback = "legacy"
 this.talking = false;
+this.light = 0.5;
 //extras
 this.direction = null
 Normal.prototype.listname = function(){

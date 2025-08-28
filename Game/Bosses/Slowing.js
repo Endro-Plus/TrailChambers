@@ -11,6 +11,8 @@ this.size = size;
 this.height = 8;//How tall they are, if small enough, higher hitting attacks may miss! However, if too tall, that's just a hitbox extension.
 this.hitbox = new hitbox(this.x, this.y, this.z, this.height, this.size);
 this.hitbox.disable();
+this.light = 0.5;
+
 //this.hitbox.immunityframes(60);
 //color
 this.color = "rgba(255, 0, 0, 1)";
