@@ -11,16 +11,22 @@ this.color = "#99CC99";
 this.desc = ["Honestly, fuck being a player in a boss rush game, why not BE the boss instead!",
     "Armor Clad: Can only take up to 20 damage over a short period. Excess damage is ignored!",
      "1. Pierce: Hold to charge, swinging a lance overhead and doing AoE damage! Release to stab ahead, dealing great damage!",
-     "  after 2 seconds of charging, instead throw the lance! Lighter enemies are forcefully dragged back towards you!",
-      "2. Bash: Charge a short distance and bash enemies with your shield! Has great knockback, and grants immunity on hit!",
+     "  after 2 seconds of charging, instead throw the lance! Lighter enemies are forcefully dragged towards you!",
+      "2. Bash: Swing your shield in an arc, doing good damage, while keeping you protected! Destroys projectiles",
+      " If the shield is broken, instead dash a short distance and deal contact damage!",
+      " Both variants will reduce the damage cap to 5 if it is higher than 5",
        "3. Run Through: Shojo gains really good armor frames, and runs through everything, dealing damage!", 
-       "    This is a stance move, and can be ended by using pierce, bash or the ability again.",
-        "4. Shield: Raise your shield, defending against virtually all damage! Really slows you down though. deflects certain projectiles."];
+       "    This is a stance move, and can be ended by using any abilities. ",
+       "If the shield is broken, this move doesn't reduce damage. When pissed off, this move does more damage.",
+        "4. Shield: Raise your shield, defending against virtually all damage! Really slows you down though. deflects most projectiles.",
+        "   The shield can be broken (very unlikely this will happen normally). This really pisses Shojo off, however."
+    
+    ];
 //game stats
 this.playershift = [0, 0];//shift the position of the player
 
 this.cooldowns = [0, 0, 0, 0]
-this.damagetypemod = [["pain", 0], ["slashing", 0.2], ["physical", 0.8]];//I dare you, hurt the guy in full steel and tungstun, come on.
+this.damagetypemod = [["pain", 0], ["slashing", 0.2], ["physical", 0.8], ["contact", 0.5]];//I dare you, hurt the guy in full steel and tungstun, come on.
 this.hp = 100; //EVEN THE FUCKING TANK GETS 100! FUCK YOUR OPINION!!!
 this.damagemod = 0.6; //40% tungsten
 this.maxspeed = 8;
@@ -37,6 +43,16 @@ this.iframe = false;//completely ignore hits
 this.won = false;
 
 //UNIQUE
+this.enraged = 0;//bro gets a little angry when his shield is broken
+/*when enraged, get the following buffs
+    Spin the lance faster
+    Lance throw charges faster
+    superarmor for EVERYTHING
+    less damagecap drain
+    ability changes explained in the character description
+*/
+this.shieldhp = 100;//yep... the shield has an hp stat, it can be broken!
+
 this.dmgcap = 20;//max is 20!
 this.lancespin = new hitbox(0, 0, this.pz+4, this.height + 4, 60);
 this.lancespin.disable();
@@ -48,6 +64,12 @@ this.spinspeed = 0.2;
 this.chargetime = 0
 this.stabtime = [0, 0];//timer, what kind of stab
 this.lockfacing = [];
+
+//shieldbash
+this.shield = new hitbox(0, 0, this.pz, this.height, 75);
+this.shield.immunityframes(5);
+this.shield.disable();
+this.shieldbashframes = 0;
 }
 Shojo.prototype.listname = function(){
 return "Shojo";
@@ -68,15 +90,7 @@ if(this.hp - this.dmgcap > 0){
 screen.fillStyle = "#00F";
 screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, ((this.hp - this.dmgcap) / 2), 4);//damage able to be taken
 }
-}else if(this.hp <=0 || this.won == true){
-    //play the death anmiation, then call off
-    if(this.won == false){
-        this.death();
-    }else{
-        this.win()
-    }
-    return;
-}else{
+}else if (this.hp > 0){
 //over max
 
 screen.fillStyle = "#0F0";
@@ -97,10 +111,44 @@ screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
         //yes, I'm aware this is effectively a free defense
     }
 }
+if(this.hp <=0 || this.won == true){
+    //play the death anmiation, then call off
+    if(this.won == false){
+        this.death();
+    }else{
+        this.win()
+    }
+    return "dead";
+}
 
+//enraged
+if(this.shieldhp <= 0 && this.enraged == 0){
+    this.enraged = 300
+}
+
+if(this.enraged > 0){
+    this.enraged--;
+    this.color = "#811d1dff";
+    if(this.enraged % 30 == 0){
+        projectiles.push(new movingpart(canvhalfx, canvhalfy, random(-4, 4), random(-4, 4), 6, "#800", 20))
+    }
+    if(this.enraged <= 0){
+        this.color = "#99CC99";
+        this.enraged = -210;
+        
+    }
+    
+}else if(this.enraged < 0){
+    this.enraged++;
+    if(this.enraged >= 0){
+        this.enraged = 0;
+        this.shieldhp = 100
+    }
+}
 //update damage cap
 if(this.dmgcap < 20){
-    this.dmgcap+=0.2
+    
+    this.dmgcap+=(this.enraged > 0)? 0.1:0.2;
 }
 //update immunity frames
 this.lancespin.updateimmunity()
@@ -153,7 +201,7 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             
             if(this.hitstun > 0){
                 //account for super armor
-                if(this.chargetime > 15){
+                if(this.chargetime > 15 || this.enraged > 0){
                     this.hitstun = 0;
                 }else{
                 this.hurt();
@@ -200,10 +248,10 @@ for(let i = 0; i < this.cooldowns.length ; i++){
 }
 //attacks
 
-if(this.cooldowns[0] <= 0 && inputs.includes(controls[4])){
+if(this.cooldowns[0] <= 0 && inputs.includes(controls[4]) || this.spinspeed >0.2 && this.spinspeed < 3.2){
     this.spec1();
 }
-if(this.spinspeed > 0.2 && !inputs.includes(controls[4])){
+if(this.spinspeed > 3 && !inputs.includes(controls[4])){
     //use the skill!
     this.spinspeed = 0.2
     this.lockfacing = [...this.facing];
@@ -225,7 +273,7 @@ if(this.spinspeed > 0.2 && !inputs.includes(controls[4])){
 if(this.stabtime[0] > 0 && this.stabtime[1] == 0){
     this.stabtime[0]--;
     this.stab.move(canvhalfx, canvhalfy)
-for(let i = 0 ; i < 9 ; i++){
+for(let i = 0 ; i < ((Math.abs(this.lockfacing[0] + this.lockfacing[1]) == 1)? 9:6) ; i++){
     //deal damage
     this.stab.move(this.stab.x + (this.stab.size*2 * this.lockfacing[0]), this.stab.y + (this.stab.size*2 * this.lockfacing[1]))
     //this.stab.showbox();
@@ -258,7 +306,7 @@ screen.beginPath();
     //throw that bitch!
     this.cooldowns[0] = 15;
     this.stab.move(canvhalfx, canvhalfy)
-for(let i = 0 - Math.sin(this.stabtime[0])*15 ; i <6  ; i++){
+for(let i = 0 - Math.sin(this.stabtime[0])*15 ; i <((Math.abs(this.lockfacing[0] + this.lockfacing[1]) == 1)? 6:4)  ; i++){
     //deal damage
     //since the string and lance should look different, the visuals are built in the for loop rather than the end
     screen.beginPath();
@@ -511,8 +559,8 @@ Shojo.prototype.spec1 = function(){
     }
     var x = (canvhalfx + 20 * this.facing[0]) + (this.size + 40) * Math.cos(this.spinspeed);
     var y =(canvhalfy + 20 * this.facing[1]) + (this.size + 40) * Math.sin(this.spinspeed);
-    this.spinspeed  += 0.2 + (this.spinspeed/50)
-    this.chargetime++;
+    this.spinspeed  += 0.2 + ((this.enraged > 0)? (this.spinspeed/15):(this.spinspeed/50));
+    this.chargetime+= (this.enraged > 0)? 1.5 : 1;
     screen.beginPath();
         screen.lineWidth = 10;
         screen.strokeStyle = "#4485"
@@ -546,7 +594,7 @@ Shojo.prototype.spec1 = function(){
     }
 }
 Shojo.prototype.spec2 = function(){
-this.hp = 200;
+this.shieldbashframes = 5
 }
 Shojo.prototype.spec3 = function(){
 

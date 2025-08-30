@@ -45,15 +45,7 @@ screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
 screen.fillStyle = "#0F0";
 screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, this.hp / 2, 4);//current hp
 
-}else if(this.hp <=0 || this.won == true){
-    //play the death anmiation, then call off
-    if(this.won == false){
-        this.death();
-    }else{
-        this.win()
-    }
-    return;
-}else{
+}else if (this.hp > 0){
 //over max
 
 screen.fillStyle = "#0F0";
@@ -69,6 +61,15 @@ screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
 
 
 
+}
+if(this.hp <=0 || this.won == true){
+    //play the death anmiation, then call off
+    if(this.won == false){
+        this.death();
+    }else{
+        this.win()
+    }
+    return "dead";
 }
 
 
