@@ -14,7 +14,7 @@ this.desc = ["Honestly, fuck being a player in a boss rush game, why not BE the 
      "  after 2 seconds of charging, instead throw the lance! Lighter enemies are forcefully dragged towards you!",
       "2. Bash: Swing your shield in an arc, doing good damage, while keeping you protected! Destroys projectiles",
       " If the shield is broken, instead dash a short distance and deal contact damage!",
-      " Both variants will reduce the damage cap to 5 if it is higher than 5",
+      " Both variants will reduce the damage cap to 0 on hit. ",
        "3. Run Through: Shojo gains really good armor frames, and runs through everything, dealing damage!", 
        "    This is a stance move, and can be ended by using any abilities. ",
        "If the shield is broken, this move doesn't reduce damage. When pissed off, this move does more damage.",
@@ -38,7 +38,7 @@ this.DI = 0.9; //Bro's looking more and more like robot from YOMI hustle
 this.hitstunmod = 0.2; //Hitstun, what's that?
 this.knockbackmod = 0.2; //You know, Barons are bosses in Fire Emblem Thracia 776... (sued)
 this.height = 10; //Big boi
-this.facing = [0, 0]; //what direction the player is facing
+this.facing = [1, 0, -Math.PI/2]; //what direction the player is facing
 this.iframe = false;//completely ignore hits
 this.won = false;
 
@@ -67,7 +67,7 @@ this.lockfacing = [];
 
 //shieldbash
 this.shield = new hitbox(0, 0, this.pz, this.height, 75);
-this.shield.immunityframes(5);
+this.shield.immunityframes(6);
 this.shield.disable();
 this.shieldbashframes = 0;
 }
@@ -124,6 +124,9 @@ if(this.hp <=0 || this.won == true){
 //enraged
 if(this.shieldhp <= 0 && this.enraged == 0){
     this.enraged = 300
+    projectiles.push(new flashpart(canvhalfx, canvhalfy, this.size*2, 20, "#600", 100, 10))
+    this.shieldbashframes = 0;
+
 }
 
 if(this.enraged > 0){
@@ -156,6 +159,7 @@ if(this.stabtime[1] != 1){
 //if it is 1, enemies can be caught on the lance, and potentially damaged twice! This isn't wanted, however
 this.stab.updateimmunity();
 }
+this.shield.updateimmunity();
 timeplayed++;
 
 //speedmod is ALWAYS 1 to begin with
@@ -201,10 +205,12 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             
             if(this.hitstun > 0){
                 //account for super armor
-                if(this.chargetime > 15 || this.enraged > 0){
+                if(this.enraged > 0 || this.chargetime > 15 || this.shieldbashframes > 0 && this.shieldhp > 0){
                     this.hitstun = 0;
                 }else{
                 this.hurt();
+                this.stabtime = [0, 0];
+                this.shieldbashframes = 0;
                 return;
                 }
             }
@@ -306,7 +312,7 @@ screen.beginPath();
     //throw that bitch!
     this.cooldowns[0] = 15;
     this.stab.move(canvhalfx, canvhalfy)
-for(let i = 0 - Math.sin(this.stabtime[0])*15 ; i <((Math.abs(this.lockfacing[0] + this.lockfacing[1]) == 1)? 6:4)  ; i++){
+for(let i = 0 - Math.sin(this.stabtime[0])*15 ; i < 6  ; i++){
     //deal damage
     //since the string and lance should look different, the visuals are built in the for loop rather than the end
     screen.beginPath();
@@ -331,10 +337,10 @@ for(let i = 0 - Math.sin(this.stabtime[0])*15 ; i <((Math.abs(this.lockfacing[0]
     //this.stab.showbox();
     for(let cheese = 2 ; cheese < this.stabtime.length ; cheese++){
         //NO ESCAPE NOW!!! HAHAHAHAHAHAHAHAHAHAAHA
-        this.stabtime[cheese].x = this.stab.x - player.px;
-        this.stabtime[cheese].y = this.stab.y - player.py;
+        this.stabtime[cheese].x = this.stab.x - player.px +this.stabtime[cheese].shift[0];
+        this.stabtime[cheese].y = this.stab.y - player.py + this.stabtime[cheese].shift[1];
         this.stabtime[cheese].hitstun = 90;//I wasn't kidding!
-        this.stabtime[cheese].hit(0.2, ["piercing", "physical"]);
+        this.stabtime[cheese].hit(0, ["piercing", "physical"]);
     }
     console.log((this.chargetime-60)/40-0.2)
     for(let d = 0 ; d < enemies.length ; d++){
@@ -360,6 +366,92 @@ if(Math.sin(this.stabtime[0]) < -0.5){
 }
 if(this.cooldowns[1] <= 0 && inputs.includes(controls[5])){
     this.spec2();
+}
+//shield bash
+if(this.shieldbashframes > 0){
+    if(this.shieldhp > 0){
+
+    //swing effect
+    this.shield.enable();
+    this.shieldbashframes--;
+    screen.fillStyle = "rgba(77, 77, 77, 1)";
+    screen.beginPath();
+    if(this.facing[0] == -1){
+    //console.log("left")
+        if(this.facing[1] == 1){
+            //left down
+            this.facing[2] = Math.PI / 4;
+        }else if (this.facing[1] == -1){
+            //left up
+            this.facing[2] = 3 * Math.PI / 4;
+        }else{
+            //just left
+            this.facing[2] = Math.PI/2
+        }
+    }else if (this.facing[0] == 1){
+        if(this.facing[1] == 1){
+                    //right down
+                    this.facing[2] = 7 * Math.PI / 4;
+                }else if (this.facing[1] == -1){
+                    //right up
+                    this.facing[2] = 5 * Math.PI / 4;
+
+                }else{
+                    //just right
+                    this.facing[2] = 3 * Math.PI / 2;
+                    //console.log(this.facing[2])
+                }
+
+    }else{
+        if(this.facing[1] == -1){
+            //just up
+            this.facing[2] = Math.PI
+        }else{
+            //just down
+            this.facing[2] = 0
+        }
+    }
+    
+    screen.arc(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.shield.size, this.facing[2], this.facing[2] + Math.PI);
+    screen.fill();
+    screen.closePath();
+    this.shield.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.shield.size);
+    //damage and effects
+    for(let i = 0 ; i < enemies.length ; i++){
+    if(this.shield.checkenemy(i) && this.shield.enemyhalf(i, this.facing)){
+        enemies[i].hit(24, ['physical', 'bludgeoning'], [5 * this.facing[0], 5 * this.facing[1]], 36);
+        this.shield.grantimmunity(i);
+        if(this.cooldowns[1] > 10){
+            this.cooldowns[1] = 10;
+            //allow them to do it again faster if they hit!
+        }
+        
+            this.dmgcap = 0;
+        
+    }
+    
+    }
+
+    for(let i = 0 ; i < projectiles.length ; i++){
+        if(this.shield.scanproj(i) && typeof projectiles[i].lifetime == "number" && projectiles[i].lifetime > 1){
+            //destroy the projectile at the cost of a bit of shield hp
+            this.shieldhp-=1;
+            projectiles[i].lifetime = 0;
+            this.cooldowns[1] = 10;
+            this.dmgcap = 0;
+        }
+    }
+}else{
+    //Shield gone??? no problem, EAT THESE HANDS!
+    if(this.shieldbashframes == 5){
+        //commit!
+        this.lockfacing = [...this.facing];
+        this.speedcause.push(["FITE ME NOW", 5, 0]);
+    }
+    this.px -= this.maxspeed * 5 * this.lockfacing[0];
+    this.py -= this.maxspeed * 5 * this.lockfacing[1];
+    this.shieldbashframes--;
+}
 }
 if(this.cooldowns[2] <= 0 && inputs.includes(controls[6])){
     this.spec3();
@@ -401,7 +493,18 @@ if(arena.pleavedir().includes("u")){
 
 }
 Shojo.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
+        if(this.shieldbashframes > 0 && this.shieldhp <= 0 && typeof damagetype[damagetype.length-1] == "number"){
+            //you hit an enemy!
+            enemies[damagetype[damagetype.length-1]].hit(35, ["contact", "physical", "bludgeoning"], [this.lockfacing[0] * 10, this.lockfacing[1] * 10], 30);
+            this.dmgcap = 0;
+            this.shieldbashframes = 0;
+            if(this.cooldowns[1] > 5){
+                this.cooldowns[1] = 5;//quick reposte be like
+            }
+            return;
+        }
         //handle damage dealth
+        
         var dmg = damage * this.damagemod;
         
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
@@ -594,7 +697,8 @@ Shojo.prototype.spec1 = function(){
     }
 }
 Shojo.prototype.spec2 = function(){
-this.shieldbashframes = 5
+this.shieldbashframes = 5;
+this.cooldowns[1] = 30;
 }
 Shojo.prototype.spec3 = function(){
 

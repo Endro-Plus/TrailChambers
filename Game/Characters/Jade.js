@@ -162,16 +162,16 @@ if(this.slashtime > 0 && this.spin == false){
     }
     if(this.powerup > 0){
             screen.fillStyle = "#fc03db";
-            screen.arc(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size * 8, this.facing[2], this.facing[2] + Math.PI);
+            screen.arc(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size * 10, this.facing[2], this.facing[2] + Math.PI);
             screen.fill();
             screen.closePath();
             screen.beginPath();
         }
     screen.fillStyle = "#FF8";
-    screen.arc(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size * 4, this.facing[2], this.facing[2] + Math.PI);
+    screen.arc(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size * 5, this.facing[2], this.facing[2] + Math.PI);
     screen.fill();
     screen.closePath();
-    this.swordbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.size * 4);
+    this.swordbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.size * 5);
     for(let i = 0 ; i < enemies.length ; i++){
     if(this.swordbox.checkenemy(i) && this.swordbox.enemyhalf(i, this.facing)){
         enemies[i].hit(15, ['physical', 'slashing'], [5 * this.facing[0], 5 * this.facing[1]], 20);
@@ -180,7 +180,7 @@ if(this.slashtime > 0 && this.spin == false){
     }
     if(this.powerup > 0){
         this.swordbox.refreshimmune();
-        this.swordbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.size * 8);
+        this.swordbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.size * 10);
         for(let i = 0 ; i < enemies.length ; i++){
             if(this.swordbox.checkenemy(i) && this.swordbox.enemyhalf(i, this.facing)){
                 enemies[i].hit(7, ['light']);

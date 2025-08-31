@@ -331,7 +331,9 @@ if(arena.leavedir(0, this.y - this.shift[1], this.size).includes('u')){
     this.y = canvhalfy - arena.h + this.size;
 }
 }
-
+ screen.fillStyle = "#222";
+        circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size + this.z);
+        this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
 }
 Eye.prototype.exist = function(){
 this.hitbox.updateimmunity();
@@ -342,9 +344,7 @@ if(arena.leave(this.x + player.px - this.shift[0], this.y + player.py - this.shi
     if(this.hp < 0){
         return "delete";
     }
-        screen.fillStyle = "#222";
-        circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size + this.z);
-        this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
+       
     //can't take too much hitstun on hard mode!
     if(!enemyezmode() && this.hitstun > 30){
         this.hitstun = 30;
@@ -353,6 +353,9 @@ if(arena.leave(this.x + player.px - this.shift[0], this.y + player.py - this.shi
         this.hurt();
         return;
     }
+     screen.fillStyle = "#222";
+        circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size + this.z);
+        this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
     //speedmod is ALWAYS 1 to begin with
     this.speedmod = 1;
     this.speedcause.sort();//sorting it makes it easier to check for duplicated

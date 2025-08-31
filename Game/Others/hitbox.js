@@ -531,20 +531,20 @@ if(skip == true){
     }
 }
 hitbox.prototype.enemyhalf = function(index, facing){
-    if(facing[0] == -1 && this.x - player.px > enemies[index].x - enemies[index].size){
+    if(facing[0] == -1 && canvhalfx > findposition(enemies[index])[0] - enemies[index].size){
         //left
         return true;
     }
-    if(facing[0] == 1 && this.x - player.px < enemies[index].x + enemies[index].size){
+    if(facing[0] == 1 && canvhalfx < findposition(enemies[index])[0] + enemies[index].size){
         //right
         return true;
     }
-    if(facing[1] == -1 && this.y - player.py > enemies[index].y - enemies[index].size){
+    if(facing[1] == -1 && canvhalfy > findposition(enemies[index])[1] - enemies[index].size){
         //up
         return true;
 
     }
-    if(facing[1] == 1 && this.y - player.py < enemies[index].y + enemies[index].size){
+    if(facing[1] == 1 && canvhalfy < findposition(enemies[index])[1] + enemies[index].size){
         //down
         return true;
 
