@@ -15,9 +15,9 @@ this.desc = ["Honestly, fuck being a player in a boss rush game, why not BE the 
       "2. Bash: Swing your shield in an arc, doing good damage, while keeping you protected! Destroys projectiles",
       " If the shield is broken, instead dash a short distance and deal contact damage!",
       " Both variants will reduce the damage cap to 0 on hit. ",
-       "3. Run Through: Shojo gains really good armor frames, and runs through everything, dealing damage!", 
+       "3. Run Through: Shojo gains armor frames, and runs through everything, dealing damage!", 
        "    This is a stance move, and can be ended by using any abilities. ",
-       "If the shield is broken, this move doesn't reduce damage. When pissed off, this move does more damage.",
+       "If the shield is broken, this move doesn't reduce damage, but it does move faster. When pissed off, this move does more damage.",
         "4. Shield: Raise your shield, defending against virtually all damage! Really slows you down though. deflects most projectiles.",
         "   The shield can be broken (very unlikely this will happen normally). This really pisses Shojo off, however."
     
@@ -47,7 +47,7 @@ this.enraged = 0;//bro gets a little angry when his shield is broken
 /*when enraged, get the following buffs
     Spin the lance faster
     Lance throw charges faster
-    superarmor for EVERYTHING
+    superarmor for EVERYTHING (including doing nothing lol)
     less damagecap drain
     ability changes explained in the character description
 */
@@ -70,6 +70,14 @@ this.shield = new hitbox(0, 0, this.pz, this.height, 75);
 this.shield.immunityframes(6);
 this.shield.disable();
 this.shieldbashframes = 0;
+
+//rush!
+this.rush = false;
+this.accel = 0;
+this.lowdamagerush = 0;
+
+//Actual shield block
+this.shielding = false;
 }
 Shojo.prototype.listname = function(){
 return "Shojo";
@@ -153,6 +161,10 @@ if(this.dmgcap < 20){
     
     this.dmgcap+=(this.enraged > 0)? 0.1:0.2;
 }
+//update this.rush
+if(this.shieldbashframes > 0 || this.chargetime > 0 || this.shielding){
+    this.rush = false;//that simple
+}
 //update immunity frames
 this.lancespin.updateimmunity()
 if(this.stabtime[1] != 1){
@@ -162,8 +174,18 @@ this.stab.updateimmunity();
 this.shield.updateimmunity();
 timeplayed++;
 
-//speedmod is ALWAYS 1 to begin with
+
+if(this.rush == true){
+    //no moving allowed when rushing! Well not in that way anyways...
+    this.speedmod = 0;
+}else{
+    this.accel = 1;
+    if(this.shielding){
+        //slow down a lot while shielding
+        this.speedmod = 0.25
+    }else{
 this.speedmod = 1;
+    }
 this.speedcause.sort();//sorting it makes it easier to check for duplicated
 for(let i = 0 ; i < this.speedcause.length ; i++){
     //for every non-stacking buff, delete any duplicates
@@ -196,7 +218,17 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
         this.speedmod*=this.speedcause[i][2];
     }
 }
+}
 //The character exists in my plane of existance!
+            if(this.shielding){
+                //show the shield
+                screen.fillStyle = "#444"
+                circle(canvhalfx, canvhalfy, this.size+5);
+                if(this.shieldhp <= 0 || this.chargetime > 0 || this.shieldbashframes > 0){
+                    //simply put, no attacking and blocking!
+                    this.shielding = false;
+                }
+            }
             screen.fillStyle = this.color;
             circle(canvhalfx, canvhalfy, this.size)
             //hp
@@ -205,7 +237,7 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             
             if(this.hitstun > 0){
                 //account for super armor
-                if(this.enraged > 0 || this.chargetime > 15 || this.shieldbashframes > 0 && this.shieldhp > 0){
+                if(this.enraged > 0 || this.chargetime > 15 || this.shieldbashframes > 0 && this.shieldhp > 0 || this.rush == true){
                     this.hitstun = 0;
                 }else{
                 this.hurt();
@@ -248,6 +280,50 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
                 this.facing[0] = 0;
             }
             }
+
+
+        if(this.rush == true){
+            this.lowdamagerush--;
+           
+            //stop if you hit a wall
+            if(arena.pleave()){
+                
+                this.shieldhp-=this.accel;
+                
+                this.rush = false;
+                this.cooldowns[2] = 20;
+                for(let i = 0 ; i < 7 ; i++){
+                    projectiles.push(new movingpart(canvhalfx, canvhalfy, random(-12, 12), random(-12, 12), 10, "#ccc", 10));
+                }
+            }else{
+             //movement is forced, and it ignores speed debuffs
+             if(this.lockfacing[0] != this.facing[0]){
+                //slowly turn as opposed to immediately turning
+                if(this.lockfacing[0] < this.facing[0]){
+                    this.lockfacing[0]+=0.025
+                }else{
+                    this.lockfacing[0]-=0.025
+                }
+                
+
+                if(this.lockfacing[1] < this.facing[1]){
+                    this.lockfacing[1]+=0.025
+                }else{
+                    this.lockfacing[1]-=0.025
+                }
+                
+             }
+            this.px -= this.lockfacing[0] * this.speed * 2 * this.accel;
+            this.py -= this.lockfacing[1] * this.speed * 2 * this.accel;
+            if(this.shieldhp > 0 && this.accel < 2 || this.shieldhp <= 0 && this.accel < 8){
+                if(this.enraged > 0){
+                    this.accel+=1
+                }else{
+                this.accel+=0.05
+                }
+            }
+            }
+        }
 //lower all cooldowns
 for(let i = 0; i < this.cooldowns.length ; i++){
     this.cooldowns[i]--;
@@ -305,7 +381,7 @@ screen.beginPath();
     screen.closePath();
     screen.lineWidth = 1;
 }else if(this.stabtime[1] == 1){
-    this.stabtime[0]+=0.5;
+    this.stabtime[0]+=0.25;
     if(this.chargetime > 100){
         this.chargetime = 100;//make sure no overcharge exists...
     }
@@ -340,7 +416,7 @@ for(let i = 0 - Math.sin(this.stabtime[0])*15 ; i < 6  ; i++){
         this.stabtime[cheese].x = this.stab.x - player.px +this.stabtime[cheese].shift[0];
         this.stabtime[cheese].y = this.stab.y - player.py + this.stabtime[cheese].shift[1];
         this.stabtime[cheese].hitstun = 90;//I wasn't kidding!
-        this.stabtime[cheese].hit(0, ["piercing", "physical"]);
+        this.stabtime[cheese].hit(0.1, ["piercing", "physical"]);
     }
     console.log((this.chargetime-60)/40-0.2)
     for(let d = 0 ; d < enemies.length ; d++){
@@ -420,6 +496,7 @@ if(this.shieldbashframes > 0){
     for(let i = 0 ; i < enemies.length ; i++){
     if(this.shield.checkenemy(i) && this.shield.enemyhalf(i, this.facing)){
         enemies[i].hit(24, ['physical', 'bludgeoning'], [5 * this.facing[0], 5 * this.facing[1]], 36);
+        this.shieldhp--;
         this.shield.grantimmunity(i);
         if(this.cooldowns[1] > 10){
             this.cooldowns[1] = 10;
@@ -503,6 +580,56 @@ Shojo.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
             }
             return;
         }
+
+         if(this.rush == true && typeof damagetype[damagetype.length-1] == "number"){
+            
+            //you hit an enemy by running into him!
+            let collision = (this.enraged > 0)? 45 : 70;
+            if(this.lowdamagerush > 0){
+                collision/=10;//instead of no damage, a lot less damage
+            }else{
+            this.lowdamagerush = 30;
+            }
+            enemies[damagetype[damagetype.length-1]].hit(collision, ["contact", "physical", "bludgeoning"], [this.lockfacing[0] * 45, this.lockfacing[1] * 45], 25);
+            //when your mad... your ANGRY!!!
+            this.dmgcap = 3;
+            this.shieldbashframes = 0;
+            //you don't get immunity... but you barely take any damage anyways soooo.....
+        }
+        if(this.shielding == true && !damagetype.includes("true") && damage > 0){
+            //THAT'S NOTHING!
+            this.shieldhp--;
+            if(damagetype.includes("proj")){
+                //damage to projectiles? Never heard of it
+            damage = 0;
+            }else{
+                damage *=0.1;//damage? Never heard of it
+            }
+            if(damagetype.includes("proj")){
+                //check to see if it can be reflected
+                for(let i = 0 ; i < projectiles.length ; i++){
+                    
+                    if((projectiles[i] instanceof enemyproj || projectiles[i] instanceof enemyhomeproj) && projectiles[i].hitbox.hitplayer()){
+                        //deflect!
+                        if(projectiles[i] instanceof enemyproj){
+                        let def = aim(canvhalfx, canvhalfy, findposition(projectiles[i])[0], findposition(projectiles[i])[1], Math.abs(projectiles[i].mx) + Math.abs(projectiles[i].my));
+
+                        projectiles.push(new playerproj(projectiles[i].name, findposition(projectiles[i])[0], findposition(projectiles[i])[1], projectiles[i].size, -def[0], -def[1], projectiles[i].color, projectiles[i].dmg, 90, projectiles[i].dmgtype, projectiles[i].knockback, projectiles[i].hitstun))                        }else{
+                        let def = aim(canvhalfx, canvhalfy, findposition(projectiles[i])[0], findposition(projectiles[i])[1], projectiles[i].speed);
+
+                        projectiles.push(new playerproj(projectiles[i].name, findposition(projectiles[i])[0], findposition(projectiles[i])[1], projectiles[i].size, -def[0], -def[1], projectiles[i].color, projectiles[i].dmg, 90, projectiles[i].dmgtype, projectiles[i].knockback, projectiles[i].hitstun))
+                        }
+                    }
+                }
+            }
+        }
+        if(this.shieldbashframes > 0 && this.shieldhp > 0){
+            //successful block of a hitscan!
+            this.shieldhp--;
+            this.dmgcap = 0;
+            damage = 0;
+        }
+        
         //handle damage dealth
         
         var dmg = damage * this.damagemod;
@@ -514,12 +641,26 @@ Shojo.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
         }
 
         //ensure protection
+        //lower damage based on if your rushing or not
+        if(this.rush == true && !damagetype.includes("true") && this.shieldhp > 0){
+            //true damage is not reduced. Otherwise, 50% damage reduction!
+            dmg*=0.50;
+            this.shieldhp--;
+        }
+        //damage cap
         if(dmg >= this.dmgcap){
             dmg = this.dmgcap
             this.dmgcap = 0;
         }else{
             this.dmgcap-=dmg
         }
+        //check for guardbreaks (as they instantly break shield)
+        if((this.rush == true || this.shieldbashframes > 0 || this.shielding) && this.shieldhp > 0 && damagetype.some((x) => ["softblock", "guardbreak"].includes(x))){
+            this.shieldhp = 0;
+            this.rush = false;
+            dmg = 0;
+        }
+
         if(this.hp > 100 && this.hp - dmg < 100){
         this.hp = 100;
         }else{
@@ -701,10 +842,24 @@ this.shieldbashframes = 5;
 this.cooldowns[1] = 30;
 }
 Shojo.prototype.spec3 = function(){
-
+this.rush = (this.rush == true)? false:true;
+this.cooldowns[2] = 10;
+if(this.rush == true){
+    this.lowdamagerush = 0;
+    this.lockfacing = [...this.facing]
+}
+if(this.shielding){
+    this.shielding = false;
+    //swap from defense to offense!
+}
 }
 Shojo.prototype.spec4 = function(){
-
+if(this.shielding == false && this.shieldhp > 0){
+    this.shielding = true;
+}else{
+    this.shielding = false;
+}
+this.cooldowns[3] = 10;
 }
 
 Shojo.prototype.inst = function(x = this.px, y = this.py, size = this.size){

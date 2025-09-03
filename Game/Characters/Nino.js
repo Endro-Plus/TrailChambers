@@ -17,7 +17,7 @@ this.size = size;
 //character poster/character color
 this.postColor = "#000088";
 this.color = "#7700CC";
-this.desc = ["The wizard! Many strong projectiles that are hard to miss, but not many mobility options. Also, don't tell him this, but he's kinda short", "Growing Darkness: Every successful hit on an enemy lowers their defense. After a damage drought, the enemy detonates, leaving miasma on the ground", "  the explosion does 50% of the damage you dealt before the detonation, so keep that combo high!", "1. Chain Lightning: Fire a bolt of lightning that constantly bounces off enemies, projectiles, and even you! The closer targets are, the more bounces!", "Electrified enemies are slower, and take passive damage.", "2. Pyro mine: A stationary projectile that detonates into a large inferno when near an enemy!", "Electrified mines deal critical damage AND electrifies enemies in the radius! Pyro mines hold charges for longer times.", "3. Cutting Barrage: conjure several cutting gales at once that move irratically!", "4. Miasma Storm: An install that creates a dark aura around you, damaging nearby enemies and spewing random balls of miasma!", "enemies are slowed down by the aura, and enemies hit by miasma balls emit a similar damaging aura, causing more overtime damage!"]
+this.desc = ["The wizard! Many strong projectiles that are hard to miss, but not many mobility options. Also, don't tell him this, but he's kinda short", "Growing Darkness: Every successful hit on an enemy lowers their defense. After a damage drought, the enemy detonates!", "  the explosion does 50% of the damage you dealt before the detonation, so keep that combo high!", "1. Chain Lightning: Fire a bolt of lightning that constantly bounces off enemies, projectiles, and even you! The closer targets are, the more bounces!", "Electrified enemies are slower, and take passive damage.", "2. Pyro mine: A stationary projectile that detonates into a large inferno when near an enemy!", "Electrified mines deal critical damage AND electrifies enemies in the radius! Pyro mines hold charges for longer times.", "3. Cutting Barrage: conjure several cutting gales at once that move irratically!", "4. Miasma Storm: An install that creates a dark aura around you, damaging nearby enemies and spewing random balls of miasma!", "enemies are slowed down by the aura, and enemies hit by miasma balls emit a similar damaging aura, causing more overtime damage!"]
 //game stats
 this.playershift = [0, 0]
 this.cooldowns = [0, 0, 0, 0];
@@ -784,6 +784,7 @@ Pyromine.prototype.exist = function(){
                         enemies[i].hit(((charezmode())? 60:30) + enemies[i].growingdarknessdebuff/player.defdiv, ["CRITICAL", "electric", "magic"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
 
                         //electrify the enemy
+                        crit++;
                         projectiles.push(new chain_lightning(0, 0, 0, [0, 0]));
                         projectiles[projectiles.length-1].phase = 2;
                         projectiles[projectiles.length-1].target = enemies[i];
