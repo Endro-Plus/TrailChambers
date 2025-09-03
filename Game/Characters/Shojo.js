@@ -237,7 +237,7 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             
             if(this.hitstun > 0){
                 //account for super armor
-                if(this.enraged > 0 || this.chargetime > 15 || this.shieldbashframes > 0 && this.shieldhp > 0 || this.rush == true){
+                if(this.enraged > 0 || this.chargetime > 15 || this.shieldbashframes > 0 && this.shieldhp > 0 || this.rush == true || this.shielding == true){
                     this.hitstun = 0;
                 }else{
                 this.hurt();
@@ -496,7 +496,7 @@ if(this.shieldbashframes > 0){
     for(let i = 0 ; i < enemies.length ; i++){
     if(this.shield.checkenemy(i) && this.shield.enemyhalf(i, this.facing)){
         enemies[i].hit(24, ['physical', 'bludgeoning'], [5 * this.facing[0], 5 * this.facing[1]], 36);
-        this.shieldhp--;
+        this.shieldhp-=0.5;
         this.shield.grantimmunity(i);
         if(this.cooldowns[1] > 10){
             this.cooldowns[1] = 10;
@@ -512,7 +512,7 @@ if(this.shieldbashframes > 0){
     for(let i = 0 ; i < projectiles.length ; i++){
         if(this.shield.scanproj(i) && typeof projectiles[i].lifetime == "number" && projectiles[i].lifetime > 1){
             //destroy the projectile at the cost of a bit of shield hp
-            this.shieldhp-=1;
+            this.shieldhp-=0.5;
             projectiles[i].lifetime = 0;
             this.cooldowns[1] = 10;
             this.dmgcap = 0;
@@ -609,25 +609,29 @@ Shojo.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
                 //check to see if it can be reflected
                 for(let i = 0 ; i < projectiles.length ; i++){
                     
-                    if((projectiles[i] instanceof enemyproj || projectiles[i] instanceof enemyhomeproj) && projectiles[i].hitbox.hitplayer()){
+                    if(typeof projectiles[i].lifetime == "number" && (projectiles[i] instanceof enemyproj || projectiles[i] instanceof enemyhomeproj || projectiles[i] instanceof enemyhitscan) && projectiles[i].hitbox.hitplayer()){
                         //deflect!
+                        projectiles[i].lifetime = 0;
                         if(projectiles[i] instanceof enemyproj){
                         let def = aim(canvhalfx, canvhalfy, findposition(projectiles[i])[0], findposition(projectiles[i])[1], Math.abs(projectiles[i].mx) + Math.abs(projectiles[i].my));
 
-                        projectiles.push(new playerproj(projectiles[i].name, findposition(projectiles[i])[0], findposition(projectiles[i])[1], projectiles[i].size, -def[0], -def[1], projectiles[i].color, projectiles[i].dmg, 90, projectiles[i].dmgtype, projectiles[i].knockback, projectiles[i].hitstun))                        }else{
+                        projectiles.push(new playerproj(projectiles[i].name, findposition(projectiles[i])[0], findposition(projectiles[i])[1], projectiles[i].size, -def[0], -def[1], projectiles[i].color, projectiles[i].dmg, 90, projectiles[i].dmgtype, projectiles[i].knockback, projectiles[i].hitstun))    
+                        }else if(projectiles[i] instanceof enemyhomeproj){
                         let def = aim(canvhalfx, canvhalfy, findposition(projectiles[i])[0], findposition(projectiles[i])[1], projectiles[i].speed);
 
                         projectiles.push(new playerproj(projectiles[i].name, findposition(projectiles[i])[0], findposition(projectiles[i])[1], projectiles[i].size, -def[0], -def[1], projectiles[i].color, projectiles[i].dmg, 90, projectiles[i].dmgtype, projectiles[i].knockback, projectiles[i].hitstun))
+                        }else{
+                            let def = aim(canvhalfx, canvhalfy, findposition(projectiles[i])[0], findposition(projectiles[i])[1],Math.abs(projectiles[i].mx) + Math.abs(projectiles[i].my));
+
+                        projectiles.push(new playerhitscan(projectiles[i].name, findposition(projectiles[i])[0], findposition(projectiles[i])[1], projectiles[i].size, -def[0], -def[1], projectiles[i].color, projectiles[i].dmg, 90, projectiles[i].jumps ,projectiles[i].dmgtype, projectiles[i].knockback, projectiles[i].hitstun))
                         }
                     }
                 }
             }
         }
         if(this.shieldbashframes > 0 && this.shieldhp > 0){
-            //successful block of a hitscan!
-            this.shieldhp--;
+            //negate the damage!
             this.dmgcap = 0;
-            damage = 0;
         }
         
         //handle damage dealth

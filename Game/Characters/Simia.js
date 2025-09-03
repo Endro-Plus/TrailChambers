@@ -1,4 +1,15 @@
 
+
+/*
+Hard mode changes: 
+    Introduces the combo system
+    all attacks are naturally weaker, but get stronger as comboes extend
+    at 7+ combo, start bouncing off walls
+    worse air mobility, and using momentum and moving in the air costs more
+    lose more momentum when taking damage (which indirectly means you die faster)
+
+
+*/
 function Simia(startposx, startposy, size){
 this.px = startposx;
 this.py = startposy;

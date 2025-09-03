@@ -299,6 +299,7 @@ MagnaE.prototype.move = function(){
 MagnaE.prototype.zone = function(){
         if(this.hitstun > 0){
         this.hurt();
+        this.hitbox.reassign(this.x + player.px, this.y + player.py, this.z, 8, this.size);
         return;
         }
         if(arena.leave(this.x - this.shift[0], this.y - this.shift[1], this.size)){
@@ -454,7 +455,7 @@ if(arena.leavedir(0, this.y - this.shift[1], this.size).includes('u')){
     
 }
 }
-
+this.hitbox.reassign(this.x + player.px, this.y + player.py, this.z, 8, this.size);
 }
 MagnaE.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
     //Unlike his training bot, you only get ONE free hit on Magna

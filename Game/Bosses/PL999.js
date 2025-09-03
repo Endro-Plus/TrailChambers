@@ -167,7 +167,7 @@ if(this.hitstun > 0){
         }
 if(this.convo < 60){
     this.convo++;
-    this.modelnumber = 300//random(100, 998, false)
+    this.modelnumber = random(100, 998, false)
 screen.fillStyle = this.color;
   screen.textAlign = "center";
   screen.font = "15px Times New Roman";

@@ -272,6 +272,61 @@ playerproj.prototype.exist = function(){
         }
         }
     }
+
+    function playerhitscan(name, x, y, size, mx, my, color, dmg, lifetime, jumps, dmgtype = ["true"], knockback = [0, 0], hitstun = 0){
+    this.name = name;
+    this.x = x;
+    this.y = y;
+    this.shift = [player.px, player.py];
+    this.size = size
+    this.mx = mx;
+    this.my = my;
+    this.color = color;
+    this.hitbox = new hitbox(x, y, 2, size/2, size);
+    this.hitbox.disable();
+    this.lifetime = lifetime;
+    this.dmg = dmg
+    this.dmgtype = dmgtype;
+    this.knockback = knockback;
+    this.hitstun = hitstun;
+    
+    this.jumps = jumps;
+    this.canhit = true;
+}
+playerhitscan.prototype.exist = function(){
+    
+    screen.strokeStyle = this.color;
+    this.hitbox.enable();
+    
+
+
+     screen.beginPath();
+    screen.lineWidth = this.size;
+    
+    screen.moveTo(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    for(let i = 0 ; i < this.jumps ; i++){
+        this.x += this.mx;
+        this.y += this.my;
+        this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1])
+        for(let x = 0 ; this.canhit == true && x < enemies.length ; x++){
+        if(this.hitbox.checkenemy(x)){
+            playerattack = this.name;
+            enemies[x].hit(this.dmg, this.dmgtype, this.knockback, this.hitstun);
+            this.canhit = false;
+        }
+    }
+        
+    }
+   this.lifetime--;
+    screen.lineTo(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+  
+    screen.stroke();
+    screen.closePath();
+    screen.lineWidth = 1;
+    if(this.lifetime < 0){
+        return "delete"
+    }
+}
 //functions
 var circle = function(x, y, size, noFill = false, noStroke = true){
     //because I'm not typing beginPath and closePath every damn time!
@@ -466,24 +521,8 @@ var resttimer = 0;
 var pauseselection = 0;
 
 //for challenges
-var challengesdef = 
-    [
-    //lvl 0
-    [[enemyezmode, "Have fun!!!", true], [notenemyezmode, "No hit the boss!!!", true], [["Jade", "Magmax"], "End the encounter with 100+% hp", false], [["Simia"], "Hit a tornado kick", false], [["Magna","Jade"], "Hit a parry!", false], [["Ezekiel"], "Hit the boss with a deathorb while in PANIC", false], [[ "Nino"], "Electrically charge a miasma ball", false], [[ "Magna"], "Use nunchuck and parry your own shuriken", false], [[ "Magmax"], "Use flow to cancel harden", false], [["Ezekiel", "Nino"], "Land a critical hit!", false]],
-    //lvl 1
-    [[enemyezmode, "rout the enemies!", false], [notenemyezmode, "kill the boss last", true]], 
-    //lvl 2
-    [[true, "don't get parried", true], ["Magna", "Parry the parry beam!", false]],
-    //lvl 3
-    [[true, "Don't take any damage!", true], ["Magmax", "Have flow active more than not", false]],
-    //lvl 4
-    [[true, "Don't stray too far from the boss!", true], ["Nino", "Kill the boss in under 10 seconds", true]],
-    //lvl 5
-    [[true, "Pressure the boss into using an escape option!", false], [["Jade", notenemyezmode], "Parry the sniper rifle!", false], ["Ezekiel", "Survive for 30 seconds", false], ["Jade", "Stay in magic stance for the majority of the battle!", false]],
-    //lvl 6 (nothing, since there's no boss)
-    [[false, "PREPARE THYSELF", false]]//POV, thyself is not prepared
-]//visibility condition, description, completed (these are what the challenges default to on reset)
-var challenges;
+
+var challenges;//fully initiallized in prep
 var completedchallenges = 0;
 var parried = 0;
 var crit = 0;
@@ -1065,7 +1104,22 @@ var Hidden1Select = function(){
 }
 var prep = function(){
     //reset challenges
-challenges = [...challengesdef]
+challenges =    [
+    //lvl 0
+    [[enemyezmode, "Have fun!!!", true], [notenemyezmode, "No hit the boss!!!", true], ["Jade", "End the encounter with 100+% hp", false], [["Simia"], "Hit a tornado kick", false], [["Magna","Jade"], "Hit a parry!", false], [["Ezekiel"], "Hit the boss with a deathorb while in PANIC", false], [[ "Nino"], "Electrically charge a miasma ball", false], [[ "Magna"], "Use nunchuck and parry your own shuriken", false], [[ "Magmax"], "Use flow to cancel harden", false], [["Ezekiel", "Nino"], "Land a critical hit!", false], [["Shojo", "Magmax"], "Win without using any movement keys!", true]],
+    //lvl 1
+    [[enemyezmode, "rout the enemies!", false], [notenemyezmode, "kill the boss last", true]], 
+    //lvl 2
+    [[true, "don't get parried", true], ["Magna", "Parry the parry beam!", false]],
+    //lvl 3
+    [[true, "Don't take any damage!", true], ["Magmax", "Have flow active more than not", false]],
+    //lvl 4
+    [[true, "Don't stray too far from the boss!", true], ["Nino", "Kill the boss in under 10 seconds", true]],
+    //lvl 5
+    [[true, "Pressure the boss into using an escape option!", false], [["Jade", notenemyezmode], "Parry the sniper rifle!", false], ["Ezekiel", "Survive for 30 seconds", false], ["Jade", "Stay in magic stance for the majority of the battle!", false], ["Shojo", "Make it shoot itself!", false]],
+    //lvl 6 (nothing, since there's no boss)
+    [[false, "PREPARE THYSELF", false]]//POV, thyself is not prepared
+]//visibility condition, description, completed (these are what the challenges default to on reset)
 completedchallenges = 0;
 parried = 0;
 crit = 0;
@@ -1245,6 +1299,11 @@ var gametime = function(){
                     challenges[0][5][2] = true;
                 }
 
+                //no movement allowed!
+                if(challenges[0][10][2] == true && ["Shojo", "Magmax"].includes(player.listname()) && inputs.some((x) => [controls[0], controls[1], controls[2], controls[3]].includes(x))){
+                    challenges[0][10][2] = false
+                }
+
                 
 
 
@@ -1296,6 +1355,11 @@ var gametime = function(){
                 //deathorb
                 if(challenges[0][5][2] == true){
                     challenges[0][5][2] = false;
+                    completedchallenges++;
+                }
+                //no moving allowed
+                if(challenges[0][10][2] == true){
+                    challenges[0][10][2] = false;
                     completedchallenges++;
                 }
 
@@ -1468,6 +1532,11 @@ var gametime = function(){
                     challenges[5][3][2] = crit > 0;//since you spawn in magic stance, no hand holding!
                     
                 }
+
+                //Stop hitting yourself!
+                if(player.listname() == "Shojo" && playerattack == "bullet"){
+                    challenges[5][4][2] = true;
+                }
                 break;
             case 6:
                 //6 is a unique case, no challenges!
@@ -1492,6 +1561,11 @@ var gametime = function(){
                 //Being more of a zon- I meant spacer than PL
                 if(challenges[5][3][2] == true){
                     challenges[5][3][2] = false;
+                    completedchallenges++;
+                }
+                //Giving bro the V2 treatment
+                if(challenges[5][4][2] == true){
+                    challenges[5][4][2] = false;
                     completedchallenges++;
                 }
                 break;
