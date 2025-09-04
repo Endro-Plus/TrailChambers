@@ -1,3 +1,12 @@
+
+/*
+Hardmode changes:
+    Armor clad is nerfed to 30 damage as opposed to 20
+    shield takes more damage when using shield (not bash or run through. This is based on damage you would've taken)
+    run through with shield takes more damage (50% reduction opposed to 75% on easy mode)
+    shieldbreak lasts longer (total break time is now 30 seconds, opposed to 20 on easy mode)
+    enraged status is shortened (about 10 seconds opposed to 20)
+*/
 function Shojo(startposx, startposy, size){
 //startup
 this.px = startposx;
@@ -53,7 +62,8 @@ this.enraged = 0;//bro gets a little angry when his shield is broken
 */
 this.shieldhp = 100;//yep... the shield has an hp stat, it can be broken!
 
-this.dmgcap = 20;//max is 20!
+this.dmgcap = 0;//max is 20! Usually
+this.maxdmgcap = null;//Maybe not always 20... 
 this.lancespin = new hitbox(0, 0, this.pz+4, this.height + 4, 60);
 this.lancespin.disable();
 this.lancespin.immunityframes(5);
@@ -131,7 +141,7 @@ if(this.hp <=0 || this.won == true){
 
 //enraged
 if(this.shieldhp <= 0 && this.enraged == 0){
-    this.enraged = 300
+    this.enraged = (charezmode())? 450:300;//on easy mode it's 15 seconds, on hard it's 10
     projectiles.push(new flashpart(canvhalfx, canvhalfy, this.size*2, 20, "#600", 100, 10))
     this.shieldbashframes = 0;
 
@@ -145,7 +155,7 @@ if(this.enraged > 0){
     }
     if(this.enraged <= 0){
         this.color = "#99CC99";
-        this.enraged = -210;
+        this.enraged = (charezmode())? -150:-600;//5 seconds of just coping without a shield on easy, 20 seconds on hard!
         
     }
     
@@ -157,7 +167,17 @@ if(this.enraged > 0){
     }
 }
 //update damage cap
-if(this.dmgcap < 20){
+//first, ensure max damagecap is set properly
+if(this.maxdmgcap == null){
+if(charezmode()){
+    this.maxdmgcap = 20;
+}else{
+    this.maxdmgcap = 30;
+}
+this.dmgcap = this.maxdmgcap;
+}
+//update the standard dmg cap
+if(this.dmgcap < this.maxdmgcap){
     
     this.dmgcap+=(this.enraged > 0)? 0.1:0.2;
 }
@@ -599,11 +619,16 @@ Shojo.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
         if(this.shielding == true && !damagetype.includes("true") && damage > 0){
             //THAT'S NOTHING!
             this.shieldhp--;
+            if(notcharezmode()){
+                //a bit extra shield damage based on the damage of the move. Don't worry about it being too much, getting 10 damage would mean the attack did 100 damage!!!
+                //this is based on base damage, before any modifiers, even before the damage modifier
+                this.shieldhp-=(damage/10 < 10)? damage/10:10;
+            }
             if(damagetype.includes("proj")){
                 //damage to projectiles? Never heard of it
             damage = 0;
             }else{
-                damage *=0.1;//damage? Never heard of it
+                damage *=0.1;//damage? I've only heard tales of such!
             }
             if(damagetype.includes("proj")){
                 //check to see if it can be reflected
@@ -634,7 +659,7 @@ Shojo.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
             this.dmgcap = 0;
         }
         
-        //handle damage dealth
+        //handle damage dealth (yes at this point the mispelling is intentional)
         
         var dmg = damage * this.damagemod;
         
@@ -647,8 +672,8 @@ Shojo.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
         //ensure protection
         //lower damage based on if your rushing or not
         if(this.rush == true && !damagetype.includes("true") && this.shieldhp > 0){
-            //true damage is not reduced. Otherwise, 50% damage reduction!
-            dmg*=0.50;
+            //true damage is not reduced. Otherwise, 75% damage reduction! Only 50% (which is still a lot) on hard mode
+            dmg*= (charezmode() == true)? 0.25:0.5;
             this.shieldhp--;
         }
         //damage cap
