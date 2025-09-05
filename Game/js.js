@@ -5,8 +5,8 @@ var fps = 30;
 var canvas = document.getElementsByTagName("canvas")[0];
 var screen = canvas.getContext("2d");
 //set the canvas size
-canvas.width = 750 //half is 375
-canvas.height = 600 // half is 300
+canvas.width = 855 //half is 427.5
+canvas.height = 705 // half is 352.5
 var topmargin = 0; //the top margin of the canvas is 0
 var canvhalfx = canvas.width / 2;
 var canvhalfy = canvas.height / 2;

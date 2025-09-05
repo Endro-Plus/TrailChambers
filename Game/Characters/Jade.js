@@ -19,7 +19,7 @@ this.desc = ["This is the main character! Beware her tenacity!", "1. Radiant Ech
 //game stats
 this.playershift = [0, 0];//shift the position of the player
 this.cooldowns = [0, 0, 0, 0]
-this.damagetypemod = [["seduction", 0.5], ["sexual", 0.8], ["dark", 0.4]]; //as a canon succubus, it makes sense she's be resistant to these. Thanks to her light affinity, dark magic is particularly ineffective.
+this.damagetypemod = [["seduction", 0.5], ["pleasure", 0.8], ["dark", 0.4]]; //as a canon succubus, it makes sense she's be resistant to these. Thanks to her light affinity, dark magic is particularly ineffective.
 this.hp = 100;
 this.damagemod = 1;
 this.speed = 10;
