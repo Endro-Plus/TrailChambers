@@ -44,7 +44,7 @@ this.repetitivebonus = 1;//get a small damage boost for every attack hit
 this.projstart = 0;
 this.abilitylock = [false, false];
 this.secondphase = -1;
-this.hitboxsize = 50;//just so you know, this is a LOT bigger than what you think it is
+this.hitboxsize = 75;//just so you know, this is a LOT bigger than what you think it is
 //hard mode exclusive
 this.energy = 50;//also straight from evades.io
 this.energyregen = 0.13;//straight from evades.io (4 energy a second)
@@ -93,7 +93,7 @@ if(this.hp > 100){
     this.hitstun = 0;
     this.clutch = true;
     this.secondphase = 0;
-    this.hitboxsize = 75;
+    this.hitboxsize = 120;
     }else{
     //play the death anmiation, then call off
     if(this.won == false){
@@ -360,7 +360,7 @@ screen.arc(canvhalfx, canvhalfy + 10, 30, -12.25, -9.76);
 this.slashbox.reassign(canvhalfx, canvhalfy + 20, this.pz, 2, this.hitboxsize);
 }
 }
-//this.slashbox.showbox()
+//this.slashbox.showbox("red")
 
 for(let i = 0 ; i < enemies.length ; i++){
 if(this.slashbox.checkenemy(i)){

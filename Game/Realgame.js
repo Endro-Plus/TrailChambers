@@ -273,7 +273,7 @@ playerproj.prototype.exist = function(){
         }
     }
 
-    function playerhitscan(name, x, y, size, mx, my, color, dmg, lifetime, jumps, dmgtype = ["true"], knockback = [0, 0], hitstun = 0){
+function playerhitscan(name, x, y, size, mx, my, color, dmg, lifetime, jumps, dmgtype = ["true"], knockback = [0, 0], hitstun = 0){
     this.name = name;
     this.x = x;
     this.y = y;
@@ -515,7 +515,7 @@ var player;
 var projectiles = [];
 var enemies = [];
 var summons = [];
-var level = 5;
+var level = 0;
 var rest = 60;
 var resttimer = 0;
 var pauseselection = 0;

@@ -179,7 +179,7 @@ for(let i = 0; i < this.cooldowns.length ; i++){
 
 if(this.cooldowns[0] <= 0 && inputs.includes(controls[4])){
     this.spec1();
-    this.cooldowns[0] = fps;//keep in mind the user can change the FPS freely.
+    this.cooldowns[0] = 30;//keep in mind the user can change the FPS freely.
 }
 if(this.cooldowns[1] <= 0 && inputs.includes(controls[5])){
     this.spec2();
