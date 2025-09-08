@@ -417,6 +417,31 @@ return !["normal", "Mob"].includes(difficulty)//if true, then easy mode!
 var notenemyezmode = function(){
 return !["normal", "Player"].includes(difficulty)//if true, then easy enemies!
 }
+var checkweight = function(enemy, weight){
+    //return true if an enemy is light lighter than the weight
+    return (typeof enemy.light == "number" && weight < enemy.light || typeof enemy.light != "number" && weight < enemy.knockbackmod)
+}
+var resetchallenges = function(){
+    //the challenges
+    return  [
+    //lvl 0
+    [[enemyezmode, "Have fun!!!", true], [notenemyezmode, "No hit the boss!!!", true], ["Jade", "End the encounter with 100+% hp", false], [["Simia"], "Hit a tornado kick", false], [["Magna","Jade"], "Hit a parry!", false], [["Ezekiel"], "Hit the boss with a deathorb while in PANIC", false], [[ "Nino"], "Electrically charge a miasma ball", false], [[ "Magna"], "Use nunchuck and parry your own shuriken", false], [[ "Magmax"], "Use flow to cancel harden", false], [["Ezekiel", "Nino"], "Land a critical hit!", false], [["Shojo", "Magmax"], "Win without using any movement keys!", true]],
+    //lvl 1
+    [[enemyezmode, "rout the enemies!", false], [notenemyezmode, "kill the boss last", true]], 
+    //lvl 2
+    [[true, "don't get parried", true], ["Magna", "Parry the parry beam!", false]],
+    //lvl 3
+    [[true, "Don't take any damage!", true], ["Magmax", "Have flow active more than not", false]],
+    //lvl 4
+    [[true, "Don't stray too far from the boss!", true], ["Nino", "Kill the boss in under 10 seconds", true]],
+    //lvl 5
+    [[true, "Pressure the boss into using an escape option!", false], [["Jade", notenemyezmode], "Parry the sniper rifle!", false], ["Ezekiel", "Survive for 30 seconds", false], ["Jade", "Stay in magic stance for the majority of the battle!", false], ["Shojo", "Make it shoot itself!", false]],
+    //lvl 6 (nothing, since there's no boss)
+    [[false, "PREPARE THYSELF", false]]//POV, thyself is not prepared
+
+    
+]//visibility condition, description, completed (these are what the challenges default to on reset)
+}
 //vars
 
 var arena = {
@@ -1104,22 +1129,7 @@ var Hidden1Select = function(){
 }
 var prep = function(){
     //reset challenges
-challenges =    [
-    //lvl 0
-    [[enemyezmode, "Have fun!!!", true], [notenemyezmode, "No hit the boss!!!", true], ["Jade", "End the encounter with 100+% hp", false], [["Simia"], "Hit a tornado kick", false], [["Magna","Jade"], "Hit a parry!", false], [["Ezekiel"], "Hit the boss with a deathorb while in PANIC", false], [[ "Nino"], "Electrically charge a miasma ball", false], [[ "Magna"], "Use nunchuck and parry your own shuriken", false], [[ "Magmax"], "Use flow to cancel harden", false], [["Ezekiel", "Nino"], "Land a critical hit!", false], [["Shojo", "Magmax"], "Win without using any movement keys!", true]],
-    //lvl 1
-    [[enemyezmode, "rout the enemies!", false], [notenemyezmode, "kill the boss last", true]], 
-    //lvl 2
-    [[true, "don't get parried", true], ["Magna", "Parry the parry beam!", false]],
-    //lvl 3
-    [[true, "Don't take any damage!", true], ["Magmax", "Have flow active more than not", false]],
-    //lvl 4
-    [[true, "Don't stray too far from the boss!", true], ["Nino", "Kill the boss in under 10 seconds", true]],
-    //lvl 5
-    [[true, "Pressure the boss into using an escape option!", false], [["Jade", notenemyezmode], "Parry the sniper rifle!", false], ["Ezekiel", "Survive for 30 seconds", false], ["Jade", "Stay in magic stance for the majority of the battle!", false], ["Shojo", "Make it shoot itself!", false]],
-    //lvl 6 (nothing, since there's no boss)
-    [[false, "PREPARE THYSELF", false]]//POV, thyself is not prepared
-]//visibility condition, description, completed (these are what the challenges default to on reset)
+challenges =   resetchallenges();
 completedchallenges = 0;
 parried = 0;
 crit = 0;

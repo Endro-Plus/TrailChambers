@@ -26,6 +26,8 @@ this.facing = [1, 0]; //what direction the player is facing
 this.height = 8;//How tall they are, if small enough, higher hitting attacks may miss! However, if too tall, that's just a hitbox extension.
 this.iframe = false;//completely ignore hits
 this.won = false;
+this.hitstun = 0;
+this.knockback = [0, 0]
 }
 Test.prototype.listname = function(){
 //to help position the characters correctly

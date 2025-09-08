@@ -4,7 +4,7 @@ function The_Eye(startposx, startposy, size , lvl = 0, ID = 2){
 this.enemyID = ID;
 this.x = startposx;
 this.y = startposy;
-this.z = 2; //distance up.
+this.z = 0; //distance up.
 this.shift = [this.x, this.y];//how their position may shift
 this.size = size;
 this.height = 20;//How tall they are, if small enough, higher hitting attacks may miss! However, if too tall, that's just a hitbox extension.
@@ -145,6 +145,13 @@ this.hitbox.updateimmunity();
         if(this.phase>0){
         console.log(this.phase)
             if(this.phasetimer-- > 0){
+                //resist slowing effects
+                if(charezmode() && this.speedmod < 0.5){
+                    this.speedmod = 0.5;
+                }else if(notcharezmode() && this.speedmod < 1){
+                    //slow down? CAN'T STOP THE A-TRAIN BABY!!!
+                    this.speedmod = 1;
+                }
 
                 this.mx = this.velocityX;
                 this.my = this.velocityY;
@@ -173,8 +180,8 @@ this.hitbox.updateimmunity();
             }
         }
 
-        this.x+=this.mx;
-        this.y+=this.my;
+        this.x+=this.mx * this.speedmod;
+        this.y+=this.my * this.speedmod;
         this.hitbox.enable();
 //The character exists in my plane of existance!
 screen.fillStyle = this.color;
@@ -395,43 +402,48 @@ if(arena.leave(this.x + player.px - this.shift[0], this.y + player.py - this.shi
         if(this.x + player.px - this.shift[0]< canvhalfx && this.mx < this.speed){
                     //it can go faster based on what it's level is!
 
-                    this.mx+=this.acc;
+                    this.mx+=this.acc * this.speedmod;
 
                 }else if(this.x + player.px  - this.shift[0]> canvhalfx && this.mx > -(this.speed)){
                             //it can go faster based on what it's level is!
 
-                                        this.mx-=this.acc;
+                                        this.mx-=this.acc * this.speedmod;
 
                         }
 
                 if(this.y + player.py  - this.shift[1]> canvhalfy && this.my > -(this.speed)){
                             //aim over the player, not on!
 
-                                        this.my-=this.acc;
+                                        this.my-=this.acc * this.speedmod;
 
                         }else if(this.y + player.py  - this.shift[1]< canvhalfy && this.my < (this.speed)){
                                     //it can go faster based on what it's level is!
 
-                                                this.my+=this.acc
+                                                this.my+=this.acc * this.speedmod
 
                                 }
                 //an extra for z
                 console.log(this.z)
-                if(this.z > player.pz + (player.height/2)+4 && this.mz < this.speed){
+                if(this.z > player.pz + (player.height/2)+6 && this.mz < this.speed){
                     this.mz -=this.acc/2;
 
-                }else if(this.z < player.pz + (player.height/2)-3 && this.mz > -this.speed){
+                }else if(this.z < player.pz + (player.height/2)-6 && this.mz > -this.speed){
                     this.mz += this.acc/2;
                 }
+                //not too high or low!
                 if(this.z < 0){
-                                    this.mz = 0;
-                                    this.z = 2;
-                                    }
+
+                    this.mz = 0;
+                    this.z = 2;
+                }else if(this.z > 30){
+                    this.mz = 0;
+                    this.z = 29
+                }
 
                 //console.log(this.x + "  " + this.y + "  " + this.z)
-                this.x +=this.mx;
-                this.y+=this.my;
-                this.z+=this.mz;
+                this.x +=this.mx * this.speedmod;
+                this.y+=this.my * this.speedmod;
+                this.z+=this.mz * this.speedmod;
                 this.hitbox.enable();
 
 

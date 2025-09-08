@@ -1,3 +1,9 @@
+/*
+Hardmode changes:
+    the hp costs are actually accurate to the description (on easy mode, slime requires 5 hp, but will only take 2. Supreme Slime requires 50 hp, but will only take 35)
+
+*/
+
 function Dorn(startposx, startposy, size){
 //startup
 this.px = startposx;
@@ -12,7 +18,9 @@ this.desc = ["Who would've thought a slime would become the hero? Certainly not 
      "Regeneration: Slowly regenerates hp when below than 3/4 hp",
       "1. Slime: Throw slime at the opponent! The slime lingers for a bit on miss, and clings to an enemy on hit!",
     "   Walking on slime heals you, enemies touching slime damages the slime thanks to your acidic base!",
-    "2. Supreme Slime: Sacrifice 50% of your hp to throw a large ball of slime! This slime sticks to the ground and acts like regular slime",
+    "This move costs 5% hp",
+    "2. Supreme Slime: Sacrifice 50% of your hp to roll a large ball of slime! This slime sticks to the ground and acts like regular slime",
+    "   While this is rolling, 1 light enemy can be caught in the center! Other enemies simply suffer a severe speed penalty.",
     "   Throwing regular slime at the supreme slime increases it's \"hp\" stat. Standing in sacrifices it's hp to heal you faster!",
     "   Use the ability again while a supreme slime is out to swap places with it! You inherit it's hp stat, and it will inherit yours",
     "   You autoswap instead of dying if a supreme slime is active and you take fatal damage! Swapping can be done in hitstun!",
@@ -28,11 +36,12 @@ this.desc = ["Who would've thought a slime would become the hero? Certainly not 
 //game stats
 this.playershift = [0, 0];//shift the position of the player
 this.cooldowns = [0, 0, 0, 0];
-this.damagetypemod = [["fire", 1.5], ["poison", 0], ["slashing", 0.1], ["bludgeoning", 1.3], ["magic", 1.2], ["physical", 0.8]];//guys, the slime is immune to poison, and cannot be hurt by slashing!!! Who would've thought!!!!!!
+this.damagetypemod = [["fire", 1.5], ["poison", 0], ["slashing", 0.3], ["piercing", 0.3], ["bludgeoning", 1.3], ["magic", 1.2], ["physical", 0.8]];//guys, the slime is immune to poison, and cannot be hurt by slashing or stabbing!!! Who would've thought!!!!!!
 this.hp = 100;
 this.damagemod = 0.8; //It's hard to hurt a slime..
 this.maxspeed = 9;
 this.speed = 9; //Kinda hard to move as a slime, just sliding around
+
 this.speedmod = 1;//modifies speed, multiplicately
 this.speedcause = [];//causes of speed buffs/nerfs [reason, duration, effect]
 this.DI = 1; //I SURE HOPE YOU'RE USING DI, DORN MAIN!!!
@@ -42,6 +51,15 @@ this.facing = [1, 0];
 this.height = 8;
 this.iframe = false;//completely ignore hits
 this.won = false;
+this.hitstun = 0;
+this.knockback = [0, 0]
+
+//UNIQUE
+this.friction = 0.33;//sliding around at the speed of sound!
+this.movement = [0, 0];//weeeeeee
+this.nohp = 0;
+this.superslime = null;
+this.sizeto = size;
 }
 Dorn.prototype.listname = function(){
 //to help position the characters correctly
@@ -57,7 +75,7 @@ if(this.hp <= 100 && this.hp > 0){
 //under max
 screen.fillStyle = "#F00";
 screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
-screen.fillStyle = "#0F0";
+screen.fillStyle = (this.nohp-- > 0)? "rgba(255, 145, 0, 1)":"#0F0";//if you don't have the hp to use super slime, it flashes orange for you
 screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, this.hp / 2, 4);//current hp
 
 }else if (this.hp > 0){
@@ -89,12 +107,32 @@ if(this.hp <=0 || this.won == true){
 if(this.hp < 75){
     this.hp+=0.1;//hit that passive regen! Free of charge!
 }
-
-
+//super slime
+if(this.superslime != null && this.superslime.lifetime == 0){
+    this.superslime = null;
+}
 timeplayed++;
+//resizing
+ if(this.size != this.sizeto){
+    this.speedmod = 0.5;
+    this.iframe = true;
+    this.cooldowns[1] = 30;
+            if(this.size > this.sizeto - 2){
+                this.size-=2;
+            }else if(this.size < this.sizeto + 2){
+                this.size+=2;
+            }else{
+                this.size = this.sizeto;
+                this.iframe = false;
+            }
+        }else{
+            this.speedmod = 1;
+
+        }
+
 
 //speedmod is ALWAYS 1 to begin with
-this.speedmod = 1;
+
 this.speedcause.sort();//sorting it makes it easier to check for duplicated
 for(let i = 0 ; i < this.speedcause.length ; i++){
     //for every non-stacking buff, delete any duplicates
@@ -135,8 +173,8 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             //hitstun
             if(this.hitstun > 0){
                 this.hurt();
-                return;
-            }
+                
+            }else{
             //movement
             if(inputs.includes("shift")){
                 this.speed = this.maxspeed/5;//super slow!
@@ -144,42 +182,57 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
                 this.speed = this.maxspeed;
             }
             if(inputs.includes(controls[0]) && !arena.pleavedir().includes('l')){
-            this.px+=this.speed * this.speedmod;
+            this.movement[0] =this.speed * this.speedmod;
             this.facing[0] = -1;
             if(!inputs.includes(controls[2]) && !inputs.includes(controls[3])){
                 this.facing[1] = 0;
             }
             }
             if(inputs.includes(controls[1]) && !arena.pleavedir().includes('r')){
-            this.px-=this.speed * this.speedmod;
+            this.movement[0] = this.speed * this.speedmod;
             this.facing[0] = 1;
             if(!inputs.includes(controls[2]) && !inputs.includes(controls[3])){
                 this.facing[1] = 0;
             }
             }
             if(inputs.includes(controls[2]) && !arena.pleavedir().includes('u')){
-            this.py+=this.speed * this.speedmod;
+            this.movement[1] = this.speed * this.speedmod;
             this.facing[1] = -1;
             if(!inputs.includes(controls[0]) && !inputs.includes(controls[1])){
                 this.facing[0] = 0;
             }
             }
             if(inputs.includes(controls[3]) && !arena.pleavedir().includes('d')){
-            this.py-=this.speed * this.speedmod;
+            this.movement[1] = this.speed * this.speedmod;
             this.facing[1] = 1;
             if(!inputs.includes(controls[0]) && !inputs.includes(controls[1])){
                 this.facing[0] = 0;
             }
             }
+        }
+
+            //slippery-ness (yep, the ability to slide is being accounted for even in hitstun)
+        
+            this.px += this.movement[0] * -this.facing[0];
+            this.py += this.movement[1] * -this.facing[1];
+            this.movement[0] = this.movement[0] * (1 - this.friction)
+            this.movement[1] = this.movement[1] * (1 - this.friction)
+            if(Math.abs(this.movement[0]) < 0.5){
+                this.movement[0] = 0;
+            }
+            if(Math.abs(this.movement[1]) < 0.5){
+                this.movement[1] = 0;
+            }
+
 //lower all cooldowns
 for(let i = 0; i < this.cooldowns.length ; i++){
     this.cooldowns[i]--;
 }
 //attacks
 
-if(this.cooldowns[0] <= 0 && inputs.includes(controls[4])){
+if(this.cooldowns[0] <= 0 && inputs.includes(controls[4]) && this.hitstun < 1){
     this.spec1();
-    this.cooldowns[0] = 30;//keep in mind the user can change the FPS freely.
+   
 }
 if(this.cooldowns[1] <= 0 && inputs.includes(controls[5])){
     this.spec2();
@@ -363,11 +416,53 @@ bossbar = [];
 }
 Dorn.prototype.spec1 = function(){
 //abilities
-console.log("working!");
-projectiles.push(new Slime(canvhalfx, canvhalfy, 7, 30 * this.facing[0], 30 * this.facing[1]))
+//console.log("working!");
+if(this.hp > 5){
+projectiles.push(new Slime(canvhalfx, canvhalfy, 7, 30 * this.facing[0], 30 * this.facing[1]));
+ this.cooldowns[0] = 12;//keep in mind the user can change the FPS freely.
+ if(charezmode()){
+ this.hp-=2;//a bit of mercy
+ }else{
+    this.hp-=5;//You will PAY!
+ }
+}else{
+    //PANICCC!!!!!
+    this.nohp = 10;
+}
 }
 Dorn.prototype.spec2 = function(){
+    if(this.superslime == null && this.hp > 50){
+        //can't be done in hitstun
+        if(this.hitstun < 1){
+        projectiles.push(new Super_Slime(canvhalfx, canvhalfy, this.size * 2, 25 * this.facing[0], 25 * this.facing[1]));
+        this.superslime = projectiles[projectiles.length-1]
+    this.cooldowns[1] = 30;
+     if(charezmode()){
+     this.hp-=35;//a bit of mercy
+     }else{
+    this.hp-=50;//You WILL pay the cost of greatness
+ }
+}
 
+    }else if (this.superslime != null){
+        //can be done in hitstun
+        if(typeof this.superslime.lifetime == "string"){
+        let tp = [canvhalfx - findposition(this.superslime)[0] + this.px, canvhalfy - findposition(this.superslime)[1] + this.py, this.hp];
+        this.superslime.x = canvhalfx - this.px + this.superslime.shift[0]
+        this.superslime.y = canvhalfy - this.py + this.superslime.shift[1];
+        this.hp = this.superslime.hp;
+        this.superslime.hp = tp[2];
+        this.px = tp[0];
+        this.py = tp[1];
+
+        this.size = this.superslime.sizeto;
+        this.superslime.size = this.sizeto;
+        
+        }
+    }else{
+        //no hp???
+        this.nohp = 10;
+    }
 }
 Dorn.prototype.spec3 = function(){
 
@@ -423,6 +518,7 @@ Slime.prototype.exist = function(){
     }
     }   
     this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    this.hitbox.resize(this.size)
     //console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
     //console.log(arena.leavedir(this.x, this.y, this.size))
     
@@ -448,7 +544,7 @@ Slime.prototype.exist = function(){
                 this.lifetime = "stick";
                 this.size +=10;
                 this.lifetime.HelpIamslimed = undefined;//make sure other enemies can still be slimed!
-                console.log("hi")
+                //console.log("hi")
             }
         }
 
@@ -457,7 +553,7 @@ Slime.prototype.exist = function(){
 
     if(this.hitbox.checkenemy(i) && this.lifetime == 1){
         playerattack = this.name;
-        enemies[i].hit(12, ["acid"], this.knockback, this.hitstun);
+        enemies[i].hit(12, ["acid"]);
        this.lifetime = enemies[i];//cling
         }else if (this.hitbox.checkenemy(i) && typeof this.lifetime == "string"){
             //bro stepped in some sticky acid! Ewwww!!!
@@ -468,10 +564,154 @@ Slime.prototype.exist = function(){
         
 
         }
-        if(this.hitbox.hitplayer() && typeof this.lifetime == "string"){
+        if(this.hitbox.hitplayer() && typeof this.lifetime == "string" && player.hp < 100){
             player.hp+=0.2;
             this.visibility-=0.4;
             //Heal up mate, you'll need it!
         }
     }
+}
+
+function Super_Slime(x, y, size, mx, my){
+    this.name = "Supreme Slime";
+    this.x = x;
+    this.y = y;
+    this.shift = [player.px, player.py];
+    this.size = size
+    this.mx = mx;
+    this.my = my;
+    this.color = "rgba(51, 204, 51";
+    this.hitbox = new hitbox(x, y, 0, this.size, size);//This is rolled
+    this.hitbox.disable();
+    this.lifetime = 1;//can be parried now... but not when on the ground
+    this.hp = 50;//reduces slowly, then fades out of existance. basically just visibility but I renamed it
+    this.sizeto = size;
+    
+}
+Super_Slime.prototype.exist = function(){
+    this.hitbox.enable();
+    this.hp-=0.01;//a slower death for it
+    screen.fillStyle = this.color + `,${this.hp/100})`;
+    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
+    if (typeof this.lifetime != "string"){
+        //slow down overtime and grow
+    this.x+=this.mx;
+    this.y+=this.my;
+    this.mx*=0.95;
+    this.my*=0.95
+    this.size+=2
+    if(Math.abs(this.mx) + Math.abs(this.my) < 1){
+        //if it stops, stick to the ground!
+        this.size+=12
+        this.lifetime = "cling!"
+        this.hitbox.movez(-1, 1);//extremely close to the ground!
+        this.hitbox.refreshimmune();
+        this.sizeto = this.size
+    }
+
+    //out of bounds
+        if(this.x - this.shift[0] - this.size < canvhalfx - arena.w){
+            //bounce right
+
+            this.mx = Math.abs(this.mx)
+
+        }else if(this.x - this.shift[0] + this.size > canvhalfx - arena.w + arena.w*2){
+        //bounce left
+
+        this.mx = Math.abs(this.mx) * -1
+
+        }
+        if(this.y - this.shift[1]  - this.size< canvhalfy - arena.h){
+        //bounce down
+
+        this.my = Math.abs(this.my)
+
+        }else if(this.y - this.shift[1]  + this.size> canvhalfy - arena.h + arena.h*2){
+        //bounce up
+
+        this.my = Math.abs(this.my) * -1
+
+        }
+    }   
+    this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    this.hitbox.resize(this.size)
+    //console.log((this.x - (canvhalfx + player.playershift[0])) + " " + (this.y - (canvhalfx + player.playershift[1])));
+    //console.log(arena.leavedir(this.x, this.y, this.size))
+    
+    if(this.lifetime <= 0 || this.hp < 1){
+         this.lifetime = 0;//make sure other enemies can still be slimed!
+        return "delete";
+    }
+    //hitting the enemy
+    //console.log(en);
+    
+    for(let i = 0 ; i < enemies.length ; i++){
+
+    if(this.hitbox.checkenemy(i) && typeof this.lifetime != "string"){
+        playerattack = this.name;
+        enemies[i].hit(16, ["acid"]);
+        if(this.lifetime == 1 && checkweight(enemies[i], 0.4)){
+             this.lifetime = enemies[i];//drag them along!
+            
+        }else{
+            //do a bit extra
+            enemies[i].hit(4, ["acid"], [this.mx * 10, this.my * 10], 45);
+            enemies[i].speedcause.push(["stack", 60, 0.50])
+        }
+
+        this.hitbox.grantimmunity(i);
+         
+      
+        }else if (this.hitbox.checkenemy(i) && typeof this.lifetime == "string"){
+            //bro stepped in some sticky acid! Ewwww!!!
+            enemies[i].hit(0.7, ["acid"]);
+            enemies[i].speedcause.push(["stack", 10, 0.85])
+            this.hp-=0.05;
+        }
+        
+        
+
+        }
+        if(this.hitbox.hitplayer() && typeof this.lifetime == "string" && player.hp < 100){
+            player.hp+=0.4;
+            this.hp-=0.2;
+            //Heal up mate, you'll need it!
+        }
+        if(typeof this.lifetime == "object"){
+            //They see me rollin' they hatin'!
+            this.lifetime.hitstun = 10;
+            this.lifetime.x = this.x - this.shift[0];
+            this.lifetime.y = this.y - this.shift[1];
+            this.lifetime.hit(1, ["acid"]);
+            this.lifetime.speedcause.push(["Super Slimed", 90, 0.10])//movement? not for you!
+        }
+
+    if(typeof this.lifetime == "string"){
+        //for healing the supreme slime or resizing
+        
+        //healing
+        for(let i = 0 ; i < projectiles.length ; i++){
+            if(this.hp < 100 && projectiles[i].name == "Slime" && typeof projectiles[i].lifetime == "string" && this.hitbox.scanproj(i)){
+                this.hp+=5;
+                if(this.hp > 100){
+                    this.hp = 100;
+                }
+                projectiles[i].visibility = 0;
+                
+            }
+        }
+
+        //warping/resizing
+
+        if(this.size != this.sizeto){
+            if(this.size > this.sizeto + 2){
+                this.size-=2;
+            }else if(this.size < this.sizeto - 2){
+                this.size+=2
+            }else{
+                this.size = this.sizeto;
+            }
+        }
+    }
+    
 }
