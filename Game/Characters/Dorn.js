@@ -16,20 +16,18 @@ this.postColor = "#003300";
 this.color = "#009900";
 this.desc = ["Who would've thought a slime would become the hero? Certainly not me!",
      "Regeneration: Slowly regenerates hp when below than 3/4 hp",
-      "1. Slime: Throw slime at the opponent! The slime lingers for a bit on miss, and clings to an enemy on hit!",
+      "1. Slime: Sacrifice 5% hp to throw slime at the opponent! The slime lingers for a bit on miss, and clings to an enemy on hit!",
     "   Walking on slime heals you, enemies touching slime damages the slime thanks to your acidic base!",
-    "This move costs 5% hp",
     "2. Supreme Slime: Sacrifice 50% of your hp to roll a large ball of slime! This slime sticks to the ground and acts like regular slime",
     "   While this is rolling, 1 light enemy can be caught in the center! Other enemies simply suffer a severe speed penalty.",
     "   Throwing regular slime at the supreme slime increases it's \"hp\" stat. Standing in sacrifices it's hp to heal you faster!",
-    "   Use the ability again while a supreme slime is out to swap places with it! You inherit it's hp stat, and it will inherit yours",
+    "   Use the ability again while a supreme slime is out to swap places and hp with it!",
     "   You autoswap instead of dying if a supreme slime is active and you take fatal damage! Swapping can be done in hitstun!",
-    "3. Splatter: Upon taking damage, some of the damage is done over time rather than instantly.",
+    "3. Splatter: Upon taking damage, some of the damage is done over time rather than instantly. This damage cannot kill you",
     "   During this point, use this ability to negate the damage and splatter! This negates knockback and hitstun too!",
     "   You are invulnerable and faster while in the splattered state, use this to get away before you reform!",
     "4. Deform/Reform: Become a puddle! You automatically absorb slime on the ground and heal instantly while in this state!",
-    "   Enemies take damage if they step in you, but you also take minor damage for this. Use again to reform!",
-    "   While in this state, you are practically immune to damage! This can be done in hitstun."
+    "   Enemies take damage if they step in you, but you also take minor damage for this. Use again to reform! Can be done in hitstun",
 
 ]
 
@@ -60,6 +58,7 @@ this.movement = [0, 0];//weeeeeee
 this.nohp = 0;
 this.superslime = null;
 this.sizeto = size;
+this.DoT = 0;//for damage overtime and splatter abilities
 }
 Dorn.prototype.listname = function(){
 //to help position the characters correctly
@@ -75,9 +74,20 @@ if(this.hp <= 100 && this.hp > 0){
 //under max
 screen.fillStyle = "#F00";
 screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
+if(this.iframe == false){
 screen.fillStyle = (this.nohp-- > 0)? "rgba(255, 145, 0, 1)":"#0F0";//if you don't have the hp to use super slime, it flashes orange for you
+}else{
+    screen.fillStyle = "#00f"
+}
 screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, this.hp / 2, 4);//current hp
 
+//damage over time
+screen.fillStyle = "#505"
+if(this.DoT >= this.hp){
+screen.fillRect((canvhalfx - 25), canvhalfy - this.size - 10, (this.hp / 2), 4)
+}else{
+screen.fillRect((canvhalfx - 25) + (this.hp / 2) - this.DoT/2, canvhalfy - this.size - 10, this.DoT, 4);//current hp
+}
 }else if (this.hp > 0){
 //over max
 
@@ -98,14 +108,36 @@ screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
 if(this.hp <=0 || this.won == true){
     //play the death anmiation, then call off
     if(this.won == false){
+        if(this.superslime != null && this.cooldowns[1] < 1){
+            //THIS AIN'T OVER YET!
+            this.spec2();
+            this.cooldowns[1] = 60;
+            this.hitstun = 15;
+            this.knockback = [0, 0]
+            
+            return;
+        }else{
         this.death();
+        }
     }else{
         this.win()
     }
     return "dead";
 }
-if(this.hp < 75){
+if(this.hp < 75 && this.DoT <= 1){
     this.hp+=0.1;//hit that passive regen! Free of charge!
+}
+
+//damage over time
+if(this.DoT > 0){
+    this.hp-=0.1;
+    this.DoT-=0.1;
+    if(this.DoT < 1 || this.hp < 1){
+        //some damage just ain't taken... nice!
+        this.DoT = 0;
+
+    }
+    
 }
 //super slime
 if(this.superslime != null && this.superslime.lifetime == 0){
@@ -114,13 +146,19 @@ if(this.superslime != null && this.superslime.lifetime == 0){
 timeplayed++;
 //resizing
  if(this.size != this.sizeto){
-    this.speedmod = 0.5;
+    
     this.iframe = true;
-    this.cooldowns[1] = 30;
-            if(this.size > this.sizeto - 2){
-                this.size-=2;
-            }else if(this.size < this.sizeto + 2){
-                this.size+=2;
+    this.cooldowns = [30, 30, 90, 30];
+            if(this.size > this.sizeto + 6){
+                this.size-=4;
+                this.speedmod = 0.5;
+            }else if(this.size < this.sizeto - 6){
+                if(this.DoT < 0){
+                    this.DoT++;
+                }else{
+                this.size+=1;
+                }
+                this.speedmod = 2.5;
             }else{
                 this.size = this.sizeto;
                 this.iframe = false;
@@ -237,7 +275,7 @@ if(this.cooldowns[0] <= 0 && inputs.includes(controls[4]) && this.hitstun < 1){
 if(this.cooldowns[1] <= 0 && inputs.includes(controls[5])){
     this.spec2();
 }
-if(this.cooldowns[2] <= 0 && inputs.includes(controls[6])){
+if(this.cooldowns[2] <= 0 && this.DoT > 0 && inputs.includes(controls[6])){
     this.spec3();
 }
 if(this.cooldowns[3] <= 0 && inputs.includes(controls[7])){
@@ -258,7 +296,7 @@ this.knockback[1]*=0.9;
 if(arena.pleavedir().includes("l") || arena.pleavedir().includes('r')){
 this.hitstun += 3;
 if(!charezmode()){
-this.hit(3, ["physical"]);//slamming into walls hurt!
+this.hit(2, ["physical"]);//slamming into walls hurt!
 }
 this.knockback[0]*=-0.5;
 if(arena.pleavedir().includes("l")){
@@ -270,7 +308,7 @@ if(arena.pleavedir().includes("l")){
 if(arena.pleavedir().includes("u") || arena.pleavedir().includes('d')){
 this.hitstun += 3;
 if(!charezmode()){
-this.hit(3, ["physical"]);//slamming into walls hurt!
+this.hit(2, ["physical"]);//slamming into walls hurt!
 }
 this.knockback[1]*=-0.5;
 if(arena.pleavedir().includes("u")){
@@ -283,6 +321,9 @@ if(arena.pleavedir().includes("u")){
 }
 Dorn.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
         //handle damage dealth
+        if(this.iframe){
+            return;
+        }
         var dmg = damage * this.damagemod;
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
             if(damagetype.includes(this.damagetypemod[i][0])){
@@ -292,7 +333,8 @@ Dorn.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         if(this.hp > 100 && this.hp - dmg < 100){
         this.hp = 100;
         }else{
-        this.hp-=dmg;
+        this.hp-=dmg*0.5;
+        this.DoT+=dmg*0.5;
         }
 
         //handle knockback and DI.
@@ -446,6 +488,7 @@ Dorn.prototype.spec2 = function(){
 
     }else if (this.superslime != null){
         //can be done in hitstun
+        this.iframe = true;
         if(typeof this.superslime.lifetime == "string"){
         let tp = [canvhalfx - findposition(this.superslime)[0] + this.px, canvhalfy - findposition(this.superslime)[1] + this.py, this.hp];
         this.superslime.x = canvhalfx - this.px + this.superslime.shift[0]
@@ -465,13 +508,20 @@ Dorn.prototype.spec2 = function(){
     }
 }
 Dorn.prototype.spec3 = function(){
-
+    this.DoT = -30;
+    for(let i = 0 ; i < 10 ; i++){
+        projectiles.push(new movingpart(canvhalfx, canvhalfy, random(-12, 12), random(-12, 12), this.size/10, "#00ff00", 10))
+    }
+    this.size = 1;
+    this.iframe = true;
+    this.hitstun = 0;
+this.cooldowns[2] = 90;
 }
 Dorn.prototype.spec4 = function(){
 
 }
 
-Dorn.prototype.inst = function(x = this.px, y = this.py, size = this.size){
+Dorn.prototype.inst = function(x = this.px, y = this.py, size = 20){
 player = new Dorn(x, y, size);
 }
 //center stage and 20 size is the default, feel free to change it up!
@@ -704,10 +754,10 @@ Super_Slime.prototype.exist = function(){
         //warping/resizing
 
         if(this.size != this.sizeto){
-            if(this.size > this.sizeto + 2){
-                this.size-=2;
-            }else if(this.size < this.sizeto - 2){
-                this.size+=2
+            if(this.size > this.sizeto + 4){
+                this.size-=4;
+            }else if(this.size < this.sizeto - 4){
+                this.size+=4
             }else{
                 this.size = this.sizeto;
             }
