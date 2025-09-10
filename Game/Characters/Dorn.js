@@ -9,6 +9,7 @@ function Dorn(startposx, startposy, size){
 this.px = startposx;
 this.py = startposy;
 this.pz = 0;
+this.defaultsize = size;
 this.size = size;
 
 //character poster/character color
@@ -24,11 +25,10 @@ this.desc = ["Who would've thought a slime would become the hero? Certainly not 
     "   Use the ability again while a supreme slime is out to swap places and hp with it!",
     "   You autoswap instead of dying if a supreme slime is active and you take fatal damage! Swapping can be done in hitstun!",
     "3. Splatter: Upon taking damage, some of the damage is done over time rather than instantly. This damage cannot kill you",
-    "   During this point, use this ability to negate the damage and splatter! This negates knockback and hitstun too!",
-    "   You are invulnerable and faster while in the splattered state, use this to get away before you reform!",
+    "   During this point, use this ability to negate the damage and splatter! You are invulnerable and faster while in the splattered state, use this to get away before you reform!",
     "4. Deform/Reform: Become a puddle! You automatically absorb slime on the ground and heal instantly while in this state!",
     "   Enemies take damage if they step in you, but you also take minor damage for this. Use again to reform! Can be done in hitstun",
-
+    "   If you reform while an enemy is inside you, you might gain a unique property. This is lost if deformed again."
 ]
 
 //game stats
@@ -59,6 +59,11 @@ this.nohp = 0;
 this.superslime = null;
 this.sizeto = size;
 this.DoT = 0;//for damage overtime and splatter abilities
+
+//copy abilities
+// potential abilities ["none", "hitslime", "smallsime", "slime machinegun", "slimy aura"]
+this.ability = 0;
+this.aura = new hitbox(canvhalfx, canvhalfy, 0, 20, 150)
 }
 Dorn.prototype.listname = function(){
 //to help position the characters correctly
@@ -139,20 +144,40 @@ if(this.DoT > 0){
     }
     
 }
+
+//slime aura (if applicable)
+if(this.ability == 4){
+    this.aura.move(canvhalfx, canvhalfy);
+    this.aura.showbox("#0f04")
+    for(let i = 0 ; i < enemies.length ; i++){
+        if(this.aura.checkenemy(i)){
+            enemies[i].hit(1, ["acid", "aura"])
+            enemies[i].speedcause.push(["Slimy aura", 5, 0.75])//25% slowdown
+        }
+    }
+    
+}
 //super slime
 if(this.superslime != null && this.superslime.lifetime == 0){
     this.superslime = null;
 }
 timeplayed++;
 //resizing
+
+if(this.ability == 2){
+    this.sizeto = this.defaultsize*0.5;
+    
+}else{
+    this.sizeto = this.defaultsize;
+}
  if(this.size != this.sizeto){
     
     this.iframe = true;
     this.cooldowns = [30, 30, 90, 30];
-            if(this.size > this.sizeto + 6){
+            if(this.size > this.sizeto + 4){
                 this.size-=4;
                 this.speedmod = 0.5;
-            }else if(this.size < this.sizeto - 6){
+            }else if(this.size < this.sizeto - 4){
                 if(this.DoT < 0){
                     this.DoT++;
                 }else{
@@ -164,7 +189,12 @@ timeplayed++;
                 this.iframe = false;
             }
         }else{
+            if(this.ability == 2){
+                //smol slime is fast slime
+                this.speedmod = 1.5;
+            }else{
             this.speedmod = 1;
+            }
 
         }
 
@@ -333,8 +363,14 @@ Dorn.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         if(this.hp > 100 && this.hp - dmg < 100){
         this.hp = 100;
         }else{
-        this.hp-=dmg*0.5;
-        this.DoT+=dmg*0.5;
+            //split the difference evenly
+            if(!damagetype.includes("true")){
+        this.hp-=dmg*0.25;
+        this.DoT+=dmg*0.75;
+            }else{
+                //true damage doesn't play by these rules!
+                this.hp-= dmg;
+            }
         }
 
         //handle knockback and DI.
@@ -459,10 +495,20 @@ bossbar = [];
 Dorn.prototype.spec1 = function(){
 //abilities
 //console.log("working!");
-if(this.hp > 5){
+if(this.hp > 5 || this.hp > 0.5 && this.ability == 3){
+    if(this.ability == 1){
+        //slime hitscan!
+        projectiles.push(new slimehitscan("Slime", canvhalfx, canvhalfy, 8, 30 * this.facing[0], 30 * this.facing[1], "rgba(51, 204, 51)", 0, 20, 7))
+    }else if(this.ability == 3){
+        //BABABABABAABABABBABANGG
+projectiles.push(new Slime(canvhalfx, canvhalfy, 7, 45* this.facing[0] + random(-12, 12), (45) * this.facing[1] + random(-12, 12)));
+    }else{
 projectiles.push(new Slime(canvhalfx, canvhalfy, 7, 30 * this.facing[0], 30 * this.facing[1]));
- this.cooldowns[0] = 12;//keep in mind the user can change the FPS freely.
- if(charezmode()){
+    }
+ this.cooldowns[0] = (this.ability == 3)? 2:12;//cool down SO much faster with the slime gun!
+if(this.ability == 3){
+    this.hp-=0.5;//MORE HP FOR MORE GUNNING DOWN!!!
+}else if(charezmode()){
  this.hp-=2;//a bit of mercy
  }else{
     this.hp-=5;//You will PAY!
@@ -518,10 +564,15 @@ Dorn.prototype.spec3 = function(){
 this.cooldowns[2] = 90;
 }
 Dorn.prototype.spec4 = function(){
-
+    if(this.ability < 4){
+        this.ability++
+    }else{
+this.ability = 0;
+    }
+    this.cooldowns[3] = 10;
 }
 
-Dorn.prototype.inst = function(x = this.px, y = this.py, size = 20){
+Dorn.prototype.inst = function(x = this.px, y = this.py, size = this.defaultsize){
 player = new Dorn(x, y, size);
 }
 //center stage and 20 size is the default, feel free to change it up!
@@ -621,7 +672,66 @@ Slime.prototype.exist = function(){
         }
     }
 }
+function slimehitscan(name, x, y, size, mx, my, color, dmg, lifetime, jumps, dmgtype = ["true"], knockback = [0, 0], hitstun = 0){
+    this.name = name;
+    this.x = x;
+    this.y = y;
+    this.shift = [player.px, player.py];
+    this.size = size
+    this.mx = mx;
+    this.my = my;
+    this.color = color;
+    this.hitbox = new hitbox(x, y, 2, size/2, size);
+    this.hitbox.disable();
+    this.lifetime = lifetime;
+    this.dmg = dmg
+    this.dmgtype = dmgtype;
+    this.knockback = knockback;
+    this.hitstun = hitstun;
+    
+    this.jumps = jumps;
+    this.canhit = true;
+}
+slimehitscan.prototype.exist = function(){
+   
+    screen.strokeStyle = this.color;
+    this.hitbox.enable();
+    
 
+
+     screen.beginPath();
+    screen.lineWidth = this.size;
+    
+    screen.moveTo(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    for(let i = 0 ; i < this.jumps ; i++){
+        this.x += this.mx;
+        this.y += this.my;
+        this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1])
+        for(let x = 0 ; this.canhit == true && x < enemies.length ; x++){
+        if(this.hitbox.checkenemy(x)){
+            playerattack = this.name;
+            projectiles.push(new Slime(findposition(enemies[x])[0], findposition(enemies[x])[1], 35, this.mx + this.jumps, this.my + this.jumps))
+            this.canhit = false;
+            this.lifetime = -1;
+            break;
+        }
+    }
+        
+    }
+   this.lifetime--;
+    screen.lineTo(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+   
+    screen.stroke();
+    screen.closePath();
+    screen.lineWidth = 1;
+    if(this.lifetime < 0){
+        return "delete"
+    }
+    //spawn like... a lot of slime
+    if(this.lifetime % 2 == 0){
+    projectiles.push(new Slime(findposition(this)[0], findposition(this)[1], 35, this.mx + this.jumps, this.my + this.jumps))
+    }
+}
 function Super_Slime(x, y, size, mx, my){
     this.name = "Supreme Slime";
     this.x = x;
