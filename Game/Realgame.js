@@ -425,13 +425,13 @@ var resetchallenges = function(){
     //the challenges
     return  [
     //lvl 0
-    [[enemyezmode, "Have fun!!!", true], [notenemyezmode, "No hit the boss!!!", true], ["Jade", "End the encounter with 100+% hp", false], [["Simia"], "Hit a tornado kick", false], [["Magna","Jade"], "Hit a parry!", false], [["Ezekiel"], "Hit the boss with a deathorb while in PANIC", false], [[ "Nino"], "Electrically charge a miasma ball", false], [[ "Magna"], "Use nunchuck and parry your own shuriken", false], [[ "Magmax"], "Use flow to cancel harden", false], [["Ezekiel", "Nino"], "Land a critical hit!", false], [["Shojo", "Magmax"], "Win without using any movement keys!", true]],
+    [[enemyezmode, "Have fun!!!", true], [notenemyezmode, "No hit the boss!!!", true], ["Jade", "End the encounter with 100+% hp", false], [["Simia"], "Hit a tornado kick", false], [["Magna","Jade"], "Hit a parry!", false], [["Ezekiel"], "Hit the boss with a deathorb while in PANIC", false], [[ "Nino"], "Electrically charge a miasma ball", false], [[ "Magna"], "Use nunchuck and parry your own shuriken", false], [[ "Magmax"], "Use flow to cancel harden", false], [["Ezekiel", "Nino"], "Land a critical hit!", false], [["Shojo", "Magmax"], "Win without using any movement keys!", true], [["Dorn", charezmode], "Trap the boss with Supreme Slime!", false], [["Dorn", notcharezmode], "Reduce the boss speed to 5% or less!", false]],
     //lvl 1
     [[enemyezmode, "rout the enemies!", false], [notenemyezmode, "kill the boss last", true]], 
     //lvl 2
     [[true, "don't get parried", true], ["Magna", "Parry the parry beam!", false]],
     //lvl 3
-    [[true, "Don't take any damage!", true], ["Magmax", "Have flow active more than not", false]],
+    [[true, "Don't take any damage!", true], ["Magmax", "Have flow active more than not", false], ["Dorn", "Acquire an aura of your own!", false], ["Shojo", "Become ENRAGED", false]],
     //lvl 4
     [[true, "Don't stray too far from the boss!", true], ["Nino", "Kill the boss in under 10 seconds", true]],
     //lvl 5
@@ -540,7 +540,7 @@ var player;
 var projectiles = [];
 var enemies = [];
 var summons = [];
-var level = 0;
+var level = 3;
 var rest = 60;
 var resttimer = 0;
 var pauseselection = 0;
@@ -1314,6 +1314,16 @@ var gametime = function(){
                     challenges[0][10][2] = false
                 }
 
+                //Trapping the boss
+                if(player.listname() == "Dorn" && charezmode() && player.superslime != null && typeof player.superslime.lifetime == "object"){
+                    challenges[0][11][2] = true
+                }
+
+                //slowing the boss
+                if(player.listname() == "Dorn" && notcharezmode() && enemies[0].speedmod <=0.05){
+                    challenges[0][12][2] = true
+                }
+
                 
 
 
@@ -1372,7 +1382,17 @@ var gametime = function(){
                     challenges[0][10][2] = false;
                     completedchallenges++;
                 }
+                //carried away!
+                if(challenges[0][11][2] == true){
+                    challenges[0][11][2] = false;
+                    completedchallenges++;
+                }
 
+                //YoU'Re ToO SlOw
+                if(challenges[0][12][2] == true){
+                    challenges[0][12][2] = false;
+                    completedchallenges++;
+                }
                 //level 1 challenges
                 framesplayed++;
 
@@ -1452,6 +1472,14 @@ var gametime = function(){
                     }
                     
                 }
+                //That's a nice aura you got there ;)
+                if(player.listname() == "Dorn" && player.ability == 4){
+                    challenges[3][2][2] = true;
+                }
+                //FOISAJFOAFEFDAS;LF
+                if(player.listname() == "Shojo" && player.enraged > 0){
+                    challenges[3][3][2] = true
+                }
                 break;
             case 4:
                 //acquire points
@@ -1465,6 +1493,17 @@ var gametime = function(){
                 //using flow
                 if(challenges[3][1][2] == true){
                     challenges[3][1][2] = false;
+                    completedchallenges++;
+                }
+
+                //YOINK
+                if(challenges[3][2][2] == true){
+                    challenges[3][2][2] = false;
+                    completedchallenges++;
+                }
+                //FUCKING CCH40!!!!!!
+                if(challenges[3][3][2] == true){
+                    challenges[3][3][2] = false;
                     completedchallenges++;
                 }
 

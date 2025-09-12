@@ -26,7 +26,7 @@ this.hitstunmod = (this.lvl > 5)? 0.1:0.2; //POV: weak ass boss who isn't immune
 this.knockbackmod = (this.lvl > 5)? 0.1:0.2; //POV: weak ass boss who isn't immune to knockback
 this.knockback = [0, 0];//x and y position of knockback
 this.talking = (lvl > 5)? false:true;
-this.light = (lvl > 5)? 0.7:999;//POV: too light
+this.light = (lvl > 5)? 0.3:999;//POV: too light
 //extras
 this.tutorial = 0;
 this.turnRate = 0.05;

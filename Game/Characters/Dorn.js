@@ -1,7 +1,8 @@
 /*
 Hardmode changes:
     the hp costs are actually accurate to the description (on easy mode, slime requires 5 hp, but will only take 2. Supreme Slime requires 50 hp, but will only take 35)
-
+    on hardmode, being stepped on while deformed does actual damage rather than just damage over time
+    there is no way to get over 100 hp on hard mode! it caps at 150 on easy
 */
 
 function Dorn(startposx, startposy, size){
@@ -64,6 +65,7 @@ this.DoT = 0;//for damage overtime and splatter abilities
 // potential abilities ["none", "hitslime", "smallsime", "slime machinegun", "slimy aura"]
 this.ability = 0;
 this.aura = new hitbox(canvhalfx, canvhalfy, 0, 20, 150)
+this.state = "reform"//reform and deform
 }
 Dorn.prototype.listname = function(){
 //to help position the characters correctly
@@ -148,6 +150,8 @@ if(this.DoT > 0){
 //slime aura (if applicable)
 if(this.ability == 4){
     this.aura.move(canvhalfx, canvhalfy);
+    this.aura.resize(125 + (this.size * 1.1))
+    this.aura.height = 20
     this.aura.showbox("#0f04")
     for(let i = 0 ; i < enemies.length ; i++){
         if(this.aura.checkenemy(i)){
@@ -156,6 +160,93 @@ if(this.ability == 4){
         }
     }
     
+    
+}
+//contact damage (if deformed), along with other deformed changes
+if(this.state == "deform"){
+    this.aura.move(canvhalfx, canvhalfy);
+    this.aura.resize((this.size))
+    this.aura.height = 1;
+    for(let i = 0 ; i < enemies.length ; i++){
+        if(this.aura.checkenemy(i)){
+            enemies[i].hit(1, ["contact", "acid"])
+            enemies[i].speedcause.push(["Sticky puddle of doom!", 45, 0.15])//85% slowdown
+
+            //it hurts a tad to be stepped on
+            if(charezmode()){
+            this.DoT+=0.1
+
+            }else{
+                //it's unavoidable now!
+                this.hp-=0.1
+            }
+        }
+    }
+
+    for(let i = 0 ; i < projectiles.length ; i++){
+        //basically instantly consume missed slime when deformed
+        
+        if(projectiles[i].name == "Slime" && this.aura.scanproj(i) && typeof projectiles[i].lifetime == "string"){
+            projectiles[i].lifetime = 0;
+            this.hp+=projectiles[i].visibility*0.10//this is OP!
+            projectiles[i].visibility = 0;
+            if(this.hp > 150 && charezmode()){
+                this.hp = 150;
+            }else if(this.hp > 100 && notcharezmode()){
+                this.hp = 100;
+            }
+        }
+    }
+    //no abilities except reform can be used now
+    this.cooldowns = [30, 30, 30, 0]
+}
+
+//copy ability
+if(this.ability == -1){
+    if(this.size != this.sizeto){
+        console.log("KIRBY")
+        //copying is possible!
+        this.aura.move(canvhalfx, canvhalfy);
+        this.aura.resize((this.size))
+        this.aura.height = this.height;
+        for(let i = 0 ; i < enemies.length ; i++){
+        if(this.aura.checkenemy(i)){
+            //some damage
+            enemies[i].hit(1, ["contact", "acid"])
+            enemies[i].speedcause.push(["Sticky puddle of doom!", 45, 0.15])//85% slowdown
+
+            //ability change
+            try{
+            console.log(enemies[i].listname())
+            if(["PL999"].includes(enemies[i].listname())){
+                this.ability = 1
+            }else if(["MagnaE"].includes(enemies[i].listname())){
+                this.ability = 2;
+            }else if(["HARP"].includes(enemies[i].listname())){
+                this.ability = 3
+            }else if(["Slowing"].includes(enemies[i].listname())){
+                this.ability = 4;
+            }else{
+                //POV: allergic to abilityless enemies
+
+                //it hurts a tad to be stepped on
+            if(charezmode()){
+            this.DoT+=0.1
+
+            }else{
+                //it's unavoidable now!
+                this.hp-=0.1
+            }
+            }
+        }catch(e){
+            //meh
+        }
+        }
+    }
+        
+    }else{
+        this.ability = 0;//aw man
+    }
 }
 //super slime
 if(this.superslime != null && this.superslime.lifetime == 0){
@@ -163,12 +254,19 @@ if(this.superslime != null && this.superslime.lifetime == 0){
 }
 timeplayed++;
 //resizing
-
-if(this.ability == 2){
+if(this.state == "deform"){
+    this.sizeto = this.defaultsize * 5;
+}else if(this.ability == 2){
     this.sizeto = this.defaultsize*0.5;
     
 }else{
     this.sizeto = this.defaultsize;
+}
+//z size changes
+if(this.state == "reform"){
+    this.height = 8;//basic hitbox
+}else{
+    this.height = 1;//baby hitbox
 }
  if(this.size != this.sizeto){
     
@@ -181,15 +279,18 @@ if(this.ability == 2){
                 if(this.DoT < 0){
                     this.DoT++;
                 }else{
-                this.size+=1;
+                
+                this.size+=(this.state == "deform")? 4:1;//get bigger faster when deforming
                 }
-                this.speedmod = 2.5;
+                this.speedmod = (this.state == "deform")? 0.5:2.5;//speed penalty instead of buff when deformed
             }else{
                 this.size = this.sizeto;
                 this.iframe = false;
             }
         }else{
-            if(this.ability == 2){
+            if(this.state == "deform"){
+                this.speedmod = 0.5;//a lot harder to move as a puddle...
+            }else if(this.ability == 2){
                 //smol slime is fast slime
                 this.speedmod = 1.5;
             }else{
@@ -240,7 +341,12 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             
             //hitstun
             if(this.hitstun > 0){
+                if(this.state == "deform"){
+                    //you have armor frames when deformed!
+                    this.hitstun = 0;
+                }else{
                 this.hurt();
+                }
                 
             }else{
             //movement
@@ -354,7 +460,9 @@ Dorn.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         if(this.iframe){
             return;
         }
-        var dmg = damage * this.damagemod;
+        
+        //a HEAVY damage resistance when deformed... unless it was true damage
+        var dmg = damage * this.damagemod * ((this.state == "deform" && !damagetype.includes("true"))? 0.1:1);
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
             if(damagetype.includes(this.damagetypemod[i][0])){
                 dmg *= this.damagetypemod[i][1];
@@ -363,7 +471,7 @@ Dorn.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         if(this.hp > 100 && this.hp - dmg < 100){
         this.hp = 100;
         }else{
-            //split the difference evenly
+            //split the difference not so evenly
             if(!damagetype.includes("true")){
         this.hp-=dmg*0.25;
         this.DoT+=dmg*0.75;
@@ -564,12 +672,13 @@ Dorn.prototype.spec3 = function(){
 this.cooldowns[2] = 90;
 }
 Dorn.prototype.spec4 = function(){
-    if(this.ability < 4){
-        this.ability++
-    }else{
-this.ability = 0;
+    this.state = (this.state == "reform")? "deform":"reform";
+    if(this.state == "reform"){
+        //allow the ability to change abilities!
+        this.ability = -1;
+        this.sizeto = this.defaultsize;
     }
-    this.cooldowns[3] = 10;
+    //since this is a size change, the cooldown is automatically 30 frames
 }
 
 Dorn.prototype.inst = function(x = this.px, y = this.py, size = this.defaultsize){
@@ -642,8 +751,8 @@ Slime.prototype.exist = function(){
             return "delete"
             }else{
                 //just linger instead
-                this.lifetime = "stick";
-                this.size +=10;
+                this.lifetime = "cling!";
+                this.size +=50;
                 this.lifetime.HelpIamslimed = undefined;//make sure other enemies can still be slimed!
                 //console.log("hi")
             }
