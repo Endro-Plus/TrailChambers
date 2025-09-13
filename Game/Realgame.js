@@ -422,6 +422,7 @@ var checkweight = function(enemy, weight){
     return (typeof enemy.light == "number" && weight < enemy.light || typeof enemy.light != "number" && weight < enemy.knockbackmod)
 }
 var resetchallenges = function(){
+    
     //the challenges
     return  [
     //lvl 0
@@ -540,7 +541,7 @@ var player;
 var projectiles = [];
 var enemies = [];
 var summons = [];
-var level = 3;
+var level = 0;
 var rest = 60;
 var resttimer = 0;
 var pauseselection = 0;
@@ -1129,6 +1130,7 @@ var Hidden1Select = function(){
 }
 var prep = function(){
     //reset challenges
+    rest = 60;
 challenges =   resetchallenges();
 completedchallenges = 0;
 parried = 0;
@@ -1320,7 +1322,7 @@ var gametime = function(){
                 }
 
                 //slowing the boss
-                if(player.listname() == "Dorn" && notcharezmode() && enemies[0].speedmod <=0.05){
+                if(player.listname() == "Dorn" && notcharezmode() && enemies.length > 0 && enemies[0].speedmod <=0.05){
                     challenges[0][12][2] = true
                 }
 
