@@ -1032,6 +1032,16 @@ Abraxas.prototype.exist = function(){
 
         this.my = Math.abs(this.my) * -1
         }
+
+        //a line to connect Jade and abraxus, so you can now see where it is! Even offscreen!
+        screen.beginPath();
+        screen.strokeStyle = "#ffff0055";
+        screen.lineWidth = "10";
+        screen.moveTo(canvhalfx, canvhalfy)
+        screen.lineTo(findposition(this)[0], findposition(this)[1]);
+        screen.stroke();
+        screen.lineWidth = "1";
+        screen.closePath();
         if(inputs.includes(controls[6]) && this.autofire < this.maxautofire - 30 || this.autofire < 0){
             this.stage = 1;
             player.cooldowns[2] = this.maxautofire;

@@ -249,7 +249,7 @@ MagnaE.prototype.move = function(){
             
             if(this.chuckbox.hitplayer()){
                 //a little less damage for easy mode
-                player.hit((enemyezmode())? 4:8, ["bludgeoning", "physical"], [-12 * this.facing[0], -12 * this.facing[1]], 5, 3);
+                player.hit((enemyezmode())? 4:8, ["bludgeoning", "physical"], [-12 * this.facing[0], -12 * this.facing[1]], 4, 8);
                 this.phase[1]-=10;//these comboes are too long...
                 this.combotimer = 15;
             }
