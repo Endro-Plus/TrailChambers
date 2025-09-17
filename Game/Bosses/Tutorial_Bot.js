@@ -102,6 +102,8 @@ screen.fillStyle = this.color;
 screen.textAlign = "center";
 screen.font = "25px Times New Roman";
 screen.fillText("Use " + controls[2] + ", " + controls[0] + ", " + controls[3] + ", and " + controls[1] + " to move.", canvhalfx, 100)
+screen.fillText("Press escape to pause and view challenges.", canvhalfx, 140)
+screen.fillText("Completing enough challenges may attract more powerful opponents.", canvhalfx, 180)
 this.tutorial+=0.01;
 }else if(this.tutorial < 6){
 screen.fillStyle = this.color;

@@ -14,7 +14,18 @@ this.size = size; //no she is NOT fat
 //card info
 this.postColor = "#FFFF00";
 this.color = "#9E9D27"
-this.desc = ["This is the main character! Beware her tenacity!", "1. Radiant Echo/Slash: Shoots a basic projectile that heals on hit while in magic stance. Can be charged to summon trailing projectiles that follow it around!", "    Slash with a sword in sword stance. Does more damage, and less cooldown, but no healing.", "2. Luminous Burst/Radiant Spin: In magic stance, shoot a large projectile that detonates, healing on hit, and leaves a lingering area of effect!", "    Perform a spin attack in Sword mode, heals on hit, and is a multihit!", "    Both attacks can be charged for more range and overal damage!", "3. Celestial Beam/Defend: In magic stance, aim and fire a hyperlaser from the heavens! Hitting yourself powers up your next move.", "You cannot move while aiming, use the button again to fire the hyperlaser.", "    In sword stance, parry an incoming attack, and leave light sparks that trail Radiant Echo. There are 15 parry frames!", "    Whiffing a parry inflicts 15 additonal vulnerability frames, leaving you completely inactionable", "4. Stance Change: Dash forwards, evading attacks! By the end of this move, you swap stances."];
+this.desc = ["This is the main character! Beware her tenacity!",
+     "1. Radiant Echo/Slash: Shoots a basic projectile that heals on hit while in magic stance. Can be charged to summon trailing projectiles that follow it around!",
+      "    Slash with a sword in sword stance. Does more damage, and less cooldown, but no healing.",
+       "2. Luminous Burst/Radiant Spin: In magic stance, shoot a large projectile that detonates, healing on hit, and leaves a lingering area of effect!",
+        "    Perform a spin attack in Sword mode, heals on hit, and is a multihit!",
+         "    Both attacks can be charged for more range and overal damage!",
+          "3. Celestial Beam/Defend: In magic stance, aim and fire a hyperlaser from the heavens! Hitting yourself powers up your next move.",
+           "You cannot move while aiming, use the button again to fire the hyperlaser.",
+            "   Moves with low knockback do not push you around while aiming!",
+             "    In sword stance, parry an incoming attack, and leave light sparks that trail Radiant Echo. There are 15 parry frames!", 
+             "    Whiffing a parry inflicts 15 additonal vulnerability frames, leaving you completely inactionable",
+              "4. Stance Change: Dash forwards, evading attacks! By the end of this move, you swap stances."];
 //not me changing some of the move's names so I don't get hit with the copyright strike.
 //game stats
 this.playershift = [0, 0];//shift the position of the player
@@ -252,7 +263,7 @@ if(this.hp <= 100){
 //under max
 screen.fillStyle = "#F00";
 screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
-if(this.parry > 0){
+if(this.parry > 0 || this.iframe == true){
 screen.fillStyle = "#00F";
 }else{
 screen.fillStyle = "#0F0";
@@ -260,7 +271,7 @@ screen.fillStyle = "#0F0";
 screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, this.hp / 2, 4);//current hp
 }else{
 //over max
-if(this.parry > 0){
+if(this.parry > 0 || this.iframe == true){
 screen.fillStyle = "#00F";
 }else{
 screen.fillStyle = "#0F0";
@@ -610,6 +621,12 @@ Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         //handle knockback and DI.
         knockback[0] *= this.knockbackmod;
         knockback[1] *= this.knockbackmod;
+
+        //she doesn't take the knockback or hitstun if the knockback isn't high enough and she's in abraxas stance
+        if(this.stance == "abraxas" && Math.abs(knockback[0]) + Math.abs(knockback[1]) < 35){
+            knockback = [0, 0];
+            hitstun = 0;
+        }
         if(inputs.includes(controls[0])){
             knockback[0] += this.DI * DImod;
         }
@@ -1041,6 +1058,16 @@ Abraxas.prototype.exist = function(){
         }
         this.autofire--;
         this.size += 0.25;
+
+        //a quick indicator to show where it is in relation to the player
+        screen.beginPath()
+        screen.lineWidth = ((this.size/2 < 20)? this.size/2:20).toString();
+        screen.strokeStyle = "#ff08"
+        screen.moveTo(canvhalfx, canvhalfy);
+        screen.lineTo(findposition(this)[0], findposition(this)[1]);
+        screen.stroke()
+        screen.lineWidth = "1";
+        screen.closePath()
 
 
     }else{
