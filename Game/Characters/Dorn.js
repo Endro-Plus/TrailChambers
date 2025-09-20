@@ -90,10 +90,17 @@ screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, this.hp / 2, 4);//cu
 
 //damage over time
 screen.fillStyle = "#505"
+if(this.DoT > 0){
+    //if not, then it's negative
 if(this.DoT >= this.hp){
 screen.fillRect((canvhalfx - 25), canvhalfy - this.size - 10, (this.hp / 2), 4)
 }else{
 screen.fillRect((canvhalfx - 25) + (this.hp / 2) - this.DoT/2, canvhalfy - this.size - 10, this.DoT, 4);//current hp
+}
+}else{
+    //for negative DoT, the hp bar becomes a bit of an indicator as to how much iframes you have
+    screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, Math.abs(this.DoT) * 1.67, 4);//current hp
+
 }
 }else if (this.hp > 0){
 //over max
@@ -949,8 +956,9 @@ Super_Slime.prototype.exist = function(){
         if(typeof this.lifetime == "object"){
             //They see me rollin' they hatin'!
             this.lifetime.hitstun = 10;
-            this.lifetime.x = this.x - this.shift[0];
-            this.lifetime.y = this.y - this.shift[1];
+            this.lifetime.x = this.x;
+            this.lifetime.shift = [...this.shift]
+            this.lifetime.y = this.y;
             this.lifetime.hit(1, ["acid"]);
             this.lifetime.speedcause.push(["Super Slimed", 90, 0.10])//movement? not for you!
         }

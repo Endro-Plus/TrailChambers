@@ -426,7 +426,7 @@ var resetchallenges = function(){
     //the challenges
     return  [
     //lvl 0
-    [[enemyezmode, "Have fun!!!", true], [notenemyezmode, "No hit the boss!!!", true], ["Jade", "End the encounter with 100+% hp", false], [["Simia"], "Hit a tornado kick", false], [["Magna","Jade"], "Hit a parry!", false], [["Ezekiel"], "Hit the boss with a deathorb while in PANIC", false], [[ "Nino"], "Electrically charge a miasma ball", false], [[ "Magna"], "Use nunchuck and parry your own shuriken", false], [[ "Magmax"], "Use flow to cancel harden", false], [["Ezekiel", "Nino"], "Land a critical hit!", false], [["Shojo", "Magmax"], "Win without using any movement keys!", true], [["Dorn", charezmode], "Trap the boss with Supreme Slime!", false], [["Dorn", notcharezmode], "Reduce the boss speed to 5% or less!", false]],
+    [[enemyezmode, "Have fun!!!", true], [notenemyezmode, "No hit the boss!!!", true], ["Jade", "End the encounter with 100+% hp", false], [["Simia"], "Hit a tornado kick", false], [["Magna","Jade"], "Hit a parry!", false], [["Ezekiel"], "Hit the boss with a deathorb while in PANIC", false], [[ "Nino"], "Electrically charge a miasma ball", false], [[ "Magna"], "Use nunchuck and parry your own shuriken", false], [[ "Magmax"], "Use flow to cancel harden", false], [["Ezekiel", "Nino"], "Land a critical hit!", false], [["Shojo", "Magmax"], "Win without using any movement keys!", true], [["Dorn", enemyezmode], "Trap the boss with Supreme Slime!", false], [["Dorn", notenemyezmode], "Reduce the boss speed to 5% or less!", false]],
     //lvl 1
     [[enemyezmode, "rout the enemies!", false], [notenemyezmode, "kill the boss last", true]], 
     //lvl 2
@@ -1317,12 +1317,12 @@ var gametime = function(){
                 }
 
                 //Trapping the boss
-                if(player.listname() == "Dorn" && charezmode() && player.superslime != null && typeof player.superslime.lifetime == "object"){
+                if(player.listname() == "Dorn" && enemyezmode() && player.superslime != null && typeof player.superslime.lifetime == "object"){
                     challenges[0][11][2] = true
                 }
 
                 //slowing the boss
-                if(player.listname() == "Dorn" && notcharezmode() && enemies.length > 0 && enemies[0].speedmod <=0.05){
+                if(player.listname() == "Dorn" && notenemyezmode() && enemies.length > 0 && enemies[0].speedmod <=0.05){
                     challenges[0][12][2] = true
                 }
 
