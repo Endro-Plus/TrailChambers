@@ -540,8 +540,8 @@ var setup;
 var player;
 var projectiles = [];
 var enemies = [];
-var summons = [];
-var level = 0;
+var others = [];//teleporters and the like
+var level = 7;
 var rest = 60;
 var resttimer = 0;
 var pauseselection = 0;
@@ -558,6 +558,7 @@ var playerattack;
 var enemyattack;
 var playerhp = 0;//remember what it was before a reset
 var framesplayed = 0;//good for calculating time
+var altboss = false;//fighting another boss?
 {
 var selection = 0;
 var Hidden = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'earrowleft', 'earrowright', 'earrowleft', 'earrowright', 0];
@@ -1136,9 +1137,12 @@ completedchallenges = 0;
 parried = 0;
 crit = 0;
 proj_parry = [];
+others = [];
 playerattack;
 enemyattack;
 playerhp = 0;//remember what it was before a reset
+altboss = false;
+rest = 60;
 framesplayed = 0;//good for calculating time
 
     //what people choose
@@ -1296,7 +1300,7 @@ var gametime = function(){
             }
                 //critical hit
                 if(crit > 0 && player.listname() != "Magmax"){
-                    challenges[0][challenges[0].length-1][2] = true;
+                    challenges[0][9][2] = true;
                 }
 
                 //charging a miasma ball
@@ -1783,26 +1787,45 @@ var gametime = function(){
 
     level +=0.5
     }else if(level == 6){
-        if(typeof misc != "object"){
-            misc = [0, 0]
-        }
+        
         bossbar = [];
         projectiles = [];
         enemies = [];
         player.inst(0, 0);
         if(rest != null){
-            misc[0] = rest;
+            //misc[0] = rest;
             rest = null;
             //no escape...
         }
         bossbarmode = 0;
         level = 6.5;
         arena.w = 200;
-        arena.h = 100;
+        arena.h = 500;
+        completedchallenges = 10;
+        if(completedchallenges >= 5){
+            others[0] = new hitbox(100, 25, 0, 999, 50)
+        }else{
+            others[0] = null
+        }
+            others[1] = new hitbox(100, 75, 0, 999, 50)
     }else if(level == 6.5){
         misc[1]++;
         //console.log(misc[1])
-        //completedchallenges = 10;
+        
+        if(others[0] != null){
+            others[0].move((canvhalfx)+player.px, (canvhalfy-450)+player.py)
+            others[0].showbox("red");
+            if(others[0].hitplayer()){
+                altboss = true;
+                level = 7
+            }
+        }
+        others[1].move((canvhalfx)+player.px, (canvhalfy+450)+player.py)
+        others[1].showbox("cyan")
+         if(others[1].hitplayer()){
+                altboss = false;
+                level = 7
+            }
         if(misc[1] > 90 && misc[1] < 180){
              screen.fillStyle = (completedchallenges < 5)? "black" : "red";
             screen.textAlign = "center";
@@ -1810,16 +1833,18 @@ var gametime = function(){
             screen.fillText("You have completed " + completedchallenges + " challenges ", canvhalfx, 100);
         }
         if(completedchallenges >= 5 ){
-            if(misc[1] < 290 && misc[1] > 180){
+            if(misc[1] < 999 && misc[1] > 180){
             screen.fillStyle = "red"
             screen.textAlign = "center";
             screen.font = "30px Times New Roman";
-            screen.fillText("Your impressive feats in this simulation will not go unnoticed", canvhalfx, 100);
-            }else if( misc[1] < 450 && misc[1] > 290){
+            screen.fillText("Move up to face your first real challenger.", canvhalfx, 100);
+            screen.fillText("Go down to proceed with the trials.", canvhalfx, 130);
+
+            }else if(misc[1] > 999){
                 screen.fillStyle = "red"
             screen.textAlign = "center";
             screen.font = "30px Times New Roman";
-            screen.fillText("One is already eager to face you off... in the next update", canvhalfx, 100);
+            screen.fillText("Euclid awaits your decision...", canvhalfx, 100);
             }
         }else{
             if(misc[1] < 250 && misc[1] > 180){
@@ -1828,16 +1853,39 @@ var gametime = function(){
             screen.font = "45px Times New Roman";
             screen.fillText("Not bad, but nothing extraordinary", canvhalfx, 100);
             }else if(misc[1] < 450 && misc[1] > 250){
-            screen.fillStyle = "black"
-            screen.textAlign = "center";
-            screen.font = "45px Times New Roman";
-            screen.fillText("Perhaps a few more trials are necessary...", canvhalfx, 100);
+                //basically skip the secret boss
+            level = 7;
             }
         }
 
-        if(misc[1] > 450){
-            player.win();
+        
+    }else if(level == 7){
+        bossbar = [];
+        projectiles = [];
+        enemies = [];
+        others = []
+        player.inst(0, 0);
+        rest = 60;
+        altboss = true
+        if(altboss == true){
+            //this is where the fun begins!
+            bossobject["Euclid"].inst(3, canvhalfx, canvhalfy - 250)
+            //SO much space... it's a shame none of it matters
+            arena.w = 9999;
+            arena.h = 9999;
+            bossbarmode = 2;
+            bossbar.push(enemies[0])
+            boss_title = "Euclid"
         }
+
+
+
+
+
+        level+=.5;
+            
+        
+
     }
     }
 

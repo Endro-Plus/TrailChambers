@@ -57,6 +57,7 @@ this.parry = 0;
 this.truemiracle = 0;
 this.parryiframes = 0;
 this.abraxusind = -1;//abraxus and parry now has an indicator if they are ready
+this.comboprotection = 0;//because this character needed MORE ways to stay alive... SHE DOESN'T
 }
 Jade.prototype.listname = function(){
 //to help position the characters correctly
@@ -92,6 +93,11 @@ if(this.hp > 100){
         this.win()
     }
     return "dead";
+}
+if(this.comboprotection > 0){
+    this.comboprotection-=0.01;
+}else{
+    this.comboprotection = 0;
 }
 timeplayed++;
 //speedmod is ALWAYS 1 to begin with
@@ -173,16 +179,16 @@ if(this.slashtime > 0 && this.spin == false){
     }
     if(this.powerup > 0){
             screen.fillStyle = "#fc03db";
-            screen.arc(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size * 10, this.facing[2], this.facing[2] + Math.PI);
+            screen.arc(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size * 12, this.facing[2], this.facing[2] + Math.PI);
             screen.fill();
             screen.closePath();
             screen.beginPath();
         }
     screen.fillStyle = "#FF8";
-    screen.arc(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size * 5, this.facing[2], this.facing[2] + Math.PI);
+    screen.arc(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size * 6, this.facing[2], this.facing[2] + Math.PI);
     screen.fill();
     screen.closePath();
-    this.swordbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.size * 5);
+    this.swordbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.size * 6);
     for(let i = 0 ; i < enemies.length ; i++){
     if(this.swordbox.checkenemy(i) && this.swordbox.enemyhalf(i, this.facing)){
         enemies[i].hit(15, ['physical', 'slashing'], [5 * this.facing[0], 5 * this.facing[1]], 20);
@@ -191,7 +197,7 @@ if(this.slashtime > 0 && this.spin == false){
     }
     if(this.powerup > 0){
         this.swordbox.refreshimmune();
-        this.swordbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.size * 10);
+        this.swordbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.size * 12);
         for(let i = 0 ; i < enemies.length ; i++){
             if(this.swordbox.checkenemy(i) && this.swordbox.enemyhalf(i, this.facing)){
                 enemies[i].hit(7, ['light']);
@@ -212,20 +218,20 @@ this.slashtime--;
 if(this.powerup > 0){
 //power up spin size
 screen.fillStyle = "#fc03db";
-circle(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size * 6)
+circle(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size * 7)
 }
 screen.fillStyle = "#DD" + random(0, 9, false);
 
-circle(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size * 4);
+circle(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size * 5);
 if(this.powerup > 0){
-this.swordbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.size * 6);
+this.swordbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.size * 7);
 this.powerup = this.slashtime;
 if(Math.floor(this.powerup) % 3 == 0){
 projectiles.push(new Light_Spark(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], 5, random(-10, 10), random(-10, 10)));
 projectiles.push(new Nosferatu_blast(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.size, 0, 0));
 }
 }else{
-this.swordbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.size * 4);
+this.swordbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.size * 5);
 }
     
     for(let i = 0 ; i < enemies.length ; i++){
@@ -598,7 +604,11 @@ Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
                 projectiles.push(new movingpart(canvhalfx, canvhalfy, random(-10, 10), random(-10, 10), 9, "grey", 10));
             }
         }
-        var dmg = damage * this.damagemod;
+        var dmg = damage * this.damagemod * (1 - this.comboprotection);
+        this.comboprotection+= 0.2;//so basically make her take less damage for every hit she takes
+        if(this.comboprotection > 0.75){
+            this.comboprotection = 0.75;
+        }
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
             if(damagetype.includes(this.damagetypemod[i][0])){
                 dmg *= this.damagetypemod[i][1];

@@ -735,7 +735,7 @@ Darkblast.prototype.exist = function(){
     this.mx = mx;
     this.my = my;
     this.last = 600;//20 second duration!
-    this.hitbox = new hitbox(this.x, this.y, 8, 0, 9);
+    this.hitbox = new hitbox(this.x, this.y, 0, 10, 9);
     this.hitbox.disable();
     this.hitbox.immunityframes(999);
     this.lifetime = 30;//1 second to arm, one second of it being parriable

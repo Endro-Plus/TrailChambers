@@ -23,7 +23,7 @@ var charlist = ["Jade", "Magmax", "Simia", "Magna", "Ezekiel", "Nino", "Shojo", 
 charlist.push("Realgame");
 
 //list of every boss. Once again, this is ordered based on how you put them in.
-var bosslist = ["Tutorial_Bot", 'The_Eye', "MagnaE", "Slowing", "Normal", "HARP", "Homing", "PL999"]
+var bosslist = ["Tutorial_Bot", 'The_Eye', "MagnaE", "Slowing", "Normal", "HARP", "Homing", "PL999", "Euclid"]
 
 //another list of characters a for loop will make use of
 var chars = [];

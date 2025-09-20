@@ -64,10 +64,10 @@ this.shieldhp = 100;//yep... the shield has an hp stat, it can be broken!
 
 this.dmgcap = 0;//max is 20! Usually
 this.maxdmgcap = null;//Maybe not always 20... 
-this.lancespin = new hitbox(0, 0, this.pz+4, this.height + 4, 60);
+this.lancespin = new hitbox(0, 0, this.pz+6, this.height + 4, 60);
 this.lancespin.disable();
 this.lancespin.immunityframes(5);
-this.stab = new hitbox(0, 0, this.pz+2, this.height-2, 10);
+this.stab = new hitbox(0, 0, this.pz+3, this.height-2, 10);
 this.stab.disable();
 this.stab.immunityframes(6);
 this.spinspeed = 0.2;
@@ -76,7 +76,7 @@ this.stabtime = [0, 0];//timer, what kind of stab
 this.lockfacing = [];
 
 //shieldbash
-this.shield = new hitbox(0, 0, this.pz, this.height, 75);
+this.shield = new hitbox(0, 0, this.pz+2, this.height, 75);
 this.shield.immunityframes(6);
 this.shield.disable();
 this.shieldbashframes = 0;
@@ -85,7 +85,7 @@ this.shieldbashframes = 0;
 this.rush = false;
 this.accel = 0;
 this.lowdamagerush = 0;
-
+this.contact = new hitbox(0, 0, 0, 0, 0)
 //Actual shield block
 this.shielding = false;
 }
@@ -557,6 +557,15 @@ if(this.cooldowns[3] <= 0 && inputs.includes(controls[7])){
     this.spec4();
 }
 
+if(this.rush == true || this.shieldbashframes > 0 && this.shieldhp<= 0){
+    //have your own dedicated contact hitbox ready!
+    this.contact.reassign(canvhalfx, canvhalfy, this.pz, this.height, this.size)
+    for(let i = 0 ; i < enemies.length ; i++){
+        if(this.contact.checkenemy(i)){
+            this.hit(0, ["contact", enemies[i].enemyID])
+        }
+    }
+}
 }
 
 

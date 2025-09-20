@@ -35,7 +35,7 @@ this.mercyframes = 60; //a couple seconds to get your barrings before death
 this.chuckbox = new hitbox(this.x, this.y, this.z+1, this.height - 1, 40);
 this.chuckbox.disable();
 this.chuckbox.immunityframes(5);
-this.runaura = new hitbox(this.x, this.y, this.z+1, this.height - 1, 75);
+this.runaura = new hitbox(this.x, this.y, 0, 99, 75);
 this.runaura.disable();
 this.showchuck = 0;
 this.chuckdown = 0;
@@ -120,8 +120,8 @@ this.zone();
 }else{
     //go to the player, but be a little off on purpose
     if(this.dashlocale.length == 0){
-    let dx = canvhalfx - (this.x + player.px + random(-40, 40));
-    let dy = canvhalfy - (this.y + player.py + random(-40, 40));
+    let dx = canvhalfx - (this.x + player.px  - this.shift[0]+ random(-40, 40));
+    let dy = canvhalfy - (this.y + player.py - this.shift[1] + random(-40, 40));
     let magnitude = Math.sqrt(dx * dx + dy * dy);
     this.dashlocale[0] = (dx / magnitude) * (this.speed + this.lvl);
     this.dashlocale[1] = (dy / magnitude) * (this.speed + this.lvl);
@@ -174,16 +174,16 @@ MagnaE.prototype.move = function(){
         // stay in his range, which happens to fuck up particular bad characters... simia
         this.hitbox.updateimmunity();
         this.chuckbox.updateimmunity();
-        if(this.x + player.px > canvhalfx + 45){
+        if(this.x + player.px - this.shift[0] > canvhalfx + 40){
             this.x-=this.speed * this.speedmod;
             this.facing = [-1, 0];
-        }else if (this.x + player.px < canvhalfx - 45){
+        }else if (this.x + player.px  - this.shift[0]< canvhalfx - 40){
             this.x+=this.speed * this.speedmod;
             this.facing = [1, 0];
-        }if(this.y + player.py < canvhalfy - 45){
+        }if(this.y + player.py - this.shift[1]< canvhalfy - 40){
             this.y+=this.speed * this.speedmod;
             this.facing = [0, 1];
-        }else if (this.y + player.py > canvhalfy + 45){
+        }else if (this.y + player.py - this.shift[1] > canvhalfy + 40){
             this.y-=this.speed * this.speedmod;
             this.facing = [0, -1];
         }
@@ -223,8 +223,8 @@ MagnaE.prototype.move = function(){
             this.facing[2] = 0
         }
     }
-        this.hitbox.reassign(this.x + player.px, this.y + player.py, this.z, 8, this.size);
-        this.chuckbox.move(this.x + player.px, this.y + player.py);
+        this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 5, this.size);
+        this.chuckbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
         
         //contact damage
         if(this.hitbox.hitplayer()){
@@ -251,7 +251,7 @@ MagnaE.prototype.move = function(){
                 //a little less damage for easy mode
                 player.hit((enemyezmode())? 4:8, ["bludgeoning", "physical"], [-12 * this.facing[0], -12 * this.facing[1]], 4, 8);
                 this.phase[1]-=10;//these comboes are too long...
-                this.combotimer = 15;
+                this.combotimer = 40;
             }
             
             this.chuckbox.grantimmunity(player.listname());
@@ -272,13 +272,13 @@ MagnaE.prototype.move = function(){
 
             
             
-            let dx = canvhalfx - (this.x + player.px);
-            let dy = canvhalfy - (this.y + player.py);
+            let dx = canvhalfx - (this.x + player.px - this.shift[0]);
+            let dy = canvhalfy - (this.y + player.py - this.shift[1]);
             let magnitude = Math.sqrt(dx * dx + dy * dy);
             velocityX = (dx / magnitude) * this.shurikenspeed;
             velocityY = (dy / magnitude) * this.shurikenspeed;
             
-            projectiles.push(new ParryProjE(this.x + player.px, this.y + player.py, 12, velocityX,velocityY, (this.lvl < 9)? 10 - this.lvl:0));
+            projectiles.push(new ParryProjE(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 12, velocityX,velocityY, (this.lvl < 9)? 10 - this.lvl:0));
         }
 
         }
@@ -288,7 +288,7 @@ MagnaE.prototype.move = function(){
             this.showchuck--;
             screen.beginPath();
             screen.fillStyle = "#4d1a00";
-            screen.arc(this.x + player.px, this.y + player.py, this.chuckbox.size, this.facing[2], this.facing[2] + Math.PI);
+            screen.arc(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.chuckbox.size, this.facing[2], this.facing[2] + Math.PI);
             screen.fill();
             screen.closePath();
         }
@@ -299,7 +299,7 @@ MagnaE.prototype.move = function(){
 MagnaE.prototype.zone = function(){
         if(this.hitstun > 0){
         this.hurt();
-        this.hitbox.reassign(this.x + player.px, this.y + player.py, this.z, 8, this.size);
+        this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
         return;
         }
         if(arena.leave(this.x - this.shift[0], this.y - this.shift[1], this.size)){
@@ -308,24 +308,24 @@ MagnaE.prototype.zone = function(){
     }
         this.hitbox.updateimmunity();
         //literally run away
-        this.runaura.move(this.x + player.px, this.y + player.py);
+        this.runaura.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
         if(this.runaura.scanplayer()){
-        if(this.x + player.px > canvhalfx){
+        if(this.x + player.px - this.shift[0] > canvhalfx){
             this.x+=this.speed * this.speedmod;
             this.facing = [1, 0];
-        }else if (this.x + player.px < canvhalfx){
+        }else if (this.x + player.px - this.shift[0]< canvhalfx){
             this.x-=this.speed * this.speedmod;
             this.facing = [-1, 0];
-        }if(this.y + player.py < canvhalfy){
+        }if(this.y + player.py - this.shift[1] < canvhalfy){
             this.y-=this.speed * this.speedmod;
             this.facing = [0, -1];
-        }else if (this.y + player.py > canvhalfy){
+        }else if (this.y + player.py - this.shift[1]> canvhalfy){
             this.y+=this.speed * this.speedmod;
             this.facing = [0, 1];
         }
     }
 
-        this.hitbox.reassign(this.x + player.px, this.y + player.py, this.z, 8, this.size);
+        this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 5, this.size);
 
         if(this.hitbox.hitplayer()){
         console.log("hit")
@@ -339,8 +339,8 @@ MagnaE.prototype.zone = function(){
                 this.chuckdown = 15;
             }
             // Calculate direction to throw shuriken
-        let dx = canvhalfx - (this.x + player.px);
-        let dy = canvhalfy - (this.y + player.py);
+        let dx = canvhalfx - (this.x + player.px - this.shift[0]);
+        let dy = canvhalfy - (this.y + player.py - this.shift[1]);
         let magnitude = Math.sqrt(dx * dx + dy * dy);
         velocityX = (dx / magnitude) * this.shurikenspeed;
         velocityY = (dy / magnitude) * this.shurikenspeed;
@@ -373,7 +373,7 @@ MagnaE.prototype.VROOOM = function(speedx, speedy){
         }else{
             this.dashlocale[2] = 2;
         }
-        this.hitbox.reassign(this.x + player.px, this.y + player.py, this.z, 8, this.size);
+        this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 2, this.size);//VERY low profile
         
         //contact damage
         if(this.hitbox.hitplayer()){
@@ -403,8 +403,8 @@ MagnaE.prototype.VROOOM = function(speedx, speedy){
 
             
             
-            let dx = canvhalfx - (this.x + player.px);
-            let dy = canvhalfy - (this.y + player.py);
+            let dx = canvhalfx - (this.x + player.px - this.shift[0]);
+            let dy = canvhalfy - (this.y + player.py - this.shift[1]);
             let magnitude = Math.sqrt(dx * dx + dy * dy);
             velocityX = (dx / magnitude) * this.shurikenspeed;
             velocityY = (dy / magnitude) * this.shurikenspeed;
@@ -412,7 +412,7 @@ MagnaE.prototype.VROOOM = function(speedx, speedy){
             this.dashlocale[0] = (dx / magnitude) * (this.speed + this.lvl);
             this.dashlocale[1] = (dy / magnitude) * (this.speed + this.lvl);
 
-            projectiles.push(new ParryProjE(this.x + player.px, this.y + player.py, 12, velocityX,velocityY, (this.lvl < 9)? 10 - this.lvl:0));
+            projectiles.push(new ParryProjE(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], 12, velocityX,velocityY, (this.lvl < 9)? 10 - this.lvl:0));
         }
 
         }
@@ -423,7 +423,7 @@ MagnaE.prototype.VROOOM = function(speedx, speedy){
             this.showchuck--;
             screen.beginPath();
             screen.fillStyle = "#4d1a00";
-            screen.arc(this.x + player.px, this.y + player.py, this.chuckbox.size, this.facing[2], this.facing[2] + Math.PI);
+            screen.arc(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.chuckbox.size, this.facing[2], this.facing[2] + Math.PI);
             screen.fill();
             screen.closePath();
         }
@@ -455,7 +455,7 @@ if(arena.leavedir(0, this.y - this.shift[1], this.size).includes('u')){
     
 }
 }
-this.hitbox.reassign(this.x + player.px, this.y + player.py, this.z, 8, this.size);
+this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 5, this.size);
 }
 MagnaE.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
     //Unlike his training bot, you only get ONE free hit on Magna
