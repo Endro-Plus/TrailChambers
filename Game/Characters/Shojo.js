@@ -371,7 +371,7 @@ if(this.spinspeed > 3 && !inputs.includes(controls[4])){
 
     
 }
-//melee hitbox
+//melee stab hitbox
 if(this.stabtime[0] > 0 && this.stabtime[1] == 0){
     this.stabtime[0]--;
     this.stab.move(canvhalfx, canvhalfy)

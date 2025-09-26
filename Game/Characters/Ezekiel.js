@@ -458,6 +458,7 @@ this.Timshots = 0;
 }
 }
 Ezekiel.prototype.DIE = function(orb){
+    //NOT THE BEEEEESSSSS
     this.deathorbs[orb].updateimmunity();
     if(this.stance == "ATTACK" && enemies.length > 0){
     if(this.deathphase[orb] > 0 && enemies.length > 0){
@@ -476,18 +477,18 @@ Ezekiel.prototype.DIE = function(orb){
         //movement
         try{
            this.deathorbs[orb].move(this.deathorbs[orb].x + this.px - this.deathshift[orb][0], this.deathorbs[orb].y + this.py - this.deathshift[orb][1]);
-        if(this.deathorbs[orb].x + 60 + this.px > enemies[this.targetting[orb]].x + this.px){
+        if(this.deathorbs[orb].x + 60 + this.px > findposition(enemies[this.targetting[orb]])[0]){
             this.deathorbs[orb].x-=7;
             
         }
-        if(this.deathorbs[orb].x - 60 + this.px < enemies[this.targetting[orb]].x + this.px){
+        if(this.deathorbs[orb].x - 60 + this.px < findposition(enemies[this.targetting[orb]])[0]){
             this.deathorbs[orb].x+=7;
         }
 
-        if(this.deathorbs[orb].y + 60 + this.py>enemies[this.targetting[orb]].y + this.py){
+        if(this.deathorbs[orb].y + 60 + this.py>findposition(enemies[this.targetting[orb]])[1]){
             this.deathorbs[orb].y-=7;
         }
-        if(this.deathorbs[orb].y - 60 + this.py < enemies[this.targetting[orb]].y + this.py){
+        if(this.deathorbs[orb].y - 60 + this.py < findposition(enemies[this.targetting[orb]])[1]){
             this.deathorbs[orb].y+=7;
         }
     }catch(e){
@@ -499,8 +500,8 @@ Ezekiel.prototype.DIE = function(orb){
     }
        if(this.deathphase[orb] % 25 == 0 && enemies[this.targetting[orb]].talking == false){
         //fire!
-        let dx = (this.deathorbs[orb].x + player.px - this.deathshift[orb][0]) - (enemies[this.targetting[orb]].x + this.px);
-        let dy = (this.deathorbs[orb].y + player.py - this.deathshift[orb][1]) - (enemies[this.targetting[orb]].y + this.py);
+        let dx = (this.deathorbs[orb].x + player.px - this.deathshift[orb][0]) - findposition(enemies[this.targetting[orb]])[0];
+        let dy = (this.deathorbs[orb].y + player.py - this.deathshift[orb][1]) -findposition(enemies[this.targetting[orb]])[1];
         let magnitude = Math.sqrt(dx * dx + dy * dy);
         velocityX = (dx / magnitude) * 15;
         velocityY = (dy / magnitude) * 15;
@@ -511,8 +512,8 @@ Ezekiel.prototype.DIE = function(orb){
         //console.log(this.deathphase[orb])
     }else if (this.deathphase[orb] == 0){
 
-        let dx = (this.deathorbs[orb].x + player.px - this.deathshift[orb][0]) - (enemies[this.targetting[orb]].x + this.px);
-        let dy = (this.deathorbs[orb].y + player.py - this.deathshift[orb][1]) - (enemies[this.targetting[orb]].y + this.py);
+        let dx = (this.deathorbs[orb].x + player.px - this.deathshift[orb][0]) - findposition(enemies[this.targetting[orb]])[0];
+        let dy = (this.deathorbs[orb].y + player.py - this.deathshift[orb][1]) - findposition(enemies[this.targetting[orb]])[1];
         let magnitude = Math.sqrt(dx * dx + dy * dy);
         velocityX = (dx / magnitude) * 15;
         velocityY = (dy / magnitude) * 15;
@@ -785,7 +786,7 @@ this.deathphase.push(random(35, 45, false));
 this.targetting.push(this.marked);
 this.meleedirect.push([]);
 this.deathshift.push([0, 0]);
-this.cooldowns[2] = 150;
+this.cooldowns[2] = 90;
 }
 Ezekiel.prototype.spec4 = function(){
 if(this.stance == "ATTACK"){

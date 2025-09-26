@@ -358,6 +358,16 @@ var aim = function(x, y, x2, y2, speed){
         velocityY = (dy / magnitude) * speed;
         return [velocityX, velocityY];
 }
+var aim2 = function(x, y, fp, speed){
+    let x2 = fp[0]
+    let y2 = fp[1]
+    let dx = x - x2;
+        let dy = y - y2;
+        let magnitude = Math.sqrt(dx * dx + dy * dy);
+        velocityX = (dx / magnitude) * speed;
+        velocityY = (dy / magnitude) * speed;
+        return [velocityX, velocityY];
+}
 function distance(x1, y1, x2, y2, abs = false) {
     //2 points
     let dx = x2 - x1;
@@ -1871,8 +1881,8 @@ var gametime = function(){
             //this is where the fun begins!
             bossobject["Euclid"].inst(3, canvhalfx, canvhalfy - 250)
             //SO much space... it's a shame none of it matters
-            arena.w = 9999;
-            arena.h = 9999;
+            arena.w = 5000;
+            arena.h = 5000;
             bossbarmode = 2;
             bossbar.push(enemies[0])
             boss_title = "Euclid"

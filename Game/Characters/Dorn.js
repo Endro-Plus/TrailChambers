@@ -26,7 +26,7 @@ this.desc = ["Who would've thought a slime would become the hero? Certainly not 
     "   Use the ability again while a supreme slime is out to swap places and hp with it!",
     "   You autoswap instead of dying if a supreme slime is active and you take fatal damage! Swapping can be done in hitstun!",
     "3. Splatter: Upon taking damage, some of the damage is done over time rather than instantly. This damage cannot kill you",
-    "   During this point, use this ability to negate the damage and splatter! You are invulnerable and faster while in the splattered state, use this to get away before you reform!",
+    "   During this point, use this ability to negate the damage over time and splatter! You are invulnerable and faster while in the splattered state, use this to get away before you reform!",
     "4. Deform/Reform: Become a puddle! You automatically absorb slime on the ground and heal instantly while in this state!",
     "   Enemies take damage if they step in you, but you also take minor damage for this. Use again to reform! Can be done in hitstun",
     "   If you reform while an enemy is inside you, you might gain a unique property. This is lost if deformed again."
@@ -225,7 +225,7 @@ if(this.ability == -1){
             //ability change
             try{
             console.log(enemies[i].listname())
-            if(["PL999"].includes(enemies[i].listname())){
+            if(["PL999", "Euclid"].includes(enemies[i].listname())){
                 this.ability = 1
             }else if(["MagnaE"].includes(enemies[i].listname())){
                 this.ability = 2;
@@ -620,7 +620,14 @@ projectiles.push(new Slime(canvhalfx, canvhalfy, 7, 45* this.facing[0] + random(
     }else{
 projectiles.push(new Slime(canvhalfx, canvhalfy, 7, 30 * this.facing[0], 30 * this.facing[1]));
     }
- this.cooldowns[0] = (this.ability == 3)? 2:12;//cool down SO much faster with the slime gun!
+    if(this.ability == 3){
+        this.cooldowns[0] = 2//cool down SO much faster with the slime machinegun!
+    }else if(this.superslime != null){
+        this.cooldowns[0] = 9;//confidence boost for big brother being there... HEY WAIT HE AIN'T FA-
+    }else{
+        this.cooldowns[0] = 12;
+    }
+ 
 if(this.ability == 3){
     this.hp-=0.5;//MORE HP FOR MORE GUNNING DOWN!!!
 }else if(charezmode()){
@@ -629,7 +636,7 @@ if(this.ability == 3){
     this.hp-=5;//You will PAY!
  }
 }else{
-    //PANICCC!!!!!
+    //PANICCC!!!!! 
     this.nohp = 10;
 }
 }
@@ -874,8 +881,18 @@ Super_Slime.prototype.exist = function(){
     this.x+=this.mx;
     this.y+=this.my;
     this.mx*=0.95;
-    this.my*=0.95
-    this.size+=2
+    this.my*=0.95;
+    this.size+=2;
+    //get even bigger based on how many slime projectiles consumed during the rolling phase
+    for(let i = 0 ; i < projectiles.length ; i++){
+            if(this.hp < 100 && projectiles[i].name == "Slime" && typeof projectiles[i].lifetime == "string" && this.hitbox.scanproj(i)){
+                
+                this.size+=10
+                
+                projectiles[i].visibility = 0;
+                
+            }
+        }
     if(Math.abs(this.mx) + Math.abs(this.my) < 1){
         //if it stops, stick to the ground!
         this.size+=12
