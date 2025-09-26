@@ -145,6 +145,7 @@ screen.fillStyle = this.color;
 
 if(this.talking == false){
     //combo scaling going down
+    console.log(this.comboscaling)
     if(this.comboscaling < 1 && player.hitstun <=0){
         this.comboscaling+=0.01;
         if(this.comboscaling > 1){
@@ -343,7 +344,7 @@ Euclid.prototype.walk = function(){
         if(this.hitbox.hitplayer()){
         console.log("hit")
             
-            player.hit(24, ["contact", "physical", 0], [-24 * this.facing[0], -24 * this.facing[1]], 10);
+            player.hit(7, ["contact", "physical", 0], [-24 * this.facing[0], -24 * this.facing[1]], 10);
             this.x+=2*this.speed*this.speedmod*this.facing[0];
             this.y+=2*this.speed*this.speedmod*this.facing[1];
             
@@ -357,7 +358,7 @@ Euclid.prototype.tp = function(x, y){
     if(this.tp_locale != null){
 circle(x, y, this.size);
 if(this.attack[1] <= 2){
-    if(this.foresight == null && random(0, 1, false) ){
+    if(this.foresight == null && random(0, 2, false) > 0 ){
         //just tp
         this.x = x;
         this.y = y;
@@ -496,7 +497,7 @@ Euclid.prototype.leap = function(){
         if(this.hitbox.hitplayer()){
         console.log("hit")
             
-            player.hit(24, ["contact", "physical", 0], [-24 * this.facing[0], -24 * this.facing[1]], 10);
+            player.hit(7, ["contact", "physical", 0], [-24 * this.facing[0], -24 * this.facing[1]], 10);
             this.x+=2*this.speed*this.speedmod*this.facing[0];
             this.y+=2*this.speed*this.speedmod*this.facing[1];
             

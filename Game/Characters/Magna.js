@@ -145,8 +145,8 @@ if(this.adrenaline > 2700){
     this.speedbonus = (this.adrenaline - 2700)/450 //+1 speed every 15 seconds
     if(this.regen > 0.06 && !charezmode()){
         this.regen = 0.06;//cap at 0.06 on hard mode (about 2 hp a second)
-    }else if(this.regen > 1){
-        this.regen = 1;//cap at 1 hp regen (30 a second)
+    }else if(this.regen > 0.2){
+        this.regen = 0.2;//cap at 0.2 hp regen (about 6 a second)
     }
     
     if(this.speedbonus > this.speedmax){
