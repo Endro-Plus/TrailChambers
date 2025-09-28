@@ -560,7 +560,7 @@ Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         if(this.truemiracle > 1){
         return;
         }
-        if(this.cooldowns[2] < 15){
+        if(this.cooldowns[2] < 15 && notcharezmode()){
             this.cooldowns[2] = 15;//no parry cheesing!
         }
         
@@ -579,7 +579,8 @@ Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
                 }
             }
             this.hp+=(damage + 3) * 1.5;
-            this.cooldowns = [0, 0, 35, 0];//kinda broke, IK
+            
+            this.cooldowns = [0, 0, 15, 0];//kinda broke, IK
             this.parry = -1;
             for(let i = 0 ; i < this.speedcause.length ; i++){
                 if(this.speedcause[i][0] == "PARRY"){
