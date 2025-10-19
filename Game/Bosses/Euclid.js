@@ -48,6 +48,10 @@ this.leapdir = [];
 this.shots = 0;
 this.impale_aim = []
 this.playerhpbeforeimpale = null
+
+//for speaking
+this.line = "";
+this.lineframes = 0;
 Euclid.prototype.listname = function(){
 //to help position the characters correctly
 return "Euclid";
@@ -55,7 +59,18 @@ return "Euclid";
 }
 Euclid.prototype.exist = function(){
     if(this.hp < 0){
+        if(this.phase != 2){
+            this.phase = 2;
+            this.hp = 50;
+            this.damagemod = 0.05;
+            this.line = "HAHAHAHA!"
+            this.lineframes = 60;
+        }else{
         return "delete";
+        }
+    }
+    if(this.phase == 2){
+        this.hp-=0
     }
     //speedmod is ALWAYS 1 to begin with (here anyways)
     this.speedmod = 1;
@@ -144,6 +159,15 @@ screen.fillStyle = this.color;
 }
 
 if(this.talking == false){
+//for lines mid fight
+if(this.lineframes > 0){
+    this.lineframes--;
+screen.fillStyle = this.color;
+  screen.textAlign = "center";
+  screen.font = "25px Times New Roman";
+
+  screen.fillText(this.line, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1] - 50);
+}
     //combo scaling going down
     console.log(this.comboscaling)
     if(this.comboscaling < 1 && player.hitstun <=0){
@@ -208,6 +232,47 @@ if(this.talking == false){
                 break;
             case 3:
                 //click
+                if(this.phase != 2){
+                    switch(random(1, 3, false)){
+                        case 1:
+                            this.line = "Stay on your toes!"
+                            break;
+                        case 2:
+                            this.line = "Think fast!"
+                            break;
+                        case 3:
+                            if(["Jade", "Magna"].includes(player.listname())){
+                                this.line = "Parry this one!";
+                            }else{
+                                this.line = "Can't you defend!"
+                            }
+                            break;
+                    }
+
+                    this.lineframes = 30;
+
+                }else{
+                    switch(random(1, 1, false)){
+                        case 1:
+                            var potential = ["Dance! ", "Faster! ", "Harder! ", "More! "]
+                            this.line = '';
+                            for(let i = 0 ; i < 3 ; i++){
+                                this.line+=potential[random(0, potential.length() - 1)]
+                                console.log(this.line)
+                                console.log(i)
+                            }
+                            break;
+                        case 2:
+                            if(["Simia"].includes(player.listname())){
+                                this.line = "You're really special aren't you~!";
+                            }else{
+                                this.line = "Keep up the pace! HHAHAHAHA!"
+                            }
+                            break;
+                    }
+
+                    this.lineframes = 30;
+                }
                 this.attack[1] = 10
                 this.shots = 0;
                 projectiles.push(new flashpart(findposition(this)[0], findposition(this)[1], this.size, 5, "yellow", 100, 15))
@@ -216,6 +281,13 @@ if(this.talking == false){
                 //Shojo's most hated move
                 this.attack[1] = 45;
                 this.swordbox.refreshimmune();
+                this.line = "";
+                if(this.phase == 2){
+                    this.line = `Oh ${player.listname()}~!`
+                }else{
+                this.line = "BOO!";
+                }
+                this.lineframes = 15;
                 break;
                 
                 
@@ -521,7 +593,7 @@ if(this.hitbox.hitplayer()){
             this.hitbox.grantimmunity(player.listname());
         }
 
-if(this.attack[1] == 1 && this.shots < 2){
+if(this.attack[1] == 1 && (this.shots < 2 || this.shots < 3 && this.phase == 2)){
     //6 IS TOO MUCH!
     
     this.shots++;
