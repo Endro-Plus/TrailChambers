@@ -59,18 +59,36 @@ return "Euclid";
 }
 Euclid.prototype.exist = function(){
     if(this.hp < 0){
-        if(this.phase != 2){
-            this.phase = 2;
-            this.hp = 50;
+        if(this.phase == 0){
+            this.phase = 1;
+            this.hp = 0;
             this.damagemod = 0.05;
             this.line = "HAHAHAHA!"
             this.lineframes = 60;
-        }else{
+            this.attack = [0, this.lineframes]//she walks the whole 2 seconds
+        }else if(this.phase == 2 || this.phase == 3){
+            this.hp = 0
+            this.phase = 3;
+            return;
+        
+        }else if(this.phase == 4){
         return "delete";
         }
     }
+    //regenerate half (full on hard) hp over 50 frames
+    if(this.phase == 1 || this.phase > 99){
+        this.hp+=1 * (notenemyezmode())? 2 : 1;
+        if(this.phase < 100){
+            this.phase = 100
+        }else{
+            this.phase++;
+            if(this.phase == 150){
+                this.phase = 2;
+            }
+        }
+    }
     if(this.phase == 2){
-        this.hp-=0
+        this.hp-=(notenemyezmode())? 0.075 : 0.1;//die even slower on hard mode
     }
     //speedmod is ALWAYS 1 to begin with (here anyways)
     this.speedmod = 1;
@@ -196,12 +214,16 @@ screen.fillStyle = this.color;
                 this.buffer = null
         }else if(this.attack[0] == 1){
             //swap to either walking or gun stance
-            this.attack[0] = 0;
+            this.attack[0] = (random(0, 1, false))? 0:3;
         }else{
-            if(this.hp > 50){
+            if(this.hp > 50 && this.phase == 0){
         this.attack[0] = random(0, 3, false)
             }else{
                 this.attack[0] = random(1, 3, false);//no more lame walking
+                if(random(0, 10) <= 2){
+                    //special move time!
+                    this.attack[0] = 6;
+                }
             }
             
         }
@@ -252,15 +274,10 @@ screen.fillStyle = this.color;
                     this.lineframes = 30;
 
                 }else{
-                    switch(random(1, 1, false)){
+                    switch(random(1, 2, false)){
                         case 1:
-                            var potential = ["Dance! ", "Faster! ", "Harder! ", "More! "]
-                            this.line = '';
-                            for(let i = 0 ; i < 3 ; i++){
-                                this.line+=potential[random(0, potential.length() - 1)]
-                                console.log(this.line)
-                                console.log(i)
-                            }
+                            this.line = "Dance, Dance, DANCE!"
+                            
                             break;
                         case 2:
                             if(["Simia"].includes(player.listname())){
@@ -277,7 +294,8 @@ screen.fillStyle = this.color;
                 this.shots = 0;
                 projectiles.push(new flashpart(findposition(this)[0], findposition(this)[1], this.size, 5, "yellow", 100, 15))
                 break;
-            default:
+            case 4:
+            case 5:
                 //Shojo's most hated move
                 this.attack[1] = 45;
                 this.swordbox.refreshimmune();
@@ -289,6 +307,82 @@ screen.fillStyle = this.color;
                 }
                 this.lineframes = 15;
                 break;
+            default:
+                //FINISH HIM!
+                this.attack[1] = 40;
+                
+                for(let i = 0 ; i < ((this.phase == 2)? 40:20) ; i++){
+                    let aimx = random(0, 8, false)
+                     projectiles.push(new enemydelayedhitscan("Slash", findposition(this)[0] + random(-300, 300), findposition(this)[1] + random(-300, 300), 5, (random(0, 1, false)? aimx: aimx*-1),(random(0, 1, false)? 8-aimx: (8-aimx)*-1) , "grey", 30, 40, 150, 20, ["slashing", "physical", "softblock"], [0, 0], 20, 0))
+
+                }
+                if(this.phase == 0){
+                switch(random(0, 3, false)){
+                    case 0:
+                this.line = "Check THIS out!";
+                    break;
+                    case 1:
+                        this.line = "Watch out!"
+                        break;
+                    case 2:
+                        this.line = "I think you're ready for this!"
+                        break;
+                    case 3:
+                        if(player.listname() == "Magna"){
+                            this.line = "Could you do something like this?"
+                        }else if(player.listname() == "Nino"){
+                            this.line = "This is why I'M the superior Combat God!"
+                        }else{
+                        this.line = "Witness the might that slays gods!"
+                        }
+                }
+                }else{
+                     switch(random(0, 5, false)){
+                    case 0:
+                this.line = "A BATTLE THAT SHATTERS TIME!";
+                    break;
+                    case 1:
+                        this.line = "GIVE ME YOUR WORST! HAHAHAHA!!!"
+                        break;
+                    case 2:
+                        if(notenemyezmode()){
+                            this.line = "YOU CAN'T ESCAPE!"
+                        }
+                        this.line = "YOU CAN'T HIDE!"
+                        break;
+                    case 3:
+                        if(player.listname() == "Magna"){
+                            this.line = "You turn me on~!"
+                        }else if(player.listname() == "Nino"){
+                            this.line = "I KNOW YOU LIKE IT ROUGH! HAHAHAHA"
+                        }else{
+                        this.line = "DON'T STOP NOW!!!"
+                        }
+                        break;
+                    case 4:
+                        if(player.listname() == "Jade"){
+                            this.line = "I! FEEL! SO! HOT~~~!"
+                        }else if(player.listname() == "Simia"){
+                            this.line = "When I get my hands on YOU! Oh~"
+                        }else if(player.listname() == "Shojo"){
+                            this.line = "COME ON, ENDURE IT, I'M ALMOST THERE!!!"
+                        }else{
+                            this.line = "SO TENSE~!"
+                        }
+                        break;
+                    case 5:
+                        if(charezmode() && enemyezmode()){
+                            this.line = "I NEED MORE~! HARDER! HARDER~~!"
+                        }else if(notcharezmode() && notenemyezmode()){
+                            this.line = "AH YES~! YES~~!"
+                        }else{
+                            this.line = "DON'T KEEP ME ON THE EDGE! GO INTO THE DEEP END~!"
+                        }
+                        break;
+                }
+            }
+                this.lineframes = 30;
+                break
                 
                 
         }
@@ -318,6 +412,8 @@ screen.fillStyle = this.color;
     }else if(this.attack[0] == 3){
         //KITCHEN GUN!
         this.gun();
+    }else if(this.attack[0] == 6){
+        this.time_rend()
     }else{
         //stabby stab
         this.impale();
@@ -437,7 +533,7 @@ if(this.attack[1] <= 2){
         this.shift = [player.px, player.py]
         this.tp_locale = "not null"
         this.tp_proration = .4;
-        if(random(1, 5) < 2){
+        if(random(1, 5) < 3){
             //IMPALE!
             this.buffer = 4;
         }
@@ -642,13 +738,14 @@ Euclid.prototype.impale = function(){
                 //first command grab... but on the player
                 if(this.attack[0] == 4){
                     //first 
-                player.hit(30, ["piercing", "physical", "softblock"], [0, 0], 90, 0)
+                player.hit(30, ["piercing", "physical", "softblock"], [-this.impale_aim[0], -this.impale_aim[1]], 15, 0)
                 this.attack[0] = 5;//still impale
                 }else{
                     player.hit(0.5, ["true"], [0, 0], 0, 0)
                 }
-                if(this.playerhpbeforeimpale > player.hp){
+                if(Math.floor(this.playerhpbeforeimpale) > Math.floor(player.hp)){
                     //no getting out of this now!
+                    console.log(343242)
                     this.playerhpbeforeimpale = 999;
                 player.hitstun = 45;
                 player.knockback = [0, 0];
@@ -676,7 +773,7 @@ Euclid.prototype.impale = function(){
     screen.closePath();
     screen.lineWidth = 1;
 
-    if(this.attack[0] == 5 && this.attack[1] <= 2){
+    if(this.attack[0] == 5 && this.attack[1] <= 2 && player.hitstun == 45){
         //chuck them off the sword!
         player.knockback = [this.impale_aim[0]*4, this.impale_aim[1]*4]
         this.comboscaling-=0.2;
@@ -684,6 +781,24 @@ Euclid.prototype.impale = function(){
     }
     
     
+}
+Euclid.prototype.time_rend = function(){
+    if(this.hitbox.hitplayer()){
+            //for once... don't do contact damage, but allow contact damage to be done         
+            player.hit(0, ["contact", 0]);
+            this.hitbox.grantimmunity(player.listname());
+        }
+
+    if(this.phase == 0 && notenemyezmode()){
+        //more of them!
+         let aimx = random(0, 8)
+                     projectiles.push(new enemydelayedhitscan("Slash", findposition(this)[0] + random(-300, 300), findposition(this)[1] + random(-300, 300), 5, (random(0, 1, false)? aimx: aimx*-1),(random(0, 1, false)? 8-aimx: (8-aimx)*-1) , "grey", 30, 40, 150, 20, ["slashing", "physical", "softblock"], [0, 0], 20, 0))
+
+    }
+    if(this.attack[1] < 2){
+        //players still in hitstun are allowed to move again
+        player.hitstun = 0
+    }
 }
 
 Euclid.prototype.hurt = function(){

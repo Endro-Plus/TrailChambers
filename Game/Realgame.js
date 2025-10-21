@@ -225,6 +225,78 @@ enemyhitscan.prototype.exist = function(){
         return "delete"
     }
 }
+
+function enemydelayedhitscan(name, x, y, size, mx, my, color, dmg, lifetime, hops, harmtime, dmgtype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
+
+    this.name = name;
+    this.x = x;
+    this.y = y;
+    this.shift = [player.px, player.py];
+    this.size = size
+    this.mx = mx;
+    this.my = my;
+    this.color = color;
+    this.hitbox = new hitbox(x, y, 2, size/2, size);
+    this.hitbox.disable();
+    this.lifetime = lifetime;
+    this.hops = hops;
+    this.timealive = 0;
+    this.harmtime = harmtime;//it's harmless... then it isn't
+    this.dmg = dmg
+    this.dmgtype = dmgtype;
+    this.knockback = knockback;
+    this.hitstun = hitstun;
+    this.DImod = DImod
+    
+    this.canhit = true;
+            console.log("fdsew")
+
+}
+enemydelayedhitscan.prototype.exist = function(){
+    if(this.timealive < this.harmtime){
+        //the enemy is harmless
+            this.hitbox.disable();//nothing is there technically
+            screen.globalAlpha = .5
+    }else{
+        this.hitbox.enable();
+    }
+    screen.strokeStyle = this.color;    
+
+    
+     screen.beginPath();
+    screen.lineWidth = this.size+3;
+    
+    screen.moveTo(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    for(let i = 0 ; i < this.hops ; i++){
+        this.x += this.mx;
+        this.y += this.my;
+        if(this.hitbox.enabled == true){
+            //only bother with moving the hitbox and stuff if the hitbox is active
+        this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1])
+         //this.hitbox.showbox()
+        if(this.canhit == true && this.hitbox.hitplayer()){
+                   
+
+            player.hit(this.dmg, this.dmgtype, this.knockback, this.hitstun, this.DImod);
+            this.canhit = false;
+        }
+    }
+        
+    }
+   this.lifetime--;
+    screen.lineTo(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    this.x += -this.mx * this.hops
+    this.y += -this.my * this.hops
+
+    screen.stroke();
+    screen.closePath();
+    screen.lineWidth = 1;
+    this.timealive++;
+    screen.globalAlpha = 1;//make sure we set that back
+    if(this.lifetime < 0){
+        return "delete"
+    }
+}
 function playerproj(name, x, y, size, mx, my, color, dmg, lifetime, dmgtype = ["true"], knockback = [0, 0], hitstun = 0){
     this.name = name;
     this.x = x;
