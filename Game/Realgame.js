@@ -88,6 +88,7 @@ enemyproj.prototype.exist = function(){
     //hitting the player
     //console.log(en);
     if(this.hitbox.hitplayer()){
+        this.lifetime = -3;
         player.hit(this.dmg, this.dmgtype, this.knockback, this.hitstun, this.DImod);
         return "delete";
     }
@@ -1869,7 +1870,7 @@ var gametime = function(){
 
     level +=0.5
     }else if(level == 6){
-        
+        misc = [0, 0]
         bossbar = [];
         projectiles = [];
         enemies = [];
@@ -1883,7 +1884,7 @@ var gametime = function(){
         level = 6.5;
         arena.w = 200;
         arena.h = 500;
-        completedchallenges = 10;
+        //completedchallenges = 1;
         if(completedchallenges >= 5){
             others[0] = new hitbox(100, 25, 0, 999, 50)
         }else{
@@ -1948,7 +1949,7 @@ var gametime = function(){
         others = []
         player.inst(0, 0);
         rest = 60;
-        altboss = true
+        //altboss = true
         if(altboss == true){
             //this is where the fun begins!
             bossobject["Euclid"].inst(3, canvhalfx, canvhalfy - 250)
@@ -1958,6 +1959,26 @@ var gametime = function(){
             bossbarmode = 2;
             bossbar.push(enemies[0])
             boss_title = "Euclid"
+        }else{
+            if(enemyezmode()){
+             bossobject["MagnaE"].inst(3, canvhalfx, canvhalfy - 250)
+             bosses[0].inst(6, canvhalfx, canvhalfy + 250)
+             
+
+            }else{
+             bossobject["MagnaE"].inst(7, canvhalfx, canvhalfy - 250)
+             bosses[0].inst(10, canvhalfx, canvhalfy + 250)
+             
+            }
+            enemies[1].tutorial = -2
+            enemies[1].condition = enemies[0]//enrage condition
+            enemies[0].damagemod = 0.3;//Magna is a bit tankier here
+            arena.w = 1000;
+            arena.h = 1000;
+            bossbarmode = 2;
+            bossbar.push(enemies[0])
+            bossbar.push(enemies[1])
+            boss_title = "Magna's Assault"
         }
 
 

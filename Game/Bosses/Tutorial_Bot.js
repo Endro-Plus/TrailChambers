@@ -18,7 +18,7 @@ this.lvl = lvl; //difficulty of boss (0 for no dif, 10 for DOOM).
 this.damagetypemod = [];//some people may take more or less damage from certain sources...
 this.hp = 100; //EVEN THE FUCKING BOSSES GET 100!!!!!!
 this.facing = [0, 0];
-this.damagemod = (this.lvl > 5)? (10 - this.lvl) / 10:1; //Naturally, a lesser damage taken does, in fact, make bosses feel like bosses. Not the tutorial boss though
+this.damagemod = (this.lvl > 5)? (10 - this.lvl+1) / 10:1; //Naturally, a lesser damage taken does, in fact, make bosses feel like bosses. Not the tutorial boss though
 this.speed = (this.lvl > 5)? this.lvl:3; //base speed
 this.speedmod = 1;//modifies speed, multiplicately
 this.speedcause = [];
@@ -30,12 +30,14 @@ this.light = (lvl > 5)? 0.3:999;//POV: too light
 //extras
 this.tutorial = 0;
 this.turnRate = 0.05;
-// Calculate initial direction
-        let dx = 0 - this.x;
-        let dy = 0 - this.y;
-        let magnitude = Math.sqrt(dx * dx + dy * dy);
-        this.velocityX = (dx / magnitude) * this.speed;
-        this.velocityY = (dy / magnitude) * this.speed;
+// enraging
+this.condition = null;
+this.enraged = false;
+
+//targetting with slash
+this.target = null
+this.overshoot = 0;
+this.aimat = []
 }
 Tutorial_Bot.prototype.listname = function(){
 //to help position the characters correctly
@@ -173,11 +175,55 @@ this.move();
 }
  }
 Tutorial_Bot.prototype.move = function(){
-        if(this.hitstun > 0){
+    //enraging
+    if(this.enraged == false && this.condition != null && this.condition.hp <1){
+        this.enraged = true;
+        this.condition = null
+        projectiles.push(new flashpart(findposition(this)[0], findposition(this)[1], this.size, 20, "red", 20))
+        this.color = "#820c0cff"
+        this.speed+=2;
+    }
+
+    //targetting things
+    if(this.enraged == false && this.condition != null && this.condition.listname() == "MagnaE"){
+        //check for shurikens occasionally
+        if(timeplayed % 60 == 0 && this.target == null && this.enraged == false){
+            for(let i = 0 ; i < projectiles.length ; i++){
+                if(projectiles[i].name == "ShurikenE" && distance2(findposition(this)[0], findposition(this)[1], findposition(projectiles[i]), true) < 500){
+                    //target this shuriken
+                    this.target = projectiles[i];
+
+                    break;
+                }
+            }
+        }
+        
+    }
+
+    if(this.enraged){
+        //occasionally target the player, and repurpose condition to be able to target the player after a certain point
+        if(this.condition != 100){
+            if(typeof this.condition != "number"){
+                this.condition = 0
+            }else{
+                this.condition++;
+            }
+
+        }else{
+            this.condition = 0;
+            this.target = player;
+            this.overshoot = -1;
+            return;
+        }
+    }
+
+        if(this.hitstun > 0 && this.target != null){
+        //armor frames for slash!
         this.hurt();
         this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
         return;
         }
+        if(this.target == null && this.overshoot == 0){
         // really basic following script
         this.hitbox.updateimmunity();
         if(this.x + player.px - this.shift[0]> canvhalfx + 10){
@@ -193,18 +239,65 @@ Tutorial_Bot.prototype.move = function(){
             this.y-=this.speed * this.speedmod;
             this.facing = [0, -1];
         }
-
+    }else{
+        
+        if(this.target != null && this.target.lifetime < 1 ){
+            //cancel going towards already dead projectiles
+            this.target = null;
+            this.overshoot = 0;
+            
+        }
+        //track and go towards the target, resist speed nerfs
+        if(this.speedmod < 1){
+            this.speedmod += (this.speedmod/2)
+        }
+        if(this.overshoot == 0){
+        this.aimat = aim2(findposition(this)[0], findposition(this)[1], findposition(this.target), (this.speed + 20) * this.speedmod)
+        }else if(this.overshoot > 0){
+            this.overshoot--;
+            if(this.overshoot == 0){
+            this.overshoot = -10
+            }
+            
+        }else if (this.overshoot < 0){
+            this.overshoot++;
+            if(this.overshoot == 0 && this.target == player){
+                this.aimat = aim(findposition(this)[0], findposition(this)[1], canvhalfx, canvhalfy, (this.speed + 20) * this.speedmod);
+                this.overshoot = (this.enraged)? 15:30;
+                //go for the player after aiming at a shuriken
+                this.target = null;
+            }
+        }
+        
+        if(this.overshoot >=0){
+        this.x-=this.aimat[0];
+        this.y-=this.aimat[1];
+        }
+         console.log("fsafdsafewf")
+    
+    if(this.target instanceof enemyproj && this.target.hitbox.checkenemy(this.enemyID)){
+            this.target.lifetime = -1;
+            this.overshoot = 7;
+            this.target = player;
+            //console.log("121212")
+        }
+}
         this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
 
         if(this.hitbox.hitplayer()){
         console.log("hit")
-            if(this.lvl < 5){
-            player.hit(5, ["contact", "physical", 0], [6 * this.facing[0], 6 * this.facing[1]], 10);
+            if(this.target != null){
+                player.hit(24, ["contact", "physical", this.enemyID], [this.aimat[0]*-10, this.aimat[1]*-10], 15, 2);
+
+
+            }else if(this.lvl < 5){
+                
+            player.hit(5, ["contact", "physical", this.enemyID], [6 * this.facing[0], 6 * this.facing[1]], 10);
             this.x+=2*this.speed*this.speedmod*this.facing[0];
             this.y+=2*this.speed*this.speedmod*this.facing[1];
             }else{
                 //bro comboed too good using easy mode stats
-                player.hit(4, ["contact", "physical", 0], [-(this.speed + 3)  * this.facing[0], -(this.speed + 3) * this.facing[1]], 10, 5);
+                player.hit(4, ["contact", "physical", this.enemyID], [-(this.speed + 3)  * this.facing[0], -(this.speed + 3) * this.facing[1]], 10, 5);
                 this.x+=this.speed*this.speedmod*this.facing[0];
                 this.y+=this.speed*this.speedmod*this.facing[1];
             }

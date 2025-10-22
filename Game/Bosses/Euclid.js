@@ -28,8 +28,6 @@ this.knockback = [0, 0];//x and y position of knockback
 this.talking = false;//basically an indicator of whether or not summons should target this boss
 this.showimmunity = false;
 this.light = false;//overrides the default weight of an enemy (which is determined by knockback mod)
-this.talking = true;//basically an indicator of whether or not summons should target this boss
-//extras
 this.speaking = 0;
 this.phase = 0;//this boss has 2 phases! fun...
 this.attack = [0, 60];//basically what attack she's doing, and for how long
@@ -69,6 +67,16 @@ Euclid.prototype.exist = function(){
         }else if(this.phase == 2 || this.phase == 3){
             this.hp = 0
             this.phase = 3;
+            this.z = 0;
+            this.talking = true;
+            this.speaking = 10000
+            projectiles = [];
+            player.inst(0, 0)
+            player.cooldowns = [30, 30, 30, 30]
+            this.x = canvhalfx;
+            this.y = canvhalfy - 200;
+            
+            this.shift = [player.px, player.py];
             return;
         
         }else if(this.phase == 4){
@@ -137,34 +145,51 @@ if(this.foresight != null){
 
 //boss AI goes here
 //first, talk
+if(this.talking == true){
 if(this.speaking < 120){
         this.speaking++;
 screen.fillStyle = this.color;
   screen.textAlign = "center";
   screen.font = "25px Times New Roman";
+  if(player.listname() == "Simia"){
+      screen.fillText(`Well, I wasn't expecting you to get this far, Simia.`, this.x + player.px, this.y - 50 + player.py);
 
+  }else{
   screen.fillText(`Well well well, seems you've got some style, ${player.listname()}!`, this.x + player.px, this.y - 50 + player.py);
+  }
 }else if(this.speaking < 240){
         this.speaking++;
 screen.fillStyle = this.color;
   screen.textAlign = "center";
   screen.font = "25px Times New Roman";
+ if(player.listname() == "Simia"){
+      screen.fillText(`Are you trying to prove something? Well you're sure as hell doing a good job!`, this.x + player.px, this.y - 50 + player.py);
 
+  }else{
   screen.fillText(`What's more, you decided that you wanted to challenge the combat god!`, this.x + player.px, this.y - 50 + player.py);
+  }
 }else if(this.speaking < 460){
         this.speaking++;
 screen.fillStyle = this.color;
   screen.textAlign = "center";
   screen.font = "25px Times New Roman";
+ if(player.listname() == "Simia"){
+      screen.fillText(`You made a mistake though, coming to me. Unless you can keep up with my pace?`, this.x + player.px, this.y - 50 + player.py);
 
+  }else{
   screen.fillText(`I think you knew I was going to go easy, but don't think I'm taking it too easy!`, this.x + player.px, this.y - 50 + player.py);
+  }
 }else if(this.speaking < 680){
         this.speaking++;
 screen.fillStyle = this.color;
   screen.textAlign = "center";
   screen.font = "25px Times New Roman";
+ if(player.listname() == "Simia"){
+      screen.fillText(`Well, there's only one way to find out for sure!`, this.x + player.px, this.y - 50 + player.py);
 
+  }else{
   screen.fillText(`Don't waver now, because this is going to be a GRAND battle!`, this.x + player.px, this.y - 50 + player.py);
+  }
 }else if(this.speaking < 720){
         this.speaking++;
 screen.fillStyle = this.color;
@@ -172,10 +197,62 @@ screen.fillStyle = this.color;
   screen.font = "25px Times New Roman";
 
   screen.fillText(`EN GARDE!`, this.x + player.px, this.y - 50 + player.py);
-}else{
+}else if(this.speaking < 10000){
     this.talking = false
 }
 
+if(this.speaking>=10000){
+    if(this.speaking < 10120){
+        this.speaking++;
+screen.fillStyle = this.color;
+  screen.textAlign = "center";
+  screen.font = "25px Times New Roman";
+  if(player.listname() == "Simia"){
+      screen.fillText(`Oh... Simia...`, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1] - 50);
+
+  }else{
+  screen.fillText(`Ah~! Okay I need to calm down...`, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1] - 50);
+  }
+    }else if(this.speaking < 10240){
+        this.speaking++;
+screen.fillStyle = this.color;
+  screen.textAlign = "center";
+  screen.font = "25px Times New Roman";
+  if(player.listname() == "Simia"){
+      screen.fillText(`You've done it now...`, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1] - 50);
+
+  }else{
+  screen.fillText(`${player.listname()}, you've done well to keep up with my pace, even when I was... "heated".`, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1] - 50);
+  }
+    }else if(this.speaking < 10360){
+        this.speaking++;
+screen.fillStyle = this.color;
+  screen.textAlign = "center";
+  screen.font = "25px Times New Roman";
+  if(player.listname() == "Simia"){
+      screen.fillText(`You've brought me over the edge~, I didn't think someone as weak as you could do that.`, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1] - 50);
+
+  }else{
+  screen.fillText(`We will meet again, but by that point I hope you've learned enough to fight even harder!`, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1] - 50);
+  }
+    }else if(this.speaking < 10480){
+        this.speaking++;
+screen.fillStyle = this.color;
+  screen.textAlign = "center";
+  screen.font = "25px Times New Roman";
+  if(player.listname() == "Simia"){
+      screen.fillText(`Maybe the next time, I'll show you how I feel right, now~`, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1] - 50);
+
+  }else{
+  screen.fillText(`I'm off, don't slack on your training! The whole world depends on us, after all!`, this.x + player.px - this.shift[0], this.y + player.py - this.shift[1] - 50);
+  }
+    }else{
+        altboss = false;
+        level = 7;
+        return "delete"
+    }
+}
+}
 if(this.talking == false){
 //for lines mid fight
 if(this.lineframes > 0){
@@ -310,8 +387,14 @@ screen.fillStyle = this.color;
             default:
                 //FINISH HIM!
                 this.attack[1] = 40;
-                
-                for(let i = 0 ; i < ((this.phase == 2)? 40:20) ; i++){
+                if(this.phase == 2 && notenemyezmode()){
+                    //instant teleport to the player before doing this
+                    this.x = canvhalfx
+                    this.y = canvhalfy
+                    this.shift = [player.px, player.py];
+                    
+                }
+                for(let i = 0 ; i < ((this.phase == 2)? 30:20) && enemyezmode() ; i++){
                     let aimx = random(0, 8, false)
                      projectiles.push(new enemydelayedhitscan("Slash", findposition(this)[0] + random(-300, 300), findposition(this)[1] + random(-300, 300), 5, (random(0, 1, false)? aimx: aimx*-1),(random(0, 1, false)? 8-aimx: (8-aimx)*-1) , "grey", 30, 40, 150, 20, ["slashing", "physical", "softblock"], [0, 0], 20, 0))
 
@@ -371,7 +454,9 @@ screen.fillStyle = this.color;
                         }
                         break;
                     case 5:
-                        if(charezmode() && enemyezmode()){
+                        if(player.listname() == "Magmax"){
+                            this.line = "I KNOW YOU CAN DANCE BETTER THAN THAT!"
+                        }else if(charezmode() && enemyezmode()){
                             this.line = "I NEED MORE~! HARDER! HARDER~~!"
                         }else if(notcharezmode() && notenemyezmode()){
                             this.line = "AH YES~! YES~~!"
@@ -789,11 +874,13 @@ Euclid.prototype.time_rend = function(){
             this.hitbox.grantimmunity(player.listname());
         }
 
-    if(this.phase == 0 && notenemyezmode()){
+    if(notenemyezmode()){
         //more of them!
+        for(let i = 0 ; i < 1 ; i++){
          let aimx = random(0, 8)
-                     projectiles.push(new enemydelayedhitscan("Slash", findposition(this)[0] + random(-300, 300), findposition(this)[1] + random(-300, 300), 5, (random(0, 1, false)? aimx: aimx*-1),(random(0, 1, false)? 8-aimx: (8-aimx)*-1) , "grey", 30, 40, 150, 20, ["slashing", "physical", "softblock"], [0, 0], 20, 0))
+                     projectiles.push(new enemydelayedhitscan("Slash", findposition(this)[0] + random(-300, 300), findposition(this)[1] + random(-300, 300), 5, (random(0, 1, false)? aimx: aimx*-1),(random(0, 1, false)? 8-aimx: (8-aimx)*-1) , "grey", 30, 50, 150, 40, ["slashing", "physical", "softblock"], [0, 0], 20, 0))
 
+        }
     }
     if(this.attack[1] < 2){
         //players still in hitstun are allowed to move again
@@ -829,10 +916,16 @@ if(arena.leavedir(0, this.y - this.shift[1], this.size).includes('u')){
 }
 Euclid.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0){
     if(this.talking == true){
+        if(this.phase == 3){
+            this.speaking = 999999
+            //skip the other cutscene
+        }else{
         this.speaking = 999;
         this.talking = false;
         this.attack = [1, 5]
+        }
         return;
+        
     }
     var dmg = damage * this.damagemod;
     for(let i = 0 ; i < this.damagetypemod.length ; i++){
