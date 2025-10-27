@@ -396,7 +396,7 @@ screen.fillStyle = this.color;
                 }
                 for(let i = 0 ; i < ((this.phase == 2)? 30:20) && enemyezmode() ; i++){
                     let aimx = random(0, 8, false)
-                     projectiles.push(new enemydelayedhitscan("Slash", findposition(this)[0] + random(-300, 300), findposition(this)[1] + random(-300, 300), 5, (random(0, 1, false)? aimx: aimx*-1),(random(0, 1, false)? 8-aimx: (8-aimx)*-1) , "grey", 30, 40, 150, 20, ["slashing", "physical", "softblock"], [0, 0], 20, 0))
+                     projectiles.push(new enemydelayedhitscan("Slash", findposition(this)[0] + random(-300, 300), findposition(this)[1] + random(-300, 300), 5, (random(0, 1, false)? aimx: aimx*-1),(random(0, 1, false)? 8-aimx: (8-aimx)*-1) , "grey", 20, 30, 150, 20, ["slashing", "physical", "softblock", "set"], [0, 0], 20, 0))
 
                 }
                 if(this.phase == 0){
@@ -618,7 +618,7 @@ if(this.attack[1] <= 2){
         this.shift = [player.px, player.py]
         this.tp_locale = "not null"
         this.tp_proration = .4;
-        if(random(1, 5) < 3){
+        if(random(1, 5) < 30){
             //IMPALE!
             this.buffer = 4;
         }
@@ -826,7 +826,7 @@ Euclid.prototype.impale = function(){
                 player.hit(30, ["piercing", "physical", "softblock"], [-this.impale_aim[0], -this.impale_aim[1]], 15, 0)
                 this.attack[0] = 5;//still impale
                 }else{
-                    player.hit(0.5, ["true"], [0, 0], 0, 0)
+                    player.hit(0.2, ["true"], [0, 0], 0, 0)
                 }
                 if(Math.floor(this.playerhpbeforeimpale) > Math.floor(player.hp)){
                     //no getting out of this now!
@@ -878,7 +878,7 @@ Euclid.prototype.time_rend = function(){
         //more of them!
         for(let i = 0 ; i < 1 ; i++){
          let aimx = random(0, 8)
-                     projectiles.push(new enemydelayedhitscan("Slash", findposition(this)[0] + random(-300, 300), findposition(this)[1] + random(-300, 300), 5, (random(0, 1, false)? aimx: aimx*-1),(random(0, 1, false)? 8-aimx: (8-aimx)*-1) , "grey", 30, 50, 150, 40, ["slashing", "physical", "softblock"], [0, 0], 20, 0))
+                     projectiles.push(new enemydelayedhitscan("Slash", findposition(this)[0] + random(-300, 300), findposition(this)[1] + random(-300, 300), 5, (random(0, 1, false)? aimx: aimx*-1),(random(0, 1, false)? 8-aimx: (8-aimx)*-1) , "grey", 30, 50, 150, 40, ["slashing", "physical", "softblock", "set"], [0, 0], 40, 0))
 
         }
     }
@@ -933,9 +933,21 @@ Euclid.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0
             dmg *= this.damagetypemod[i][1];
         }
     }
+    if(damagetype.includes("interrupt") && ([4, 5].includes(this.attack[0]) || this.attack[0] == 6 && this.attack[1] > 30)){
+        //cancel the attack and take extra damage and hitstun!
+        this.hp-=dmg * 5;
+        knockback[0] *= 1.5;
+        knockback[1] *= 1.5;
+        this.hitstun = 90;
+        this.line = (this.phase == 2)? "Ah~" : "Mrph!"
+        this.lineframe = 90;
+        this.attack = [0, 100];
+        this.foresight = null;
+    }else{
     this.hp-=dmg;
     knockback[0] *= this.knockbackmod;
     knockback[1] *= this.knockbackmod;
+    }
     if(this.hitstun > 0){
     knockback[0] += this.knockback[0];
     knockback[1] += this.knockback[1];

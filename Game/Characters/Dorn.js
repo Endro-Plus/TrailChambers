@@ -469,7 +469,7 @@ Dorn.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         }
         
         //a HEAVY damage resistance when deformed... unless it was true damage
-        var dmg = damage * this.damagemod * ((this.state == "deform" && !damagetype.includes("true"))? 0.1:1);
+        var dmg = damage * ((damagetype.includes("true"))? 1:this.damagemod) * ((this.state == "deform" && !damagetype.includes("true"))? 0.1:1);
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
             if(damagetype.includes(this.damagetypemod[i][0])){
                 dmg *= this.damagetypemod[i][1];

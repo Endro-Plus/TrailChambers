@@ -17,7 +17,17 @@ this.size = size;
 //character poster/character color
 this.postColor = "#000088";
 this.color = "#7700CC";
-this.desc = ["The wizard! Many strong projectiles that are hard to miss, but not many mobility options. Also, don't tell him this, but he's kinda short", "Growing Darkness: Every successful hit on an enemy lowers their defense. After a damage drought, the enemy detonates!", "  the explosion does 50% of the damage you dealt before the detonation, so keep that combo high!", "1. Chain Lightning: Fire a bolt of lightning that constantly bounces off enemies, projectiles, and even you! The closer targets are, the more bounces!", "Electrified enemies are slower, and take passive damage.", "2. Pyro mine: A stationary projectile that detonates into a large inferno when near an enemy!", "Electrified mines deal critical damage AND electrifies enemies in the radius! Pyro mines hold charges for longer times.", "3. Cutting Barrage: conjure several cutting gales at once that move irratically!", "4. Miasma Storm: An install that creates a dark aura around you, damaging nearby enemies and spewing random balls of miasma!", "enemies are slowed down by the aura, and enemies hit by miasma balls emit a similar damaging aura, causing more overtime damage!"]
+this.desc = ["The wizard! Many strong projectiles that are hard to miss, but not many mobility options. Also, don't tell him this, but he's kinda short",
+     "Growing Darkness: Every successful hit on an enemy lowers their defense. After a damage drought, the enemy detonates!",
+      "  the explosion does 50% of the damage you dealt before the detonation, so keep that combo high!",
+       "1. Chain Lightning: Fire a bolt of lightning that constantly bounces off enemies, projectiles, and even you! The closer targets are, the more bounces!",
+        "Electrified enemies are slower, and take passive damage.",
+         "2. Pyro mine: A stationary projectile that detonates into a large inferno when near an enemy!",
+          "Electrified mines deal critical damage AND electrifies enemies in the radius! Pyro mines hold charges for longer times.",
+          "An electrified mine may interrupt attacks.",
+           "3. Cutting Barrage: conjure several cutting gales at once that move irratically!",
+            "4. Miasma Storm: An install that creates a dark aura around you, damaging nearby enemies and spewing random balls of miasma!",
+             "enemies are slowed down by the aura, and enemies hit by miasma balls emit a similar damaging aura, causing more overtime damage!"]
 //game stats
 this.playershift = [0, 0]
 this.cooldowns = [0, 0, 0, 0];
@@ -272,7 +282,7 @@ if(arena.pleavedir().includes("u")){
 }
 Nino.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
         //handle damage dealth
-        var dmg = damage * this.damagemod;
+        var dmg = damage * ((damagetype.includes("true"))? 1:this.damagemod);
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
             if(damagetype.includes(this.damagetypemod[i][0])){
                 dmg *= this.damagetypemod[i][1];
@@ -781,7 +791,7 @@ Pyromine.prototype.exist = function(){
                 for(let x = 0 ; x < projectiles.length ; x++){
                     //if electrified, do bonus damage!
                     if(projectiles[x].name == "chain lightning" && this.hitbox.scanproj(x)){
-                        enemies[i].hit(((charezmode())? 60:30) + enemies[i].growingdarknessdebuff/player.defdiv, ["CRITICAL", "electric", "magic"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
+                        enemies[i].hit(((charezmode())? 60:30) + enemies[i].growingdarknessdebuff/player.defdiv, ["CRITICAL", "electric", "magic", "interrupt"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
 
                         //electrify the enemy
                         crit++;
@@ -799,7 +809,7 @@ Pyromine.prototype.exist = function(){
                 for(let x = 0 ; x < projectiles.length ; x++){
                     //if electrified, do bonus damage!
                     if(projectiles[x].name == "chain lightning" && this.hitbox.scanproj(x)){
-                        enemies[i].hit(((charezmode())? 60:30), ["CRITICAL", "electric", "magic"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
+                        enemies[i].hit(((charezmode())? 60:30), ["CRITICAL", "electric", "magic", "interrupt"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
                         crit++;
                         //electrify the enemy
                         projectiles.push(new chain_lightning(0, 0, 0, [0, 0]));

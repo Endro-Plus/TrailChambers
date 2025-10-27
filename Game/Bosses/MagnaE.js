@@ -539,7 +539,7 @@ ParryProjE.prototype.exist = function(){
             this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
             if(this.hitbox.hitplayer()){
                 enemyattack = this.name;
-                player.hit(24, ["magic", "hitscan"], [this.mx * -2, this.my * -2], 15);
+                player.hit(24, ["magic", "hitscan", "set"], [this.mx * -2, this.my * -2], 30);
                 this.range = i;
                 break;
     }

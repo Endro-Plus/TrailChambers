@@ -605,7 +605,7 @@ if(arena.pleavedir().includes("u")){
 }
 Ezekiel.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0], hitstun = 0, DImod = 1){
         //handle damage dealt
-        var dmg = damage * this.damagemod * (100 - (this.deathorbs.length * 5))/100;
+        var dmg = damage * ((damagetype.includes("true"))? 1:this.damagemod) * (100 - (this.deathorbs.length * 5))/100;
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
             if(damagetype.includes(this.damagetypemod[i][0])){
                 dmg *= this.damagetypemod[i][1];

@@ -719,7 +719,7 @@ Simia.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
         this.jumpv = 0;
         this.windup = 0;
         this.cooldowns[0] = 8;
-        var dmg = damage * this.damagemod;
+        var dmg = damage * ((damagetype.includes("true"))? 1.1:this.damagemod);//fuck Simia in particular
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
             if(damagetype.includes(this.damagetypemod[i][0])){
                 dmg *= this.damagetypemod[i][1];

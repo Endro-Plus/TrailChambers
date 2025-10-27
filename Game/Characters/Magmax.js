@@ -550,7 +550,7 @@ Magz.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
             return;//so complex!
         }
         //handle damage dealth
-        var dmg = damage * this.damagemod;
+        var dmg = damage * ((damagetype.includes("true"))? 1:this.damagemod);
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
             if(damagetype.includes(this.damagetypemod[i][0])){
                 dmg *= this.damagetypemod[i][1];

@@ -183,23 +183,7 @@ Tutorial_Bot.prototype.move = function(){
         this.color = "#820c0cff"
         this.speed+=2;
     }
-
-    //targetting things
-    if(this.enraged == false && this.condition != null && this.condition.listname() == "MagnaE"){
-        //check for shurikens occasionally
-        if(timeplayed % 60 == 0 && this.target == null && this.enraged == false){
-            for(let i = 0 ; i < projectiles.length ; i++){
-                if(projectiles[i].name == "ShurikenE" && distance2(findposition(this)[0], findposition(this)[1], findposition(projectiles[i]), true) < 500){
-                    //target this shuriken
-                    this.target = projectiles[i];
-
-                    break;
-                }
-            }
-        }
-        
-    }
-
+    //targetting things while enraged
     if(this.enraged){
         //occasionally target the player, and repurpose condition to be able to target the player after a certain point
         if(this.condition != 100){
@@ -223,6 +207,23 @@ Tutorial_Bot.prototype.move = function(){
         this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
         return;
         }
+        //targetting things
+    if(this.enraged == false && this.condition != null && this.condition.listname() == "MagnaE"){
+        //check for shurikens occasionally
+        if(timeplayed % 60 == 0 && this.target == null && this.enraged == false){
+            for(let i = 0 ; i < projectiles.length ; i++){
+                if(projectiles[i].name == "ShurikenE" && distance2(findposition(this)[0], findposition(this)[1], findposition(projectiles[i]), true) < 500){
+                    //target this shuriken
+                    this.target = projectiles[i];
+
+                    break;
+                }
+            }
+        }
+        
+    }
+
+    
         if(this.target == null && this.overshoot == 0){
         // really basic following script
         this.hitbox.updateimmunity();
@@ -292,12 +293,12 @@ Tutorial_Bot.prototype.move = function(){
 
             }else if(this.lvl < 5){
                 
-            player.hit(5, ["contact", "physical", this.enemyID], [6 * this.facing[0], 6 * this.facing[1]], 10);
+            player.hit(6, ["contact", "physical", this.enemyID], [6 * this.facing[0], 6 * this.facing[1]], 10);
             this.x+=2*this.speed*this.speedmod*this.facing[0];
             this.y+=2*this.speed*this.speedmod*this.facing[1];
             }else{
                 //bro comboed too good using easy mode stats
-                player.hit(4, ["contact", "physical", this.enemyID], [-(this.speed + 3)  * this.facing[0], -(this.speed + 3) * this.facing[1]], 10, 5);
+                player.hit(5, ["contact", "physical", this.enemyID], [-(this.speed + 3)  * this.facing[0], -(this.speed + 3) * this.facing[1]], 10, 5);
                 this.x+=this.speed*this.speedmod*this.facing[0];
                 this.y+=this.speed*this.speedmod*this.facing[1];
             }
@@ -340,9 +341,21 @@ Tutorial_Bot.prototype.hit = function(damage, damagetype = ["true"], knockback =
             dmg *= this.damagetypemod[i][1];
         }
     }
+    if(damagetype.includes("interrupt") && (this.target != null || this.overshoot > 0)){
+        //cancel the attack and take extra damage and hitstun!
+        this.hp-=dmg * 5;
+        knockback[0] *= 1.5;
+        knockback[1] *= 1.5;
+        this.hitstun = 90;
+        projectiles.push(new flashpart(findposition(this)[0], findposition(this)[1], 20, 5, "white", 30))
+        this.aimat = [];
+        this.target = null
+        this.overshoot = 0;
+    }else{
     this.hp-=dmg;
     knockback[0] *= this.knockbackmod;
     knockback[1] *= this.knockbackmod;
+    }
     if(this.hitstun > 0){
     knockback[0] += this.knockback[0];
     knockback[1] += this.knockback[1];

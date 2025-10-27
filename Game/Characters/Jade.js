@@ -20,6 +20,7 @@ this.desc = ["This is the main character! Beware her tenacity!",
        "2. Luminous Burst/Radiant Spin: In magic stance, shoot a large projectile that detonates, healing on hit, and leaves a lingering area of effect!",
         "    Perform a spin attack in Sword mode, heals on hit, and is a multihit!",
          "    Both attacks can be charged for more range and overal damage!",
+         "  The first 5 frames of Luminous Burst can interrupt attacks. The entire Radiant Spin can interrupt attacks",
           "3. Celestial Beam/Defend: In magic stance, aim and fire a hyperlaser from the heavens! Hitting yourself powers up your next move.",
            "You cannot move while aiming, use the button again to fire the hyperlaser.",
             "   Moves with low knockback do not push you around while aiming!",
@@ -236,7 +237,7 @@ this.swordbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.players
     
     for(let i = 0 ; i < enemies.length ; i++){
     if(this.swordbox.checkenemy(i)){
-        enemies[i].hit(7.5, ['light', 'physical', 'slashing'], [(canvhalfx + this.playershift[0] < enemies[i].x)? -2:2 , (canvhalfy + this.playershift[1] < enemies[i].y)? -2:2], 20);
+        enemies[i].hit(9, ['light', 'physical', 'slashing', "interrupt"], [(canvhalfx + this.playershift[0] < enemies[i].x)? -2:2 , (canvhalfy + this.playershift[1] < enemies[i].y)? -2:2], 20);
         this.swordbox.grantimmunity(i);
         if(this.hp > 95){
             //grant more hp at max hp for more armor frames
@@ -605,7 +606,7 @@ Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
                 projectiles.push(new movingpart(canvhalfx, canvhalfy, random(-10, 10), random(-10, 10), 9, "grey", 10));
             }
         }
-        var dmg = damage * this.damagemod * (1 - this.comboprotection);
+        var dmg = damage * ((damagetype.includes("true"))? 1:this.damagemod) * (1 - this.comboprotection);
         this.comboprotection+= 0.2;//so basically make her take less damage for every hit she takes
         if(this.comboprotection > 0.75){
             this.comboprotection = 0.75;
@@ -934,7 +935,14 @@ Nosferatu.prototype.exist = function(){
         //console.log(en);
         if(typeof en != "boolean"){
             playerattack = this.name;
-            enemies[en].hit(this.size / 4, ["light", "magic", "proj"], [this.mx * this.size, this.my * this.size], this.size * 5);
+            if(this.detin > 95){
+                //the first few frames can interrupt
+                enemies[en].hit(this.size / 4, ["light", "magic", "proj", "interrupt"], [this.mx * this.size, this.my * this.size], this.size * 5);
+
+            }else{
+                enemies[en].hit(this.size / 4, ["light", "magic", "proj"], [this.mx * this.size, this.my * this.size], this.size * 5);
+
+            }
             for(let i = 0 ; i < 40+this.size; i++){
                     if(this.size>=90 && random(0,1,false)){
                         projectiles.push(new Light_Spark(this.x, this.y, random(2,8), random(-this.size/4, this.size/4), random(-this.size/4, this.size/4)))

@@ -624,7 +624,7 @@ var player;
 var projectiles = [];
 var enemies = [];
 var others = [];//teleporters and the like
-var level = 5;
+var level = 7;
 var rest = 60;
 var resttimer = 0;
 var pauseselection = 0;
@@ -1224,7 +1224,7 @@ others = [];
 playerattack;
 enemyattack;
 playerhp = 0;//remember what it was before a reset
-altboss = false;
+altboss = false;//fighting another boss?
 rest = 60;
 framesplayed = 0;//good for calculating time
 
@@ -1973,8 +1973,8 @@ var gametime = function(){
             enemies[1].tutorial = -2
             enemies[1].condition = enemies[0]//enrage condition
             enemies[0].damagemod = 0.3;//Magna is a bit tankier here
-            arena.w = 1000;
-            arena.h = 1000;
+            arena.w = 500;
+            arena.h = 500;
             bossbarmode = 2;
             bossbar.push(enemies[0])
             bossbar.push(enemies[1])

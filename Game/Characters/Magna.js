@@ -16,7 +16,18 @@ this.py = startposy;
 //card info
 this.postColor = "#FF4C00";
 this.color = "#FF8B00";
-this.desc = ["SMALL AND CUUUUTTTEEEE!!!!! His size may leave him going under attacks that would normally hit! A little easier to knock around.", "Adrenaline: This passively makes him stronger overtime. With enough adrenaline, passive healing is possible!", "1. Nunchuck: swing your nunchuck forwards! Can parry most projectiles.", "    parried projectiles are reflected as a high damage beam, parrying hitscans makes this beam deal critical damage!!!","    While sliding, this becomes a contact damage move with extremely high damage, but a lot of recovry on miss! This ends slide stance, hit or miss.", "2. Shuriken: Standard issue projectile. Simple yet effective","    Shurikens thrown while sliding become hitscans. They bounce off of other shurikens and enemies! Can be parried with nunchuck if no other targets are available!", "3. Slide: Move incredibly fast in a single direction, and enter sliding stance! Exit sliding stance if already in it.", "     While sliding, you're lower to the ground, and your moves are replaced with higher damage ones!", "This is at the cost of parrying and mobility, as you cannot turn while sliding", "4. Block: Defend yourself. Has 8 frames worth of parry frames, and blocks for as long as you hold it", "  If you're sliding, this instead has you dash back and forth once, quickly. This variant has immunity frames, but may leave you vulnerable near the end."];
+this.desc = ["SMALL AND CUUUUTTTEEEE!!!!! His size may leave him going under attacks that would normally hit! A little easier to knock around.",
+     "Adrenaline: This passively makes him stronger overtime. With enough adrenaline, passive healing is possible!",
+      "1. Nunchuck: swing your nunchuck forwards! Can parry most projectiles. Can interrupt attacks",
+       "    parried projectiles are reflected as a high damage beam, parrying hitscans makes this beam deal critical damage!!!",
+       "    While sliding, this becomes a contact damage move with extremely high damage, but a lot of recovry on miss! This ends slide stance, hit or miss. Also can interrupt attacks",
+        "2. Shuriken: Standard issue projectile. Simple yet effective",
+        "    Shurikens thrown while sliding become hitscans. They bounce off of other shurikens and enemies! Can be parried with nunchuck if no other targets are available!",
+         "3. Slide: Move incredibly fast in a single direction, and enter sliding stance! Exit sliding stance if already in it.",
+          "     While sliding, you're lower to the ground, and your moves are replaced with higher damage ones!",
+           "This is at the cost of parrying and mobility, as you cannot turn while sliding",
+            "4. Block: Defend yourself. Has 8 frames worth of parry frames, and blocks for as long as you hold it",
+             "  If you're sliding, this instead has you dash back and forth once, quickly. This variant has immunity frames, but may leave you vulnerable near the end."];
 //game stats
 this.cooldowns = [0, 0, 0, 0];
 this.playershift = [0, 0];//shift the position of the player
@@ -278,7 +289,7 @@ this.chuckbox.updateimmunity();
             this.chuckbox.reassign(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1], this.pz, 2, this.chuckbox.size);
     for(let i = 0 ; i < enemies.length ; i++){
     if(this.chuckbox.checkenemy(i) && this.chuckbox.enemyhalf(i, this.facing)){
-        enemies[i].hit(9 + this.dmgboost, ['physical', 'bludgeoning'], [5 * this.facing[0], 5 * this.facing[1]], 20);
+        enemies[i].hit(10 + this.dmgboost, ['physical', 'bludgeoning', "interrupt"], [5 * this.facing[0], 5 * this.facing[1]], 20);
         this.chuckbox.grantimmunity(i);
         this.cooldowns[0]-=3;
     }
@@ -551,7 +562,7 @@ Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
         //palmstrike cheese
         if(this.sliding && this.showchuck > 0 && damagetype[0] == "contact"){
             //da love tap
-            enemies[damagetype[damagetype.length - 1]].hit(69 + this.dmgboost*2, ["contact"], [30*this.facing[0], 30*this.facing[1]], 75);
+            enemies[damagetype[damagetype.length - 1]].hit(69 + this.dmgboost*2, ["contact", "interrupt"], [30*this.facing[0], 30*this.facing[1]], 75);
             this.showchuck = -9;//no need for giving the player hitstun now!
             this.sliding = false;
             this.immunityframes = 15;
@@ -575,7 +586,7 @@ Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
             damage = 1;
         }
     }
-        var dmg = damage * this.damagemod;
+        var dmg = damage * ((damagetype.includes("true"))? 1:this.damagemod);
         for(let i = 0 ; i < this.damagetypemod.length ; i++){
             if(damagetype.includes(this.damagetypemod[i][0])){
                 dmg *= this.damagetypemod[i][1];
