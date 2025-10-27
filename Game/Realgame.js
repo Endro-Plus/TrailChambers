@@ -624,7 +624,7 @@ var player;
 var projectiles = [];
 var enemies = [];
 var others = [];//teleporters and the like
-var level = 7;
+var level = 5;
 var rest = 60;
 var resttimer = 0;
 var pauseselection = 0;

@@ -73,12 +73,12 @@ this.combolimit = 0;//at a high enough number, escape a combo
 this.luckydodge = 0;//chances that pl999 decides that damage is gay
 this.boost = 0;
 this.chamber = 1;
-this.revolver_cooldown = 1;
+this.revolver_cooldown = 100;
 this.leadingshot = 0;//on easy mode, it's predictable, on hard mode, it's rng
 this.shotgunchamber = 2;
 this.shotgun_cooldown = 100
 this.shotgun_spread = 100;
-this.snipercooldown = 150;
+this.snipercooldown = 1;
 this.aim = 0;
 this.targetshift = [];//hard mode only... the sniper rifle will autolock onto the player at a certain point.
 this.mercysniper = 0;//shotgun into sniper rifle is no longer a 0 to death combo
@@ -497,11 +497,13 @@ screen.fillStyle = this.color;
         
         
         if(enemyezmode()){
+            //gun
             var x = this.x + player.px - this.shift[0] + (this.size + this.z + 30) * Math.cos(this.aim/2);
             var y = this.y + player.py - this.shift[1] + (this.size + this.z + 30) * Math.sin(this.aim/2);
-            var bx = this.x + player.px - this.shift[0] + (this.size + this.z + 3000) * Math.cos(this.aim/2);
-            var by = this.y + player.py - this.shift[1] + (this.size + this.z + 3000) * Math.sin(this.aim/2);
-            
+            //laser
+            var bx = this.x + player.px - this.shift[0] + (this.size + this.z + 3000) * Math.cos((this.aim/2 + 32/2) + (this.snipercooldown/2));
+            var by = this.y + player.py - this.shift[1] + (this.size + this.z + 3000) * Math.sin((this.aim/2 + 32/2) + (this.snipercooldown/2));
+            console.log(this.snipercooldown)
         }else{
             var x = this.x + player.px - this.shift[0] + (this.size + this.z + 30) * Math.cos(this.aim);
             var y = this.y + player.py - this.shift[1] + (this.size + this.z + 30) * Math.sin(this.aim);
@@ -527,6 +529,7 @@ screen.fillStyle = this.color;
   
     screen.stroke();
     if(enemyezmode()){
+        screen.moveTo(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
         screen.strokeStyle = "#f00";
             screen.lineTo(bx, by)
         screen.lineWidth = 3;
