@@ -618,7 +618,7 @@ if(this.attack[1] <= 2){
         this.shift = [player.px, player.py]
         this.tp_locale = "not null"
         this.tp_proration = .4;
-        if(random(1, 5) < 30){
+        if(random(1, 5) < 3){
             //IMPALE!
             this.buffer = 4;
         }

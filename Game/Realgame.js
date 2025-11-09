@@ -624,11 +624,11 @@ var player;
 var projectiles = [];
 var enemies = [];
 var others = [];//teleporters and the like
-var level = 7;
+var level = 0;
 var rest = 60;
 var resttimer = 0;
 var pauseselection = 0;
-
+var oneshot = true;//you have one attempt to go through the entire game. Death means restart from the beginning
 //for challenges
 
 var challenges;//fully initiallized in prep
@@ -1215,52 +1215,155 @@ var Hidden1Select = function(){
 var prep = function(){
     //reset challenges
     rest = 60;
-challenges =   resetchallenges();
-completedchallenges = 0;
-parried = 0;
-crit = 0;
-proj_parry = [];
-others = [];
-playerattack;
-enemyattack;
-playerhp = 0;//remember what it was before a reset
-altboss = false;//fighting another boss?
-rest = 60;
-framesplayed = 0;//good for calculating time
+    challenges =   resetchallenges();
+    completedchallenges = 0;
+    parried = 0;
+    crit = 0;
+    proj_parry = [];
+    others = [];
+    playerattack;
+    enemyattack;
+    playerhp = 0;//remember what it was before a reset
+    rest = 60;
+    framesplayed = 0;//good for calculating time
 
     //what people choose
 
     //after setup, see the play and settings button
+    screen.textAlign = "center"
     screen.fillStyle = "#311";
     screen.fillRect(0, 0, 9999, 9999);
-    screen.fillStyle = (selection != 0)? "#500":"#F00";
-    circle(canvhalfx - 150, canvhalfy, 50);
-    screen.fillStyle = (selection != 1)? "#500":"#F00";
-    circle(canvhalfx + 150, canvhalfy, 50);
+    screen.fillStyle = (selection != 0)? "#500":"#F00";//Play button
+    circle(canvhalfx - 250, canvhalfy, (selection != 0)? 50:75);
+
+    screen.fillStyle = (selection != 1)? "#500":"#F00";//LVL button
+    circle(canvhalfx - 125, canvhalfy - 100, (selection != 1)? 50:75);
+
+    screen.fillStyle = (selection != 2)? "#500":"#F00";//Oneshot button
+    circle(canvhalfx + 125, canvhalfy - 100, (selection != 2)? 50:75);
+
+
+    screen.fillStyle = (selection != 3)? "#500":"#F00";//Settings button
+    circle(canvhalfx + 250, canvhalfy, (selection != 3)? 50:75);
     screen.fillStyle = "#000";
+    if(selection == 0){
+        screen.font = "35px Times New Roman";
+    }else{
+        screen.font = "25px Times New Roman";
+    }
+    
+    screen.fillText("Play", canvhalfx - 250, canvhalfy + 5);
+    //level
+    if(selection == 1){
+        screen.font = "35px Times New Roman";
+    }else{
+        screen.font = "25px Times New Roman";
+    }
+    if(altboss == false){
+    screen.fillText("LVL: " + level, canvhalfx - 125, canvhalfy - 90);
+    }else{
+        switch(level){
+            //use the name of the boss, not number
+            case 7:
+                screen.fillText("Euclid", canvhalfx - 125, canvhalfy - 90);
+                break;
+
+            default:
+                screen.fillText("Um...", canvhalfx - 125, canvhalfy - 90);
+
+        }
+        //screen.fillText(level, canvhalfx - 155, canvhalfy - 95);
+    }
+    if(selection == 2){
+        screen.font = "30px Times New Roman";
+    }else{
+        screen.font = "25px Times New Roman";
+    }
+    if(selection != 2){
+    screen.fillText("Lives", canvhalfx + 125, canvhalfy - 95);
+    }else{
+        if(oneshot == true){
+            screen.fillText("One Shot", canvhalfx + 125, canvhalfy - 95);
+        }else{
+            screen.fillText("Checkpoint", canvhalfx + 125, canvhalfy - 95);
+        }
+    }
+    if(selection == 3){
+        screen.font = "35px Times New Roman";
+    }else{
+        screen.font = "25px Times New Roman";
+    }
+    screen.fillText("Settings", canvhalfx + 250, canvhalfy + 5);
+
     screen.font = "25px Times New Roman";
-    screen.fillText("Play", canvhalfx - 170, canvhalfy + 5);
-    screen.fillText("Settings", canvhalfx + 110, canvhalfy + 5);
-    screen.fillText("Space to select, arrow keys to move", canvhalfx - 175, canvhalfy - 200);
-    if(input == 'arrowleft' || input == 'arrowright'){
-        selection = (selection == 0)? 1:0;
+    screen.fillText("Space to select, arrow keys to move", canvhalfx - 175, canvhalfy - 240);
+    if(input == 'arrowright'){
+        selection++;
+        if(selection > 3){
+            selection = 0
+        }
         input = '';
     }
-    if(input == ' ' && selection == 1){
-    selection = 0;
-        clearInterval(setup);
-        setup = setInterval(settings, 1000 / fps);
+    if(input == 'arrowleft'){
+        selection--;
+        if(selection < 0){
+            selection = 3
+        }
         input = '';
     }
-    if(input == ' ' && selection == 0){
-        clearInterval(setup);
-        setup = setInterval(stageSelect, 1000 / fps);
-        difficulty = "normal";
-        input = '';
+    if(input == ' '){
+        switch(selection){
+            case 0:
+                clearInterval(setup);
+                setup = setInterval(stageSelect, 1000 / fps);
+                difficulty = "normal";
+                input = '';
+                break
+            case 1:
+            altboss = false;
+            let ll = prompt("What level do you wish to start on?")
+            //check for a string first
+            if(isNaN(ll)){
+                //check for alternate levels
+                switch(ll.toLowerCase()){
+                    case "euclid":
+                        level = 7;
+                        altboss = true;
+                        break;
+                }
+                
+                alert((altboss == true)? "Good luck!":"Only numbers please.")
+                break;
+            }else{
+                Math.round(ll)
+            if(ll >= 0 && ll <=7){
+                level = parseInt(ll)
+            }else{
+                if(ll < 0){
+                    alert("There aren't any negative levels!")
+                }else{
+                    alert("The final level is 7!")
+                }
+                break;
+            }
+        }
+            break;
+            case 2:
+                oneshot = (oneshot == true)? false:true
+            break;
+            case 3:
+                selection = 0;
+                clearInterval(setup);
+                setup = setInterval(settings, 1000 / fps);
+                input = '';
+                break;
+        
+        
+
+        
     }
-
-
-
+     input = '';
+}
 }
 }
 //playing the game
