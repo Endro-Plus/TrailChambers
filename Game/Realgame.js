@@ -625,6 +625,7 @@ var projectiles = [];
 var enemies = [];
 var others = [];//teleporters and the like
 var level = 0;
+var startlevel = level;//the level you start on
 var rest = 60;
 var resttimer = 0;
 var pauseselection = 0;
@@ -976,7 +977,9 @@ var charSelect = function(){
 }
 var stageSelect = function(){
     scroll = 0;
+    startlevel = level;
     //Normal, Hard, Maddening
+    screen.textAlign = "left"
     screen.fillStyle = screen_color;
     screen.fillRect(0, 0, 9999, 9999);
     screen.fillStyle = (selection != 0)? "#C00":"#500";
@@ -1296,7 +1299,7 @@ var prep = function(){
     screen.fillText("Settings", canvhalfx + 250, canvhalfy + 5);
 
     screen.font = "25px Times New Roman";
-    screen.fillText("Space to select, arrow keys to move", canvhalfx - 175, canvhalfy - 240);
+    screen.fillText("Space to select, arrow keys to move", canvhalfx, canvhalfy - 240);
     if(input == 'arrowright'){
         selection++;
         if(selection > 3){

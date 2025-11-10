@@ -86,7 +86,8 @@ if(this.hp > 100){
         //yes, I'm aware this is effectively a free defense
     }
 
-}else if(this.hp <=0 || this.truemiracle > 0 || this.won == true){
+}
+if(this.hp <=0 || this.truemiracle > 0 || this.won == true){
     //play the death anmiation, then call off
     if(this.won == false){
         this.death();
@@ -101,6 +102,7 @@ if(this.comboprotection > 0){
     this.comboprotection = 0;
 }
 timeplayed++;
+
 //speedmod is ALWAYS 1 to begin with
 this.speedmod = 1;
 this.speedcause.sort();//sorting it makes it easier to check for duplicated
@@ -677,7 +679,7 @@ this.hp+=3;
 if(this.hp >=1 && this.truemiracle < 1){
 //IT'S NOT OVER UNTIL IT'S OVER!!!!!
 return;
-}else if(random(0, 100, false) == 50 && this.truemiracle < 1 && this.hp != null){
+}else if(random(0, 100, false) <=5  && this.truemiracle < 1 && this.hp != null){
 //NOOOTTTT YEEEEEEEETTTTTTTT!!!!!!!!!
 this.hp = 200;
 this.miracle = 20;
@@ -707,9 +709,9 @@ screen.fillStyle = "#FFF";
 screen.textAlign = "center";
 screen.font = "25px Times New Roman";
 screen.fillText("Jade", canvhalfx, 20);//char name
-screen.fillText("Made it to lvl: " + Math.floor(level), canvhalfx, canvhalfy - 60);//made it to what level
+screen.fillText(`Started on lvl ${Math.floor(startlevel)} and made it to lvl: ${Math.floor(level)}`, canvhalfx, canvhalfy - 60);//made it to what level
 screen.fillText("Was playing on " + difficulty + " mode", canvhalfx, canvhalfy - 20);//On what difficulty
-if(this.truemiracle > 1 && this.truemiracle < 5){
+if(this.truemiracle > 1 && this.truemiracle < 10){
 screen.fillStyle = "#FFF";
 screen.textAlign = "center";
 screen.font = "35px Times New Roman";
@@ -762,7 +764,7 @@ screen.font = "25px Times New Roman";
 
 screen.fillText("VICTORY", canvhalfx, 20);//PROCLAIM IT!!!
 screen.fillText("Jade", canvhalfx, 40);//char name
-screen.fillText("Won on lvl: " + Math.floor(level), canvhalfx, canvhalfy - 60);//made it to what level
+screen.fillText(`Started on lvl ${Math.floor(startlevel)} and won on lvl: ${Math.floor(level)}`, canvhalfx, canvhalfy - 60);//made it to what level;//made it to what level
 screen.fillText("Was playing on " + difficulty + " mode", canvhalfx, canvhalfy - 20);//On what difficulty
 
 //get the time
@@ -779,7 +781,6 @@ estimatedmin = "0"+estimatedmin;
 screen.fillText("Time lived: " + estimatedmin + ":" + estimatedtime, canvhalfx, canvhalfy + 20);//time lived
 
 screen.fillText("Press the space bar to go back", canvhalfx, canvas.height - 30);//tell them how to go back
-
 if(input == " "){
 //there's a chance.
 player = null;

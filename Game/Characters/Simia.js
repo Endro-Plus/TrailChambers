@@ -793,7 +793,7 @@ screen.fillStyle = "#FFF";
 screen.textAlign = "center";
 screen.font = "25px Times New Roman";
 screen.fillText("The Forgotten One", canvhalfx, 20);//char name
-screen.fillText("Made it to lvl: " + Math.floor(level), canvhalfx, canvhalfy - 60);//made it to what level
+screen.fillText(`Started on lvl ${Math.floor(startlevel)} and made it to lvl: ${Math.floor(level)}`, canvhalfx, canvhalfy - 60);//made it to what level
 screen.fillText("Was playing on " + difficulty + " mode", canvhalfx, canvhalfy - 20);//On what difficulty
 
 //get the time
@@ -837,7 +837,7 @@ screen.font = "25px Times New Roman";
 
 screen.fillText("YOU MADLAD, YOU DID IT!!!!!!", canvhalfx, 20);//PROCLAIM IT!!!
 screen.fillText("Simia!", canvhalfx, 40);//char name
-screen.fillText("Won on lvl: " + Math.floor(level), canvhalfx, canvhalfy - 60);//made it to what level
+screen.fillText(`Started on lvl ${Math.floor(startlevel)} and won on lvl: ${Math.floor(level)}`, canvhalfx, canvhalfy - 60);//made it to what level
 screen.fillText("Was playing on " + difficulty + " mode", canvhalfx, canvhalfy - 20);//On what difficulty
 
 //get the time
@@ -856,7 +856,6 @@ screen.fillText("Time lived: " + estimatedmin + ":" + estimatedtime, canvhalfx, 
 screen.fillText("Press the space bar to go back", canvhalfx, canvas.height - 30);//tell them how to go back
 
 if(input == " "){
-//there's a chance.
 player = null;
 clearInterval(setup);
 setup = setInterval(prep, 1000/fps);

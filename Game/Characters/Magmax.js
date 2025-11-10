@@ -611,7 +611,7 @@ screen.fillStyle = "#FFF";
 screen.textAlign = "center";
 screen.font = "25px Times New Roman";
 screen.fillText("Magmax", canvhalfx, 20);//char name
-screen.fillText("Made it to lvl: " + Math.floor(level), canvhalfx, canvhalfy - 60);//made it to what level
+screen.fillText(`Started on lvl ${Math.floor(startlevel)} and made it to lvl: ${Math.floor(level)}`, canvhalfx, canvhalfy - 60);//made it to what level
 screen.fillText("Was playing on " + difficulty + " mode", canvhalfx, canvhalfy - 20);//On what difficulty
 
 //get the time
@@ -658,7 +658,7 @@ screen.font = "25px Times New Roman";
 
 screen.fillText("VICTORY", canvhalfx, 20);//PROCLAIM IT!!!
 screen.fillText("Magmax", canvhalfx, 40);//char name
-screen.fillText("Won on lvl: " + Math.floor(level), canvhalfx, canvhalfy - 60);//made it to what level
+screen.fillText(`Started on lvl ${Math.floor(startlevel)} and won on lvl: ${Math.floor(level)}`, canvhalfx, canvhalfy - 60);//made it to what level
 screen.fillText("Was playing on " + difficulty + " mode", canvhalfx, canvhalfy - 20);//On what difficulty
 
 //get the time
