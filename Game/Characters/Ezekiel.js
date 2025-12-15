@@ -654,6 +654,9 @@ Ezekiel.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 
             this.knockback = knockback;
             this.hitstun = hitstun * this.hitstunmod;
             }
+            if(damagetype.includes("set")){
+                this.hitstun = hitstun * this.hitstunmod
+            }
         }
         //console.log(this.hp);
 
@@ -703,7 +706,11 @@ estimatedmin = "0"+estimatedmin;
 }
 screen.fillText("Time lived: " + estimatedmin + ":" + estimatedtime, canvhalfx, canvhalfy + 20);//time lived
 
+if(oneshot == true){
 screen.fillText("Press the space bar to go back", canvhalfx, canvas.height - 30);//tell them how to go back
+}else{
+    screen.fillText("Press the space bar to restart boss", canvhalfx, canvas.height - 30);//tell them how to restart
+}
 
 if(input == " "){
 if(oneshot == true){

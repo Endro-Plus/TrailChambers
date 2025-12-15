@@ -12,7 +12,7 @@
 
 
         {
-            "type": "chrome",
+            "type": "firefox",
             "request": "launch",
             "name": "RUN NORMALLY",
             "url": "C:/Users/Bernard/Documents/GitHub/TrailChambers/Game/index.html",

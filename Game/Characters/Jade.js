@@ -664,6 +664,9 @@ Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
             this.knockback = knockback;
             this.hitstun = hitstun * this.hitstunmod;
             }
+            if(damagetype.includes("set")){
+                this.hitstun = hitstun * this.hitstunmod
+            }
         }
         //console.log(this.hp);
     }
