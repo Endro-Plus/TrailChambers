@@ -734,10 +734,13 @@ if(estimatedmin < 10){
 estimatedmin = "0"+estimatedmin;
 }
 screen.fillText("Time lived: " + estimatedmin + ":" + estimatedtime, canvhalfx, canvhalfy + 20);//time lived
-
+if(oneshot == true){
 screen.fillText("Press the space bar to go back", canvhalfx, canvas.height - 30);//tell them how to go back
-
+}else{
+    screen.fillText("Press the space bar to restart boss", canvhalfx, canvas.height - 30);//tell them how to restart
+}
 if(input == " " && this.hp < 1){
+    if(oneshot == true){
 //there's a chance.
 player = null;
 clearInterval(setup);
@@ -746,6 +749,14 @@ screen.textAlign = "left";
 level = 0;
 input = '';
 bossbar = [];
+    }else{
+        this.hp = 1
+        level = Math.floor(level);
+        clearInterval(setup);
+        input = '';
+        bossbar = [];
+        setup = setInterval(gametime, 1000 / fps);
+    }
 }
 
 }

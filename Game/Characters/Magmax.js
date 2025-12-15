@@ -630,16 +630,23 @@ screen.fillText("Time lived: " + estimatedmin + ":" + estimatedtime, canvhalfx, 
 screen.fillText("Press the space bar to go back", canvhalfx, canvas.height - 30);//tell them how to go back
 
 if(input == " "){
-//ggwp
-
+if(oneshot == true){
+//there's a chance.
+player = null;
 clearInterval(setup);
 setup = setInterval(prep, 1000/fps);
 screen.textAlign = "left";
 level = 0;
-selection = 0;
-bossbar = [];
 input = '';
-player = null;
+bossbar = [];
+    }else{
+        this.hp = 1
+        level = Math.floor(level);
+        clearInterval(setup);
+        input = '';
+        bossbar = [];
+        setup = setInterval(gametime, 1000 / fps);
+    }
 }
 
 }
@@ -677,7 +684,6 @@ screen.fillText("Time lived: " + estimatedmin + ":" + estimatedtime, canvhalfx, 
 screen.fillText("Press the space bar to go back", canvhalfx, canvas.height - 30);//tell them how to go back
 
 if(input == " "){
-//there's a chance.
 player = null;
 clearInterval(setup);
 setup = setInterval(prep, 1000/fps);
