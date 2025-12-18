@@ -293,7 +293,7 @@ Tutorial_Bot.prototype.move = function(){
 
             }else if(this.lvl < 5){
                 
-            player.hit(6, ["contact", "physical", this.enemyID], [6 * this.facing[0], 6 * this.facing[1]], 10);
+            player.hit(6, ["contact", "physical", this.enemyID], [6 * this.facing[0], 6 * this.facing[1]], 10, 5);
             this.x+=2*this.speed*this.speedmod*this.facing[0];
             this.y+=2*this.speed*this.speedmod*this.facing[1];
             }else{

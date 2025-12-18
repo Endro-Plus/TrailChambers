@@ -379,7 +379,7 @@ MagnaE.prototype.VROOOM = function(speedx, speedy){
         if(this.hitbox.hitplayer()){
         console.log("hit")
         //the love tap (now does less damage in comboes, because magna just LOVES comboing into it)
-            player.hit((player.hitstun > 0 || this.combotimer > 0)? 25:69, ["contact", "physical", 0], [speedx * 10, 40 * speedy * 10], 30);
+            player.hit((player.hitstun > 0 || this.combotimer > 0)? 25:69, ["contact", "physical", "set", 0], [speedx * 10, 40 * speedy * 10], 30, 0);
             this.hitstun = 45;
             this.phase[1] = 0;
             this.combotimer = 120;//yes, get unlucky enough and you too will suffer the wrath of lovetap > lovetap > lovetap > lovetap ...

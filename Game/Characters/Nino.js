@@ -530,11 +530,12 @@ function chain_lightning(x, y, size, facing){
     this.visibility = 100;
     this.dist = 20
     this.target;
+    this.catalyzed = 0;//sparks faster growth and larger start size
 }
 chain_lightning.prototype.exist = function(){
     this.hitbox.enable();
 
-    
+    console.log(this.target)
     if(this.phase == 1){
     this.x = this.origin[0];
     this.y = this.origin[1];
@@ -601,7 +602,9 @@ chain_lightning.prototype.exist = function(){
         this.y = this.target.y + player.py - this.target.shift[1];
         }
         screen.strokeStyle = `rgba(100, 100, 200,${this.visibility/100})`;
+        if(this.catalyzed <= 0){
         this.visibility-=0.5;
+        }
         screen.lineWidth = 3;
         circle(this.x, this.y, this.target.size+this.dist, true, false);
 
@@ -613,16 +616,38 @@ chain_lightning.prototype.exist = function(){
         }
         
 
-        if(this.target.name != "pyro mine" || this.target.name=="pyro mine" && this.visibility % 20 == 0){
+        
             //attempt to jump
             if(this.target.name == "pyro mine"){
-                this.dist += 100;
+                //apply electrified to pyro mine
+                this.target.electrified = true;
+                //catalyze
+                this.catalyzed = 60;
+                if(this.visibility < 75){
+                    this.visibility+=1;
+                }else{
+                    this.visibility = 100;
+                }
+                if(this.visibility < 20){
+                    this.visibility = 29
+                }
             }
+            if(this.catalyzed > 0){
+                this.catalyzed--;
+                this.dist+=50 - (this.dist*.1)
+                
+                    //make sure it works on hard mode too!
+                    this.visibility+=0.5;
+                
+                
+            }else{
             this.dist+=10;
+            }
             this.hitbox.resize(this.target.size+this.dist);
             this.hitbox.move(this.x, this.y)
             //prioritize enemies
-            if(charezmode() || this.visibility % 5 == 0){
+            console.log( Math.floor(this.visibility))
+            if(charezmode() || Math.floor(this.visibility) % 5 == 0){
                 //only jump every 5 frames on hard mode
 
            
@@ -699,7 +724,7 @@ chain_lightning.prototype.exist = function(){
         screen.closePath();
         }
     }
-     }
+     
         }catch(e){
             
             return "delete"
@@ -759,18 +784,19 @@ Darkblast.prototype.exist = function(){
     this.radius = size
     this.mx = mx;
     this.my = my;
-    this.last = 600;//20 second duration!
+    this.last = 150;//5 second duration AFTER electrification
     this.hitbox = new hitbox(this.x, this.y, 0, 10, 9);
     this.hitbox.disable();
     this.hitbox.immunityframes(999);
     this.lifetime = 30;//1 second to arm, one second of it being parriable
     this.blast = -1;
+    this.electrified = false;
 
 }
 Pyromine.prototype.exist = function(){
     this.hitbox.enable();
     //this.hitbox.updateimmunity();
-    screen.fillStyle = "#F00";
+    screen.fillStyle = (this.electrified)? "#85f":"#F00";
     
     if(this.lifetime >= 0){
         this.x+=this.mx;
