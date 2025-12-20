@@ -2,6 +2,16 @@
  "version": "0.2.0",
     "configurations": [
         {
+            "name": "FCKN RUN!!!",
+            "request": "launch",
+            "type" : "chrome",
+            "runtimeExecutable": "/usr/bin/brave-browser",
+            "url": "file:///home/endro/Code/JS/TrailChambers/Game/index.html",
+            
+            "webRoot": "${workspaceFolder}"
+        },
+
+        {
             "name": "LAPTOP RUN!!!",
             "request": "launch",
             "type": "chrome",

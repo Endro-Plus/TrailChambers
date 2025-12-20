@@ -784,7 +784,7 @@ Darkblast.prototype.exist = function(){
     this.radius = size
     this.mx = mx;
     this.my = my;
-    this.last = 150;//5 second duration AFTER electrification
+    this.last = 30;//5 second duration AFTER electrification
     this.hitbox = new hitbox(this.x, this.y, 0, 10, 9);
     this.hitbox.disable();
     this.hitbox.immunityframes(999);
@@ -813,12 +813,29 @@ Pyromine.prototype.exist = function(){
     if(this.last <=0 || this.blast >4){
         return "delete";
     }
+    //electrified changes
+    if(this.electrified && this.blast == -1){
+        //blast radius shrinking
+        if(Math.abs(this.radius - this.size) > 2){
+            this.radius-=2
+        }else{
+            this.radius = this.size
+            this.last--;
+        }
+
+        //auto detonate
+        if(this.last <= 0){
+            this.blast = 0
+            this.radius = 300;
+        }
+    }
+
     //hitting the enemy
     if(this.lifetime < 0 || this.lifetime == null){
         console.log(true)
         this.lifetime = null;
         this.hitbox.resize(this.radius);
-        screen.strokeStyle = "#F00";
+        screen.strokeStyle = (this.electrified)? "#85f":"#F00";
         screen.lineWidth = 2;
         if(this.blast >= 0){
             this.hitbox.showbox("rgba(255, 0, 0, 0.5)");
@@ -831,7 +848,7 @@ Pyromine.prototype.exist = function(){
                 enemies[i].hit(30 + enemies[i].growingdarknessdebuff/player.defdiv, ["fire", "bludgeoning", "magic"], [(this.x < enemies[i].x)? 12:-12, (this.y < enemies[i].y)? 12:-12], 45);
                 for(let x = 0 ; x < projectiles.length ; x++){
                     //if electrified, do bonus damage!
-                    if(projectiles[x].name == "chain lightning" && this.hitbox.scanproj(x)){
+                    if(this.electrified){
                         enemies[i].hit(((charezmode())? 60:30) + enemies[i].growingdarknessdebuff/player.defdiv, ["CRITICAL", "electric", "magic", "interrupt"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
 
                         //electrify the enemy
@@ -849,7 +866,7 @@ Pyromine.prototype.exist = function(){
                 enemies[i].hit(30, ["fire", "bludgeoning", "magic"], [(this.x < enemies[i].x)? 12:-12, (this.y < enemies[i].y)? 12:-12], 45);
                 for(let x = 0 ; x < projectiles.length ; x++){
                     //if electrified, do bonus damage!
-                    if(projectiles[x].name == "chain lightning" && this.hitbox.scanproj(x)){
+                    if(this.electrified){
                         enemies[i].hit(((charezmode())? 60:30), ["CRITICAL", "electric", "magic", "interrupt"], [(this.x < enemies[i].x)? 36:-36, (this.y < enemies[i].y)? 36:-36], 30);//CRITICAL HIT
                         crit++;
                         //electrify the enemy
