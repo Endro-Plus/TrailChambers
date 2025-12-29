@@ -3,8 +3,9 @@ all hardmode changes:
     crits only do half 30 damage instead of 60 (+ the standard)
     defense reduction is half effective
     miasma aura no longer lowers defense
-    less cutting gales
+    wind shield aura grows more slowly, and is overal smaller
     miasma storm grows more slowly, and doesn't shoot as often.
+
 
 */
 function Nino(startposx, startposy, size){
@@ -50,6 +51,8 @@ this.defenemies = [];
 this.miasma_aura = new hitbox(0, 0, 0, 9, 45);
 this.miasmatime = 0;
 this.defdiv = null;
+this.wind_shield_time = -1;
+this.wind_shield = new hitbox(0, 0, 0, this.height+1, this.size+30);
 }
 
 
@@ -62,6 +65,14 @@ Nino.prototype.greeting = function(){
 console.log("Shadow Wizard Money Gang enthusiast Nino is ready to cast spells!")
 }
 Nino.prototype.exist = function(){
+    //i frames
+    if(this.wind_shield_time < -1){
+        this.wind_shield_time++;
+        this.iframe = true;
+        if(this.wind_shield_time == -1){
+            this.iframe = false;
+        }
+    }
 if(this.defdiv == null){
     if(charezmode()){
         this.defdiv = 24;
@@ -74,7 +85,7 @@ if(this.hp <= 100 && this.hp>0 && this.won == false){
 //under max
 screen.fillStyle = "#F00";
 screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, 50, 4);//max hp
-screen.fillStyle = "#0F0";
+screen.fillStyle = (this.iframe)? "#00f":"#0F0";
 screen.fillRect(canvhalfx - 25, canvhalfy - this.size - 10, this.hp / 2, 4);//current hp
 
 }else if(this.hp <=0 || this.won == true){
@@ -158,6 +169,28 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
 
             //attacks (basically just miasma storm)
 
+            //wind shield
+            if(this.wind_shield_time >= 0){
+                this.wind_shield_time++;
+                this.wind_shield.move(canvhalfx, canvhalfy);
+                if(charezmode()){
+                if(this.wind_shield_time > 600){
+                    this.wind_shield.resize(this.size + 200)
+                }else{
+                    this.wind_shield.resize(this.size + (this.wind_shield_time/3))
+                }
+            }else{
+                if(this.wind_shield_time > 600){
+                    this.wind_shield.resize(this.size + 100)
+                }else{
+                    this.wind_shield.resize(this.size + (this.wind_shield_time/6))
+                }
+            }
+                this.wind_shield.showbox("#0f09");
+                if(this.wind_shield_time > 120){
+                    this.speedcause.push(["wind speed", 10, 1.2]);
+                }
+            }
 if(this.miasmatime > 0){
     this.miasmatime--;
     this.miasma_aura.enable();
@@ -287,6 +320,21 @@ Nino.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
             if(damagetype.includes(this.damagetypemod[i][0])){
                 dmg *= this.damagetypemod[i][1];
             }
+        }
+        //account for the shield
+        if(this.wind_shield_time >= 0){
+            
+            this.spec3()
+            this.iframe = true;
+            if(this.cooldowns[2] < 120){
+            this.wind_shield_time = -5;
+            }else{
+                dmg*=.75;
+                hitstun*=0.2;
+                this.wind_shield_time = -15;
+                
+            }
+
         }
         if(this.hp > 100 && this.hp - dmg < 100){
         this.hp = 100;
@@ -464,19 +512,15 @@ this.cooldowns[2] = 15;
 }
 }
 Nino.prototype.spec3 = function(){
-for(let i = -1 ; i <= 1 ; i+=(charezmode())? 0.5:1){
-    for(let x = -1 ; x <= 1 ; x+=(charezmode())? 0.5:1){
-        if(i == x && i == 0){
-            //overcomplicated way if saying if I and X are 0
-            continue;
-        }
-        projectiles.push(new Cutting_Gale(canvhalfx, canvhalfy, random(11, 13), random(11,13), [i/2, x/2]));
-    
-    }
-    
-
+    if(this.wind_shield_time >= 0){
+        this.cooldowns[2] = (this.wind_shield_time < 120)? this.wind_shield_time:120;
+        this.wind_shield_time = -1;
+        
+    }else{
+this.wind_shield_time = 0;
+this.cooldowns[2] = 15;    
 }
-this.cooldowns[2] = 120;
+
 if(this.cooldowns[0] < 15){
     //casting spells takes full focus
 this.cooldowns[0] = 15;
@@ -827,6 +871,7 @@ Pyromine.prototype.exist = function(){
         if(this.last <= 0){
             this.blast = 0
             this.radius = 300;
+            this.last = 99
         }
     }
 
