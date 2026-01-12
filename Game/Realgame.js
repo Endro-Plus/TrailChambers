@@ -509,9 +509,9 @@ var resetchallenges = function(){
     //the challenges
     return  [
     //lvl 0
-    [[enemyezmode, "Have fun!!!", true], [notenemyezmode, "No hit the boss!!!", true], ["Jade", "End the encounter with 100+% hp", false], [["Simia"], "Hit a tornado kick", false], [["Magna","Jade"], "Hit a parry!", false], [["Ezekiel"], "Hit the boss with a deathorb while in PANIC", false], [[ "Nino"], "Electrically charge a miasma ball", false], [[ "Magna"], "Use nunchuck and parry your own shuriken", false], [[ "Magmax"], "Use flow to cancel harden", false], [["Ezekiel", "Nino"], "Land a critical hit!", false], [["Shojo", "Magmax"], "Win without using any movement keys!", true], [["Dorn", enemyezmode], "Trap the boss with Supreme Slime!", false], [["Dorn", notenemyezmode], "Reduce the boss speed to 5% or less!", false]],
+    [[enemyezmode, "Have fun!!!", true], [notenemyezmode, "No hit the boss!!!", true], ["Jade", "End the encounter with 100+% hp", false], [["Simia"], "Hit a tornado kick", false], [["Magna","Jade"], "Hit a parry!", false], [["Ezekiel"], "Hit the boss with a deathorb while in PANIC", false], [[ "Nino"], "Electrically charge a cutting gale", false], [[ "Magna"], "Use nunchuck and parry your own shuriken", false], [[ "Magmax"], "Use flow to cancel harden", false], [["Ezekiel", "Nino"], "Land a critical hit!", false], [["Shojo", "Magmax"], "Win without using any movement keys!", true], [["Dorn", enemyezmode], "Trap the boss with Supreme Slime!", false], [["Dorn", notenemyezmode], "Reduce the boss speed to 5% or less!", false]],
     //lvl 1
-    [[enemyezmode, "rout the enemies!", false], [notenemyezmode, "kill the boss last", true]], 
+    [[enemyezmode, "rout the enemies!", false], [notenemyezmode, "kill the boss last", true], ["Nino", "Only use 1 attack to beat the boss!", true]], 
     //lvl 2
     [[true, "don't get parried", true], ["Magna", "Parry the parry beam!", false]],
     //lvl 3
@@ -636,7 +636,8 @@ var challenges;//fully initiallized in prep
 var completedchallenges = 0;
 var parried = 0;
 var crit = 0;
-var misc;//ya know... incase
+var misc = null;//ya know... incase
+var misc2 = null;//for use in challenges... incase you need something
 var proj_parry = [];
 var playerattack;
 var enemyattack;
@@ -1492,9 +1493,9 @@ var gametime = function(){
                     challenges[0][9][2] = true;
                 }
 
-                //charging a miasma ball
+                //charging a cutting gale
                 for(let i = 0 ; challenges[0][6][2] == false && i < projectiles.length ; i++){
-                    if(projectiles[i].name == "Miasma" && projectiles.some(x => x.name == "chain lightning" && x.hitbox.scanproj(i))){
+                    if(projectiles[i].name == "Cutting Gale" && projectiles.some(x => x.name == "chain lightning" && x.hitbox.scanproj(i))){
                         challenges[0][6][2] = true;
                     }
                 }
@@ -1521,7 +1522,7 @@ var gametime = function(){
 
                 
 
-
+                
 
             break;
             case 1:
@@ -1562,7 +1563,7 @@ var gametime = function(){
                     challenges[0][challenges[0].length-1][2] = false;
                     completedchallenges++;
                 }
-                //charged miasma ball
+                //charged cutting gale
                 if(challenges[0][6][2] == true){
                     challenges[0][6][2] = false;
                     completedchallenges++;
@@ -1599,6 +1600,23 @@ var gametime = function(){
                 if(notenemyezmode() && framesplayed > 10 && enemies.length > 0 && enemies[0].phasetimer == undefined){
                     challenges[1][1][2] = false;
                 }
+                //killed in only 1 attack (hey, since you're here, here's a hint! After using this move, you'll have to nohit!)
+                
+                if(misc2 != null){
+                    misc2--;
+                }
+                
+
+
+                if(player.listname() == "Nino" && (inputs.includes(controls[4]) || inputs.includes(controls[5]) || inputs.includes(controls[6]) || inputs.includes(controls[7]))){
+                    //console.log("hfdsjfsfjsahfkjsf")
+                    if(misc2 == null){
+                    misc2 = 15;
+                    }else if(misc2 < 0){
+                        challenges[1][2][2] = false
+                        misc2 = 9999;
+                    }
+                }
 
 
                 break;
@@ -1617,6 +1635,12 @@ var gametime = function(){
                     challenges[1][1][2] = false;
                     completedchallenges++;
                 }
+                //1 move finish!
+                if(challenges[1][2][2] == true && player.listname() == "Nino"){
+                    challenges[1][2][2] = false;
+                    completedchallenges++;
+                }
+                misc2 = null;
 
                 //challenges
 

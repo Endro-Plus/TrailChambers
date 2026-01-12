@@ -22,11 +22,14 @@ this.desc = ["The wizard! Many strong projectiles that are hard to miss, but not
      "Growing Darkness: Every successful hit on an enemy lowers their defense. After a damage drought, the enemy detonates!",
       "  the explosion does 50% of the damage you dealt before the detonation, so keep that combo high!",
        "1. Chain Lightning: Fire a bolt of lightning that constantly bounces off enemies, projectiles, and even you! The closer targets are, the more bounces!",
-        "Electrified enemies are slower, and take passive damage.",
+        "Electrified enemies are slower, and take passive damage. Electrified pyro mines automatically detonate after some time.",
          "2. Pyro mine: A stationary projectile that detonates into a large inferno when near an enemy!",
-          "Electrified mines deal critical damage AND electrifies enemies in the radius! Pyro mines hold charges for longer times.",
+          "Electrified mines deal critical damage AND electrifies enemies in the radius! Pyro mines causes chain lighting to go MUCH faster, but slow down overtime",
           "An electrified mine may interrupt attacks.",
-           "3. Cutting Barrage: conjure several cutting gales at once that move irratically!",
+           "3. Wind Shield: Conjure many (8) gales to orbit you, increasing your defense for 1 attack, and giving you a small speed boost after 4 seconds",
+           "When hit or used again after the shield has been up for at least 4 seconds, cutting gales conjured by the shield are ejected and are launched towards you.",
+           "Ejected cutting gales will home onto enemies after touching you, then it'll home back on you after hitting an enemy. Cutting gales do not damage the player!!!",
+           "At max size, the number of cutting gales increases (12). Cutting gales don't count as an projectile until AFTER they eject!",
             "4. Miasma Storm: An install that creates a dark aura around you, damaging nearby enemies and spewing random balls of miasma!",
              "enemies are slowed down by the aura, and enemies hit by miasma balls emit a similar damaging aura, causing more overtime damage!"]
 //game stats
@@ -167,31 +170,73 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             screen.fillStyle = this.color;
             circle(canvhalfx, canvhalfy, this.size)
 
-            //attacks (basically just miasma storm)
+            //attacks
 
             //wind shield
             if(this.wind_shield_time >= 0){
                 this.wind_shield_time++;
+                screen.fillStyle = "#0f0"
+                
                 this.wind_shield.move(canvhalfx, canvhalfy);
                 if(charezmode()){
                 if(this.wind_shield_time > 600){
+                    //wind particles
+                    let particles = 12
+                    for(let i = 0 ; i < particles ; i++){
+                    circle((canvhalfx) + (this.size + (200)) * Math.cos(this.wind_shield_time/10 + i*(6.34/particles)), (canvhalfy) + (this.size + (200)) * Math.sin(this.wind_shield_time/10 + i*(6.34/particles)), 10)
+                    }
+                    //the shield
                     this.wind_shield.resize(this.size + 200)
                 }else{
+                    //wind particles
+                    let particles = 8
+                    for(let i = 0 ; i < particles ; i++){
+                    circle((canvhalfx) + (this.size + (this.wind_shield_time/3)) * Math.cos(this.wind_shield_time/10 + i*(6.34/particles)), (canvhalfy) + (this.size + (this.wind_shield_time/3)) * Math.sin(this.wind_shield_time/10 + i*(6.34/particles)), 10)
+                    }
+                    //the shield
                     this.wind_shield.resize(this.size + (this.wind_shield_time/3))
                 }
             }else{
                 if(this.wind_shield_time > 600){
+                    //wind particles
+                    let particles = 12
+                    for(let i = 0 ; i < particles ; i++){
+                    circle((canvhalfx) + (this.size + (100)) * Math.cos(this.wind_shield_time/10 + i*(6.34/particles)), (canvhalfy) + (this.size + (100)) * Math.sin(this.wind_shield_time/10 + i*(6.34/particles)), 10)
+                    }
+                    //the shield
                     this.wind_shield.resize(this.size + 100)
                 }else{
+                    //wind particles
+                    let particles = 8
+                    for(let i = 0 ; i < particles ; i++){
+                    circle((canvhalfx) + (this.size + (this.wind_shield_time/6)) * Math.cos(this.wind_shield_time/10 + i*(6.34/particles)), (canvhalfy) + (this.size + (this.wind_shield_time/6)) * Math.sin(this.wind_shield_time/10 + i*(6.34/particles)), 10)
+                    }
+                    //the shield
                     this.wind_shield.resize(this.size + (this.wind_shield_time/6))
                 }
             }
                 this.wind_shield.showbox("#0f09");
                 if(this.wind_shield_time > 120){
-                    this.speedcause.push(["wind speed", 10, 1.2]);
+                    this.speedcause.push(["wind speed", 10, 1.50]);
+                }
+                //dealing damage
+                for(let i = 0 ; i < enemies.length ; i++){
+                    if(this.wind_shield.checkenemy(i)){
+                        if(player.defenemies.includes(enemies[i])){
+            enemies[i].hit(0.5 + enemies[i].growingdarknessdebuff/player.defdiv, ["wind", "magic", "slashing"]);
+            enemies[i].growingdarknessdebuff += 0.5;//it's too op when adding the debuff over and over and over again
+             enemies[i].GDdetonationtime = 100;
+        }else{
+            enemies[i].hit(this.size,  ["wind", "magic", "slashing"]);
+            enemies[i].growingdarknessdebuff = 0.5
+            enemies[i].GDdetonationtime = 100;
+            player.defenemies.push(enemies[i]);
+        }
+                    }
                 }
             }
-if(this.miasmatime > 0){
+            //miasma
+            if(this.miasmatime > 0){
     this.miasmatime--;
     this.miasma_aura.enable();
     this.miasma_aura.move(canvhalfx, canvhalfy);
@@ -327,11 +372,19 @@ Nino.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
             this.spec3()
             this.iframe = true;
             if(this.cooldowns[2] < 120){
-            this.wind_shield_time = -5;
+            
+            if(!(damagetype.includes["true"] && damagetype.includes["corrosive"])){
+                //only protects against attacks that aren't true or corrosive damage... this is a pretty weak defense tbh
+                dmg*=.90;
+                this.wind_shield_time = -5;
+            }
             }else{
-                dmg*=.75;
-                hitstun*=0.2;
-                this.wind_shield_time = -15;
+                if(!(damagetype.includes["true"] && damagetype.includes["corrosive"])){
+                //better protection if after the shield has been active for 4 seconds... still beat out by true or corrosive damage
+                dmg*=.65;
+                hitstun*=0.1;
+                this.wind_shield_time = -20;
+                }
                 
             }
 
@@ -514,8 +567,31 @@ this.cooldowns[2] = 15;
 Nino.prototype.spec3 = function(){
     if(this.wind_shield_time >= 0){
         this.cooldowns[2] = (this.wind_shield_time < 120)? this.wind_shield_time:120;
-        this.wind_shield_time = -1;
         
+        if(this.wind_shield_time > 120){
+            //eject cutting gales
+            let particles = (this.wind_shield_time>600)? 12:8;
+            for(let i = 0 ; i < particles ; i++){
+                if(charezmode()){
+                if(particles == 8){
+                projectiles.push(new Cutting_Gale((canvhalfx) + (this.size + (this.wind_shield_time/3)) * Math.cos(this.wind_shield_time/10 + i*(6.34/particles)), (canvhalfy) + (this.size + (this.wind_shield_time/3)) * Math.sin(this.wind_shield_time/10 + i*(6.34/particles)), 10));
+                //circle((canvhalfx) + (this.size + (this.wind_shield_time/3)) * Math.cos(this.wind_shield_time/10 + i*(6.34/particles)), (canvhalfy) + (this.size + (this.wind_shield_time/3)) * Math.sin(this.wind_shield_time/10 + i*(6.34/particles)), 10)
+                }else{
+                    projectiles.push(new Cutting_Gale((canvhalfx) + (this.size + (200)) * Math.cos(this.wind_shield_time/10 + i*(6.34/particles)), (canvhalfy) + (this.size + (200)) * Math.sin(this.wind_shield_time/10 + i*(6.34/particles)), 10));
+
+                }
+            }else{
+                if(particles == 8){
+                projectiles.push(new Cutting_Gale((canvhalfx) + (this.size + (this.wind_shield_time/6)) * Math.cos(this.wind_shield_time/10 + i*(6.34/particles)), (canvhalfy) + (this.size + (this.wind_shield_time/6)) * Math.sin(this.wind_shield_time/10 + i*(6.34/particles)), 10));
+                //circle((canvhalfx) + (this.size + (this.wind_shield_time/3)) * Math.cos(this.wind_shield_time/10 + i*(6.34/particles)), (canvhalfy) + (this.size + (this.wind_shield_time/3)) * Math.sin(this.wind_shield_time/10 + i*(6.34/particles)), 10)
+                }else{
+                    projectiles.push(new Cutting_Gale((canvhalfx) + (this.size + (100)) * Math.cos(this.wind_shield_time/10 + i*(6.34/particles)), (canvhalfy) + (this.size + (100)) * Math.sin(this.wind_shield_time/10 + i*(6.34/particles)), 10));
+
+                }
+            }
+            }
+        }
+        this.wind_shield_time = -1;
     }else{
 this.wind_shield_time = 0;
 this.cooldowns[2] = 15;    
@@ -946,18 +1022,18 @@ Pyromine.prototype.exist = function(){
     }
 }
 
-function Cutting_Gale(x, y, size, speed, facing){
+function Cutting_Gale(x, y, size){
     this.name = "Cutting Gale";
     this.x = x;
     this.y = y;
+    this.mx = 0;
+    this.my = 0
     this.shift = [player.px, player.py];
     this.size = size
-    this.speed = speed
     this.hitbox = new hitbox(x, y, 2, size/2, size);
     this.hitbox.disable();
-    this.lifetime = 210;
-    this.facing = [facing[0], facing[1]];
-    this.turning = [0, 0, 10]//force, rate, time
+    this.lifetime = 300;
+    this.target = null
     this.hitbox.immunityframes(10);
 }
 Cutting_Gale.prototype.exist = function(){
@@ -967,34 +1043,39 @@ Cutting_Gale.prototype.exist = function(){
     }
     this.hitbox.enable();
     this.hitbox.updateimmunity();
-
-    //turning
-    this.facing[0]+=this.turning[0];
-    this.facing[1]+=this.turning[1];
-
-    if(this.facing[0] > 1){
-        this.facing[0] = 1
-    }else if(this.facing[0] < -1){
-        this.facing[0] = -1
+    //moving
+    if(this.target == null){
+        //go towards the player
+        if(findposition(this)[0]< canvhalfx){
+            this.mx++;
+        }else{
+            this.mx--;
+        }
+        if(findposition(this)[1] < canvhalfy){
+            this.my++;
+        }else{
+            this.my--;
+        }
+    }else{
+        //go towards the target (which WILL be an enemy... probably... depends on whether or not I have to delete this comment)
+        if(findposition(this)[0]< findposition(this.target)[0]){
+            this.mx++;
+        }else{
+            this.mx--;
+        }
+        if(findposition(this)[1] < findposition(this.target)[1]){
+            this.my++;
+        }else{
+            this.my--;
+        }
     }
+    this.x+=this.mx;
+    this.y+=this.my;
+    this.hitbox.move(findposition(this)[0], findposition(this)[1])
 
-    if(this.facing[1] > 1){
-        this.facing[1] = 1
-    }else if(this.facing[1] < -1){
-        this.facing[1] = -1
-    }
-    //turn a new direction
-    if(this.turning[2]-- <= 0){
-        this.turning = [random(-3, 2, true)/50, random(-3, 2, true)/50, random(1, 10, false)];
-    }
-
-    //SHOWING
-    screen.fillStyle = "rgb(29, 255, 97)";
-    circle(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.size)
-    this.x+=this.speed * this.facing[0];
-    this.y+=this.speed * this.facing[1];
-
-    this.hitbox.move(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1]);
+    //showing
+    this.hitbox.showbox("#0F0");
+    
     if(this.lifetime < 0){
         return "delete";
     }
@@ -1003,18 +1084,43 @@ Cutting_Gale.prototype.exist = function(){
     if(this.hitbox.checkenemy(i)){
             if(player.defenemies.includes(enemies[i])){
                 
-            enemies[i].hit(24 + enemies[i].growingdarknessdebuff/player.defdiv, ["wind", "magic", "slashing", "proj"]);
-            enemies[i].growingdarknessdebuff += 24 + enemies[i].growingdarknessdebuff/player.defdiv
+            enemies[i].hit(18 + enemies[i].growingdarknessdebuff/player.defdiv, ["wind", "magic", "slashing", "proj"]);
+            enemies[i].growingdarknessdebuff += 18 + enemies[i].growingdarknessdebuff/player.defdiv
              enemies[i].GDdetonationtime = 100;
         }else{
-           enemies[i].hit(24, ["wind", "magic", "slashing", "proj"]);
-            enemies[i].growingdarknessdebuff = 24
+           enemies[i].hit(18, ["wind", "magic", "slashing", "proj"]);
+            enemies[i].growingdarknessdebuff = 18
             enemies[i].GDdetonationtime = 100;
             player.defenemies.push(enemies[i]);
         }
         this.hitbox.grantimmunity(i);
-        this.lifetime-=random(10, 30, false)
+        this.lifetime+=15;
+        if(this.target!=null){
+        //slow things down a little bit so it doesn't end up too crazy
+        this.mx/=2;
+        this.my/=2;
         }
+        //target the player (NO THIS DOES NOT DAMAGE THE PLAYER FAHFFEWGHWRQA)
+        this.target = null;
+
+        
+        }
+        }
+        //hitting the player
+        if(this.hitbox.hitplayer()){
+            this.lifetime+=15;
+          
+            if(this.target == null && enemies!=0){
+            //slow things down a little bit so it doesn't end up too crazy
+            this.mx/=2;
+            this.my/=2;
+              //target some random enemy out there...
+             this.target = enemies[random(0, enemies.length-1, false)]
+             //console.log(this.target)
+            }
+           
+        
+            
         }
 }
 
