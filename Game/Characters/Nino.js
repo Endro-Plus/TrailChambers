@@ -1023,7 +1023,7 @@ Pyromine.prototype.exist = function(){
 }
 
 function Cutting_Gale(x, y, size){
-    this.name = "Cutting Gale";
+    this.name = "Cutting Gale";//DA BEEESSSSS
     this.x = x;
     this.y = y;
     this.mx = 0;
@@ -1047,26 +1047,27 @@ Cutting_Gale.prototype.exist = function(){
     if(this.target == null){
         //go towards the player
         if(findposition(this)[0]< canvhalfx){
-            this.mx++;
+            
+            this.mx+=(this.mx > 0)? 1:2;
         }else{
-            this.mx--;
+            this.mx-=(this.mx < 0)? 1:2;
         }
         if(findposition(this)[1] < canvhalfy){
-            this.my++;
+            this.my+=(this.my > 0)? 1:2;
         }else{
-            this.my--;
+            this.my-=(this.my < 0)? 1:2;
         }
     }else{
         //go towards the target (which WILL be an enemy... probably... depends on whether or not I have to delete this comment)
         if(findposition(this)[0]< findposition(this.target)[0]){
-            this.mx++;
+             this.mx+=(this.mx > 0)? 1:2;
         }else{
-            this.mx--;
+            this.mx-=(this.mx < 0)? 1:2;
         }
         if(findposition(this)[1] < findposition(this.target)[1]){
-            this.my++;
+            this.my+=(this.my > 0)? 1:2;
         }else{
-            this.my--;
+            this.my-=(this.my < 0)? 1:2;
         }
     }
     this.x+=this.mx;
