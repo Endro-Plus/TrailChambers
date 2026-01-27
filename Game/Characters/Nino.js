@@ -30,8 +30,8 @@ this.desc = ["The wizard! Many strong projectiles that are hard to miss, but not
            "When hit or used again after the shield has been up for at least 4 seconds, cutting gales conjured by the shield are ejected and are launched towards you.",
            "Ejected cutting gales will home onto enemies after touching you, then it'll home back on you after hitting an enemy. Cutting gales do not damage the player!!!",
            "At max size, the number of cutting gales increases (12). Cutting gales don't count as an projectile until AFTER they eject!",
-            "4. Miasma Storm: An install that creates a dark aura around you, damaging nearby enemies and spewing random balls of miasma!",
-             "enemies are slowed down by the aura, and enemies hit by miasma balls emit a similar damaging aura, causing more overtime damage!"]
+            "4. Miasma Beam: After a small charge up, fire a beam of pure dark magic at your opponents! The beam triggers the growing darkness detonation at double power!",
+            "Can be aimed with arrow keys, and prevents you from moving while using it. It's cancelled if you attack or are hit."]
 //game stats
 this.playershift = [0, 0]
 this.cooldowns = [0, 0, 0, 0];
