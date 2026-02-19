@@ -4,7 +4,7 @@ all hardmode changes:
     defense reduction is half effective
     miasma aura no longer lowers defense
     wind shield aura grows more slowly, and is overal smaller
-    miasma storm grows more slowly, and doesn't shoot as often.
+    The miasma aura isn't as big
 
 
 */
@@ -31,7 +31,7 @@ this.desc = ["The wizard! Many strong projectiles that are hard to miss, but not
            "Ejected cutting gales will home onto enemies after touching you, then it'll home back on you after hitting an enemy. Cutting gales do not damage the player!!!",
            "At max size, the number of cutting gales increases (12). Cutting gales don't count as an projectile until AFTER they eject!",
             "4. Miasma Beam: After a small charge up, fire a beam of pure dark magic at your opponents! The beam triggers the growing darkness detonation at double power!",
-            "Can be aimed with arrow keys, and prevents you from moving while using it. It's cancelled if you attack or are hit."]
+            "Can be aimed with arrow keys, and prevents you from moving while using it. It's only cancelled if you use the ability again. This gives you super armor"]
 //game stats
 this.playershift = [0, 0]
 this.cooldowns = [0, 0, 0, 0];
@@ -51,8 +51,8 @@ this.won = false;
 
 //extras
 this.defenemies = [];
-this.miasma_aura = new hitbox(0, 0, 0, 9, 45);
-this.miasmatime = 0;
+this.miasma_aura = new hitbox(0, 0, 0, 9, 1);
+this.beam_start = -1;
 this.defdiv = null;
 this.wind_shield_time = -1;
 this.wind_shield = new hitbox(0, 0, 0, this.height+1, this.size+30);
@@ -121,6 +121,9 @@ for(let i = 0 ; i < this.defenemies.length ; i++){
         screen.stroke();
         screen.closePath();
         this.defenemies[i].GDdetonationtime-=1.25;
+        if(isNaN(this.defenemies[i].growingdarknessdebuff)){
+            this.defenemies[i].growingdarknessdebuff = 40;//happens sometimes...
+        }
         if(this.defenemies[i].GDdetonationtime <= 0){
             delete this.defenemies[i].GDdetonationtime;
             projectiles.push(new Darkblast(this.defenemies[i].x + this.px - this.defenemies[i].shift[0], this.defenemies[i].y + this.py - this.defenemies[i].shift[1], this.defenemies[i].growingdarknessdebuff/2))
@@ -235,29 +238,24 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
                     }
                 }
             }
-            //miasma
-            if(this.miasmatime > 0){
-    this.miasmatime--;
-    this.miasma_aura.enable();
-    this.miasma_aura.move(canvhalfx, canvhalfy);
-    this.miasma_aura.resize(((charezmode())? 150:100) + (40 - this.miasmatime/((charezmode())? 2:5)))
-    this.miasma_aura.showbox("rgba(108, 0, 158, 0.5)");
-    for(let i = 0 ; i < enemies.length ; i++){
-        if(this.miasma_aura.checkenemy(i)){
-            enemies[i].hit(1.2, ["aura", "magic", "dark"]);
-        }
-    }
-    if(this.miasmatime % ((charezmode())? 10:15) == 0){
-        for(let i = 1 ; i <= 3 ; i++){
-        let speed = 20;
-        let velx = random(0, speed) * (random(0, 1, false)? -1:1)
-        speed -= Math.abs(velx)
-        let vely = speed * (random(0, 1, false)? -1:1)
-        
-        projectiles.push(new Miasma(canvhalfx, canvhalfy, 15, velx, vely));
-        }
-    }
-}
+            //miasma beam!
+            if(this.beam_start > 0){
+                if(this.beam_start < 90){
+                    //start up
+                    this.beam_start--;
+                    if(this.beam_start <= 1){
+                        //actually shoot the laser
+                        this.beam_start = 1000;
+                        
+                    }
+                }else{
+                    if(--this.beam_start % 2 == 0){
+                            this.beam_start = 1000;
+                            projectiles.push(new Miasma(canvhalfx, canvhalfy, 20, 40 * this.facing[0], 40 * this.facing[1]))
+                        }
+                }
+            }
+          
             
             //hitstun
             if(this.hitstun > 0){
@@ -265,6 +263,8 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
                 return;
             }
             //movement
+            if(this.beam_start < 0){
+                //only be able to move if the beam isn't being used
             if(inputs.includes("shift")){
                 this.speed = 5;
             }else{
@@ -298,12 +298,57 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
                 this.facing[0] = 0;
             }
             }
+        }else if(this.beam_start > 90){
+            //angle the beam
+            //this.beam_start = -1;
+            if(inputs.includes(controls[0]) && !arena.pleavedir().includes('l')){
+            this.facing[0] = -1;
+            if(!inputs.includes(controls[2]) && !inputs.includes(controls[3])){
+                this.facing[1] = 0;
+            }
+            }
+            if(inputs.includes(controls[1]) && !arena.pleavedir().includes('r')){
+            this.facing[0] = 1;
+            if(!inputs.includes(controls[2]) && !inputs.includes(controls[3])){
+                this.facing[1] = 0;
+            }
+            }
+            if(inputs.includes(controls[2]) && !arena.pleavedir().includes('u')){
+            this.facing[1] = -1;
+            if(!inputs.includes(controls[0]) && !inputs.includes(controls[1])){
+                this.facing[0] = 0;
+            }
+            }
+            if(inputs.includes(controls[3]) && !arena.pleavedir().includes('d')){
+            this.facing[1] = 1;
+            if(!inputs.includes(controls[0]) && !inputs.includes(controls[1])){
+                this.facing[0] = 0;
+            }
+            }
+            
+        }
 //lower all cooldowns
 for(let i = 0; i < this.cooldowns.length ; i++){
+    if(this.beam_start == -1 || i == 3){
     this.cooldowns[i]--;
-    if(this.miasmatime <= 0 && this.cooldowns[3] < 0){
+    }else{
+        this.cooldowns[i] = 30;
+    }
+    if(this.cooldowns[3] < 0 && this.beam_start == -1){
         screen.fillStyle = "rgba(255, 0, 212, 0.02)";
         circle(canvhalfx, canvhalfy, this.size + 10)
+    }else if (this.beam_start > 0){
+        this.miasma_aura.move(canvhalfx, canvhalfy);
+        //aura hitbox
+        this.miasma_aura.resize((charezmode())? 125: 75);
+        this.miasma_aura.showbox("rgba(255, 0, 212, 0.2)");
+        //aura hitbox
+        for(let i = 0 ; i < enemies.length ; i++){
+            if(this.miasma_aura.checkenemy(i)){
+                enemies[i].hit(0.2, ["magic", "dark", "aura"]);
+                enemies[i].speedcause.push(["Miasma", 45, 0.5]);
+            }
+        }
     }
 }
 
@@ -396,6 +441,8 @@ Nino.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
         }
 
         //handle knockback and DI.
+        if(this.beam_start < 90){
+            //no need to calculate this if you already have super armor
         knockback[0] *= this.knockbackmod;
         knockback[1] *= this.knockbackmod;
         if(inputs.includes(controls[0])){
@@ -425,6 +472,7 @@ Nino.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
                 this.hitstun = hitstun * this.hitstunmod
             }
         }
+    }
         //console.log(this.hp);
     }
 Nino.prototype.death = function(){
@@ -608,8 +656,13 @@ this.cooldowns[1] = 15;
 
 }
 Nino.prototype.spec4 = function(){
-this.miasmatime = 210;
-this.cooldowns[3] = 510;
+    if(this.beam_start < 1){
+        this.beam_start = 15;
+        this.cooldowns[3] = this.beam_start;
+    }else{
+        this.beam_start = -1;
+        this.cooldowns[3] = 510;
+    }
 
 
 if(this.cooldowns[0] < 7){
@@ -872,6 +925,11 @@ chain_lightning.prototype.exist = function(){
     this.hitbox.immunityframes(999);//one massive hit!
     this.lifetime = null;
     this.dmg = dmg;
+    if(isNaN(this.dmg)){
+        //happens sometimes...
+        this.dmg = 10;
+    }
+    console.log(this.dmg);
 }
 Darkblast.prototype.exist = function(){
     if(this.size > 400){
@@ -888,6 +946,9 @@ Darkblast.prototype.exist = function(){
             playerattack = this.name;
             enemies[i].hit(this.dmg, ["dark", "magic", "bludgeoning", "proj"]);
             this.hitbox.grantimmunity(i);
+            if(enemies[i].knockback == "legacy"){
+                enemies[i].hitstun = 60;
+            }
         }
     }
     this.size+=50;
@@ -1161,7 +1222,7 @@ Miasma.prototype.exist = function(){
         this.hitbox.move(this.x, this.y)
         this.hitbox.disable();
         this.hitbox.resize(this.size)
-        this.size-=1;
+        this.size-=2;
         circle(this.x, this.y, this.size)
     }
    
@@ -1178,25 +1239,21 @@ Miasma.prototype.exist = function(){
         playerattack = this.name;
             
              if(player.defenemies.includes(enemies[i])){
-            enemies[i].hit(30 + enemies[i].growingdarknessdebuff/24, ["magic", "dark", "proj"]);
-            enemies[i].growingdarknessdebuff += 30 + enemies[i].growingdarknessdebuff/24
-             enemies[i].GDdetonationtime = 100;
+            enemies[i].hit(15, ["magic", "dark", "proj"]);
+             enemies[i].GDdetonationtime = 0;//essentially autodetonate
         }else{
-           enemies[i].hit(30, ["magic", "dark", "proj"]);
-            enemies[i].growingdarknessdebuff = 30
-            enemies[i].GDdetonationtime = 100;
+            enemies[i].hit(5, ["magic", "dark", "proj"]);
+            enemies[i].growingdarknessdebuff = 60;//that's right, it triggers it as well. Every other hitbox will be doing extra + AOE!
+            enemies[i].GDdetonationtime = 25;
             player.defenemies.push(enemies[i]);
         }
-            this.size = enemies[i].size * 2 + 100;
+            this.size = enemies[i].size * 2;
             this.lifetime = null;//unparriable now!
             this.follow = enemies[i]
             this.phase = 1
             this.color = "rgba(60, 0, 60, 0.7)"
         }else{
-            enemies[i].hit(0.8, ["magic", "dark", "aura"]);
-            if(player.defenemies.includes(enemies[i])){
-                enemies[i].growingdarknessdebuff += (charezmode())? 4: 0;
-            }
+            enemies[i].hit(1, ["magic", "dark", "aura"]);
             //this.size+=0.5
         }
         }
