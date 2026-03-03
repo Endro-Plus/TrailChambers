@@ -1222,7 +1222,7 @@ Miasma.prototype.exist = function(){
         this.hitbox.move(this.x, this.y)
         this.hitbox.disable();
         this.hitbox.resize(this.size)
-        this.size-=2;
+        this.size-=this.follow.size/25;
         circle(this.x, this.y, this.size)
     }
    
@@ -1239,21 +1239,21 @@ Miasma.prototype.exist = function(){
         playerattack = this.name;
             
              if(player.defenemies.includes(enemies[i])){
-            enemies[i].hit(15, ["magic", "dark", "proj"]);
+            enemies[i].hit(25, ["magic", "dark", "proj"]);
              enemies[i].GDdetonationtime = 0;//essentially autodetonate
         }else{
-            enemies[i].hit(5, ["magic", "dark", "proj"]);
+            enemies[i].hit(15, ["magic", "dark", "proj"]);
             enemies[i].growingdarknessdebuff = 60;//that's right, it triggers it as well. Every other hitbox will be doing extra + AOE!
             enemies[i].GDdetonationtime = 25;
             player.defenemies.push(enemies[i]);
         }
-            this.size = enemies[i].size * 2;
+            this.size = enemies[i].size * 5;
             this.lifetime = null;//unparriable now!
             this.follow = enemies[i]
             this.phase = 1
             this.color = "rgba(60, 0, 60, 0.7)"
         }else{
-            enemies[i].hit(1, ["magic", "dark", "aura"]);
+            enemies[i].hit(1, ["magic", "dark", "aura"]);//DOT
             //this.size+=0.5
         }
         }
