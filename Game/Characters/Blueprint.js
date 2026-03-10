@@ -177,6 +177,8 @@ if(this.cooldowns[3] <= 0 && inputs.includes(controls[7])){
 
 }
 
+Test.prototype.bonus = function(){
+    //for interrupting an attack!
 }
 
 Test.prototype.hurt = function(){

@@ -42,6 +42,7 @@ this.chuckdown = 0;
 this.shurikenspeed = this.lvl*2;
 this.dashlocale = []
 this.combotimer = 0;//can only deal full damage with strong moves without setup!
+this.interrupt = false;
 }
 MagnaE.prototype.listname = function(){
 //to help position the characters correctly
@@ -111,6 +112,14 @@ screen.fillText("*Stares cutely*", this.x + player.px, this.y-+ 50 + player.py)
     this.talking = false;
     this.combotimer--;
 //this.chuckbox.showbox();
+if(this.interrupt == true && this.hitstun > 0){
+    screen.fillStyle = this.color;
+    screen.textAlign = "center";
+    screen.font = "25px Times New Roman";
+    screen.fillText("Eep!", this.x + player.px - this.shift[0], this.y- 50 + player.py - this.shift[1]);
+}else{
+    this.interrupt = false;
+}
 if(this.phase[0] == 0){
 this.zone();
 
@@ -466,6 +475,18 @@ MagnaE.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0
     }
     if(this.dashlocale[2] < 0){
         return;//first boss with Iframes!
+    }
+    if(damagetype.includes("interrupt") && this.phase[0] == 2 && this.dashlocale[2] > 1){
+        //cancel the attack and take extra damage and hitstun!
+        this.hp = (this.hp > 50)? 10 : 0;
+        knockback[0] *= 10;
+        knockback[1] *= 10;
+        this.hitstun = 45;
+        this.interrupt = true;
+        player.bonus();
+        if(damage >= 10){
+            damage = 9;
+        }
     }
     var dmg = damage * this.damagemod;
     for(let i = 0 ; i < this.damagetypemod.length ; i++){

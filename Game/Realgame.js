@@ -521,8 +521,9 @@ var resetchallenges = function(){
     //lvl 5
     [[true, "Pressure the boss into using an escape option!", false], [["Jade", notenemyezmode], "Parry the sniper rifle!", false], ["Ezekiel", "Survive for 30 seconds", false], ["Jade", "Stay in magic stance for the majority of the battle!", false], ["Shojo", "Make it shoot itself!", false]],
     //lvl 6 (nothing, since there's no boss)
-    [[false, "PREPARE THYSELF", false]]//POV, thyself is not prepared
-
+    [[false, "PREPARE THYSELF", false]],//POV, thyself is not prepared
+    //lvl 7(regular)
+    [[true, "Do not enrage tutorial bot", true], [["Jade", "Magna", "Nino"], "Interrupt either Magna's or the tutorial bot's dash attack!", false]]
     
 ]//visibility condition, description, completed (these are what the challenges default to on reset)
 }
@@ -1837,7 +1838,24 @@ var gametime = function(){
                     completedchallenges++;
                 }
                 break;
+            case 7:
+                //there were no challenges before! Only challenges here!
 
+                //challenges
+                if(altboss == false){
+                //not enraging tutorial bot
+                if(enemies[0] != null && enemies[0].enraged == true && enemies[0].listname() == "Tutorial_Bot"){
+                    challenges[7][0][2] = false; 
+                }
+
+                //interrupting an attack
+                if(enemies[1] != null && enemies[1].interrupted == true || enemies[0] != null && enemies[0].interrupted == true){
+                    challenges[7][1][2] = true;
+                }
+
+
+                }
+                break;
                 
 
         }
@@ -2092,19 +2110,21 @@ var gametime = function(){
         }else{
             if(enemyezmode()){
              bossobject["MagnaE"].inst(3, canvhalfx, canvhalfy - 250)
-             bosses[0].inst(6, canvhalfx, canvhalfy + 250)
+             bosses[0].inst(8, canvhalfx, canvhalfy + 250)
              
 
             }else{
              bossobject["MagnaE"].inst(7, canvhalfx, canvhalfy - 250)
-             bosses[0].inst(10, canvhalfx, canvhalfy + 250)
+             bosses[0].inst(13, canvhalfx, canvhalfy + 250)
+             
              
             }
             enemies[1].tutorial = -2
             enemies[1].condition = enemies[0]//enrage condition
             enemies[0].damagemod = 0.3;//Magna is a bit tankier here
-            arena.w = 500;
-            arena.h = 500;
+            enemies[1].damagemod = 0.2;//tutorial bot is a little less tanky here
+            arena.w = 600;
+            arena.h = 300;
             bossbarmode = 2;
             bossbar.push(enemies[0])
             bossbar.push(enemies[1])
@@ -2139,15 +2159,16 @@ var gametime = function(){
 }
 var pause = function(){
     //no background needed here
-    let challengeskip = challenges[Math.floor(level)]//I'm not typing that all the time!
+    let challengeskip = (altboss == true)? undefined:challenges[Math.floor(level)];//I'm not typing that all the time!
+    //altbossses do not have challenges
     let challengenum = 0;
     //challenges
     screen.fillStyle = "#161616";
     for(let i = 0 ; challengeskip != undefined && i < challengeskip.length ; i++){
     screen.fillStyle = "#161616";
     //console.log(challengeskip[i])
-    //first, are there any challenges???
     
+   
     //second, does the challenge even show?
     if(Array.isArray(challengeskip[i][0])){
         //there are many character names or conditions. all functions must be true, only 1 string has to be true
@@ -2185,7 +2206,6 @@ var pause = function(){
         //it's a booleon... for some reason
         continue;
     }
-    
     screen.fillRect(canvhalfx - 300, 30 + (challengenum * 50), 600, 50);
     
     screen.fillStyle = (challengeskip[i][2] == true)? "#0f0" : "#fff";

@@ -678,7 +678,18 @@ if(this.cooldowns[2] < 7){
 this.cooldowns[2] = 7;
 }
 }
-
+Nino.prototype.bonus = function(){
+    //for interrupting an attack!
+    this.cooldowns = [0, 0, 0, 0];
+    for(let i = 0 ; i < enemies.length ; i++){
+        //afflict every enemy with the debuff!
+    if(!this.defenemies.includes(enemies[i])){ 
+        this.defenemies.push(enemies[i]);
+    }
+    enemies[i].growingdarknessdebuff += 200;//basically 50 extra explosion damage for free
+    enemies[i].GDdetonationtime = 100;
+    }
+}
 
 Nino.prototype.inst = function(x = this.px, y = this.py, size = this.size){
 player = new Nino(x, y, size);

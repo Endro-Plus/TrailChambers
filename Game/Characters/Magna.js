@@ -881,10 +881,18 @@ Magna.prototype.spec4 = function(){
     }
 }
 
+Magna.prototype.bonus = function(){
+    this.hp+=10;
+    this.adrenaline+=300;//10 SECONDS
+    this.iframe = true;
+    this.immunityframes = 60;
+    //for interrupting an attack!
+}
 Magna.prototype.inst = function(x = this.px, y = this.py, size = this.size){
 player = new Magna(x, y, size);
 }
 chars.push(new Magna(canvhalfx, canvhalfy, 13));//Literally a small child
+
 
 
 //projectiles

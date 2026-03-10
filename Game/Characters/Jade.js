@@ -807,6 +807,17 @@ bossbar = [];
 }
 
 }
+
+Jade.prototype.bonus = function(){
+    //for interrupting an attack!
+    this.hp = (this.hp < 50)? 100:this.hp+50;
+    this.parry = 60;
+    this.slashtime = 0;
+    this.spin = false;
+    this.speedcause = [];
+    this.powerup = 300;
+    this.cooldowns = [0, 0, 0, 0];
+}
 //Projectiles
 function Seraphim(x, y, size, mx, my, charge){
     this.name = "Seraphim";

@@ -943,6 +943,7 @@ Euclid.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0
         this.lineframe = 90;
         this.attack = [0, 100];
         this.foresight = null;
+        player.bonus();
     }else{
     this.hp-=dmg;
     knockback[0] *= this.knockbackmod;

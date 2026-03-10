@@ -29,7 +29,7 @@ this.talking = (lvl > 5)? false:true;
 this.light = (lvl > 5)? 0.3:999;//POV: too light
 //extras
 this.tutorial = 0;
-this.turnRate = 0.05;
+this.interrupted = false;
 // enraging
 this.condition = null;
 this.enraged = false;
@@ -201,7 +201,7 @@ Tutorial_Bot.prototype.move = function(){
         }
     }
 
-        if(this.hitstun > 0 && this.target != null){
+        if(this.hitstun > 0 && this.target == null){
         //armor frames for slash!
         this.hurt();
         this.hitbox.reassign(this.x + player.px - this.shift[0], this.y + player.py - this.shift[1], this.z, 8, this.size);
@@ -343,6 +343,8 @@ Tutorial_Bot.prototype.hit = function(damage, damagetype = ["true"], knockback =
     }
     if(damagetype.includes("interrupt") && (this.target != null || this.overshoot > 0)){
         //cancel the attack and take extra damage and hitstun!
+        this.interrupted = true;
+        this.damagemod+=0.1;//this actually makes the boss weaker
         this.hp-=dmg * 5;
         knockback[0] *= 1.5;
         knockback[1] *= 1.5;
@@ -351,6 +353,7 @@ Tutorial_Bot.prototype.hit = function(damage, damagetype = ["true"], knockback =
         this.aimat = [];
         this.target = null
         this.overshoot = 0;
+        player.bonus();
     }else{
     this.hp-=dmg;
     knockback[0] *= this.knockbackmod;
