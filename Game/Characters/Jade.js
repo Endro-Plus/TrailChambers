@@ -596,6 +596,7 @@ Jade.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0],
             }else{
             this.parryiframes = 15;//HURRY UP!!!
             }
+            this.iframe = true;
             return;
         }
         if(this.parry >= 0 && damagetype.includes("softblock")){

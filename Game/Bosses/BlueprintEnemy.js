@@ -32,12 +32,14 @@ this.talking = false;//basically an indicator of whether or not summons should t
 //extras
 this.tutorial = 0;
 this.turnRate = 0.05;
+}
 Blueboss.prototype.listname = function(){
 //to help position the characters correctly
 return "Blueboss";
-}
+
 }
 Blueboss.prototype.exist = function(){
+    this.hitbox.updateimmunity();
     if(this.hp < 0){
         return "delete";
     }

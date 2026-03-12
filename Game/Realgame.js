@@ -625,7 +625,7 @@ var player;
 var projectiles = [];
 var enemies = [];
 var others = [];//teleporters and the like
-var level = 0;
+var level = 8;
 var startlevel = level;//the level you start on
 var rest = 60;
 var resttimer = 0;
@@ -1341,13 +1341,13 @@ var prep = function(){
                 break;
             }else{
                 Math.round(ll)
-            if(ll >= 0 && ll <=7){
+            if(ll >= 0 && ll <=8){
                 level = parseInt(ll)
             }else{
                 if(ll < 0){
                     alert("There aren't any negative levels!")
                 }else{
-                    alert("The final level is 7!")
+                    alert("The final level is 8!")
                 }
                 break;
             }
@@ -2139,8 +2139,51 @@ var gametime = function(){
             
         
 
+    }else if(level == 8){
+        bossbar = [];
+        projectiles = [];
+        enemies = [];
+        others = []
+        player.inst(0, 0);
+        if(enemyezmode()){
+            //just 2 of them, nothing too serious
+        bossobject["Windup_Machine"].inst(5, canvhalfx - 220, canvhalfy);
+        bossobject["Windup_Machine"].inst(5, canvhalfx + 220, canvhalfy);
+        enemies[0].sync = enemies[1];
+        enemies[0].leader = true;
+        arena.w = 600;
+        arena.h = 600;
+        }else{
+            //HELP THEY JUMPING MEEE!!!
+            bossobject["Windup_Machine"].inst(7, canvhalfx + 150, canvhalfy);
+            bossobject["Windup_Machine"].inst(7, canvhalfx - 150, canvhalfy);
+            bossobject["Windup_Machine"].inst(5, canvhalfx, canvhalfy - 200);
+            bossobject["Windup_Machine"].inst(5, canvhalfx, canvhalfy + 200);
+            enemies[0].sync = enemies[1];
+            enemies[2].sync = enemies[3];
+            
+
+            enemies[0].leader = true;
+            enemies[2].leader = true;
+            
+
+            arena.w = 850;
+            arena.h = 850;
+        }
+        
+        bossbarmode = 2;
+        for(let i = 0 ; i < enemies.length ; i++){
+            bossbar.push(enemies[i]);
+            if(notenemyezmode()){
+                enemies[i].damagemod = 0.4;//yeah... there's 6 of them, I can give you some leeway here
+            }
+        }
+        
+        boss_title = "Wind-up Defense Machines";
+
+        level+=0.5
     }
-    }
+}
 
 
     if(input == "escape"){

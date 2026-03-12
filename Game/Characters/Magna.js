@@ -536,6 +536,7 @@ Magna.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 0]
             for(let i = 0 ; i < 5 ; i++){
                 projectiles.push(new Parrypart(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1]));
             }
+            this.iframe = true;
             return;
 
 
