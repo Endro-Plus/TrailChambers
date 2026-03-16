@@ -3,8 +3,8 @@ hard mode changes:
     death orbs do less damage
     PANIC in hitstun has a much longer cooldown
     Tim takes his sweet time getting to you after activating panic mode
-    death orbs can die on PANIC mode, albeit still less frequently. For context, easy mode makes deathorbs immortal
-    Tim's defensive aura is smaller, and only defense 50% of the damage
+    death orbs are more likely to die based on damage, with a minimum of 20% at 5 damage
+    Tim's defensive aura is smaller, and only defends 50% of the damage
 */
 function Ezekiel(startposx, startposy, size){
 //startup
@@ -16,14 +16,15 @@ this.size = size;
 //character poster/character color
 this.postColor = "#0000FF";
 this.color = "#0088FF";
-this.desc = ["The Summoner! Overwhelm your foes with superior numbers, and swap places with your Tim when you're in danger!", "Tim: Your skeletal companion teleports around at random and fires magical orbs at your opponents!", "    He is completely autonomous, teleports instantly when in danger, and cannot be killed.", "Pain Split: For every existing deathorb, you are given a +5% resistance to damage", "1. Whip: A VERY long reach melee attack! A successful hit marks your opponent for death", "    When marked for death, all summons target the enemy, and summons do additional damage to marked enemies.", "2. Swap: swap places with Tim. Tim can just teleport out of danger anyway! Goes on cooldown if Tim teleports.", "3. Death Sphere: Summon up to 10 autonomous death spheres that fire projectiles and rush at enemies!", "Death Spheres block projectiles, BUT if Ezekiel takes damage, there's a 33% chance for a Death Sphere to be die. Death Spheres don't take damage.", "4. PANIC/ATTACK: Changes stance to PANIC stance, causing all death sphere to orbit you, and Tim to stop attacking.", "  While PANIC is active, Tim emits an aura that negates 75% of damage instead of attacking. This aura passively damages bosses, but it's weak", "    Use again to go back to ATTACK stance. Can be used in hitstun"]
+this.desc = ["The Summoner! Overwhelm your foes with superior numbers, and swap places with your Tim when you're in danger!", "Tim: Your skeletal companion teleports around at random and fires magical orbs at your opponents!", "    He is completely autonomous, teleports instantly when in danger, and cannot be killed.", "Pain Split: For every existing deathorb, you are given a +5% resistance to damage", "1. Whip: A VERY long reach melee attack! A successful hit marks your opponent for death", "    When marked for death, all summons target the enemy, and summons do additional damage to marked enemies.", "2. Swap: swap places with Tim. Tim can just teleport out of danger anyway! Goes on cooldown if Tim teleports.", "3. Death Sphere: Summon up to 10 autonomous death spheres that fire projectiles and rush at enemies!", "Death Spheres block projectiles, BUT if Ezekiel takes damage, there's a 20% chance for a Death Sphere to be die. Death Spheres don't take damage.", "4. PANIC/ATTACK: Changes stance to PANIC stance, causing all death sphere to orbit you, and Tim to stop attacking.", "  While PANIC is active, Tim emits an aura that negates 75% of damage instead of attacking. This aura passively damages bosses, but it's weak", "    Use again to go back to ATTACK stance. Can be used in hitstun"]
 //game stats
 this.playershift = [0, 0];//shift the position of the player
 this.cooldowns = [0, 0, 0, 0];
 this.damagetypemod = [];
 this.hp = 100;
 this.damagemod = 1;
-this.speed = 10;
+this.maxspeed = 12;
+this.speed = 12;//a little faster. He needs it
 this.speedcause = [];//causes of speed buffs/nerfs
 this.speedmod = 1;//modifies speed, multiplicately
 this.DI = 1;
@@ -277,9 +278,9 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
             }else{
             //movement
             if(inputs.includes("shift")){
-                this.speed = 5;
+                this.speed = this.maxspeed * 0.5;
             }else{
-                this.speed = 10;
+                this.speed = this.maxspeed;
             }
             if(inputs.includes(controls[0]) && !arena.pleavedir().includes('l')){
             this.px+=this.speed * this.speedmod;
@@ -358,7 +359,7 @@ if(this.Timshots == 174){
 }
 this.Timbox.move(this.Timstats[0] + this.px, this.Timstats[1] + this.py);
 this.Timshots--;
-let damage = 15;
+let damage = 17;
 if(this.stance == "ATTACK" && this.Timshots != 0 && this.Timshots % 50 == 0 && enemies.length > 0){
     //aim
     if(typeof this.marked != "number"){
@@ -477,19 +478,19 @@ Ezekiel.prototype.DIE = function(orb){
         //movement
         try{
            this.deathorbs[orb].move(this.deathorbs[orb].x + this.px - this.deathshift[orb][0], this.deathorbs[orb].y + this.py - this.deathshift[orb][1]);
-        if(this.deathorbs[orb].x + 60 + this.px > findposition(enemies[this.targetting[orb]])[0]){
-            this.deathorbs[orb].x-=7;
+        if(this.deathorbs[orb].x + 60 + this.px - this.deathshift[orb][0]> findposition(enemies[this.targetting[orb]])[0]){
+            this.deathorbs[orb].x-=10;
             
         }
-        if(this.deathorbs[orb].x - 60 + this.px < findposition(enemies[this.targetting[orb]])[0]){
-            this.deathorbs[orb].x+=7;
+        if(this.deathorbs[orb].x - 60 + this.px - this.deathshift[orb][0]< findposition(enemies[this.targetting[orb]])[0]){
+            this.deathorbs[orb].x+=10;
         }
 
-        if(this.deathorbs[orb].y + 60 + this.py>findposition(enemies[this.targetting[orb]])[1]){
-            this.deathorbs[orb].y-=7;
+        if(this.deathorbs[orb].y + 60 + this.py - this.deathshift[orb][1]>findposition(enemies[this.targetting[orb]])[1]){
+            this.deathorbs[orb].y-=10;
         }
-        if(this.deathorbs[orb].y - 60 + this.py < findposition(enemies[this.targetting[orb]])[1]){
-            this.deathorbs[orb].y+=7;
+        if(this.deathorbs[orb].y - 60 + this.py - this.deathshift[orb][1]< findposition(enemies[this.targetting[orb]])[1]){
+            this.deathorbs[orb].y+=10;
         }
     }catch(e){
         this.targetting[orb] = null;
@@ -505,7 +506,7 @@ Ezekiel.prototype.DIE = function(orb){
         let magnitude = Math.sqrt(dx * dx + dy * dy);
         velocityX = (dx / magnitude) * 15;
         velocityY = (dy / magnitude) * 15;
-        projectiles.push(new playerproj("death orb", this.deathorbs[orb].x + this.px - this.deathshift[orb][0], this.deathorbs[orb].y + this.py - this.deathshift[orb][1], this.deathorbs[orb].size, velocityX * -1, velocityY * -1, "black", (charezmode())? 15: 8, 45, ["magic", "proj"]));
+        projectiles.push(new playerproj("death orb", this.deathorbs[orb].x + this.px - this.deathshift[orb][0], this.deathorbs[orb].y + this.py - this.deathshift[orb][1], this.deathorbs[orb].size, velocityX * -1, velocityY * -1, "black", 10, 45, ["magic", "proj"]));
        }
 
         this.deathphase[orb]--;
@@ -661,17 +662,18 @@ Ezekiel.prototype.hit = function(damage, damagetype = ["true"], knockback = [0, 
         //console.log(this.hp);
 
         //kill deathspheres
-        if(dmg > 1 && this.stance == "ATTACK"){
+        if(dmg > 5 && this.stance == "ATTACK"){
             //only do this if damage is actually done (or don't kill death orbs if in panic stance)
-        for(let i = 0 ; i < this.deathorbs.length ; i++){
-            if(charezmode() && random(0, 2, false) == 1 || notcharezmode() && random(0, 1, false)){
+        
+            if(charezmode() && random(0, 5, false) == 1 || notcharezmode() && random(0, 5, false)<this.dmg/5, false){
                 this.deathorbs.pop();
                 this.deathphase.pop();
                 this.targetting.pop();
                 this.meleedirect.pop();
                 this.deathshift.pop();
             }
-        }
+            
+        
     }
     }
 Ezekiel.prototype.death = function(){
