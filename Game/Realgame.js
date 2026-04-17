@@ -2174,9 +2174,7 @@ var gametime = function(){
         bossbarmode = 2;
         for(let i = 0 ; i < enemies.length ; i++){
             bossbar.push(enemies[i]);
-            if(notenemyezmode()){
-                enemies[i].damagemod = 0.4;//yeah... there's 6 of them, I can give you some leeway here
-            }
+            
         }
         
         boss_title = "Wind-up Defense Machines";
