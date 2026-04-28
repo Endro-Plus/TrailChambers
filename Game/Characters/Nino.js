@@ -1251,11 +1251,16 @@ Miasma.prototype.exist = function(){
             
              if(player.defenemies.includes(enemies[i])){
             enemies[i].hit(25, ["magic", "dark", "proj"]);
-             enemies[i].GDdetonationtime = 0;//essentially autodetonate
+            if(enemies[i].growingdarknessdebuff < 150){
+                enemies[i].growingdarknessdebuff+=10;
+
+                enemies[i].hit(enemies[i].growingdarknessdebuff/30, ["dark", "true"]);
+            }
+             enemies[i].GDdetonationtime = 50;
         }else{
             enemies[i].hit(15, ["magic", "dark", "proj"]);
             enemies[i].growingdarknessdebuff = 60;//that's right, it triggers it as well. Every other hitbox will be doing extra + AOE!
-            enemies[i].GDdetonationtime = 25;
+            enemies[i].GDdetonationtime = 50;
             player.defenemies.push(enemies[i]);
         }
             this.size = enemies[i].size * 5;

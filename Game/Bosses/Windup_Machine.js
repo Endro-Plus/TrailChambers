@@ -35,7 +35,7 @@ this.error = false;
 this.teammate = null;//sync with one other windup machine
 this.leader = false;//the followers sync with the leader, no matter what
 this.aim = [];
-this.attack = -1;//-1 is when they aim at eachother, 1 is base dash, 2 is dash but more following, 3 is slash barrage
+this.attack = -1;//-1 is when they aim at eachother, 1 is base dash, 2 is dash but more following, 3 is double dash or slash when enraged
 this.enraged = false;
 }
 
@@ -130,9 +130,8 @@ if(this.timer <= 0){
         //calibrate timings and such
         this.calibrate();
     }
-    if(this.attack != 4){
-        this.dash();//4 is the slash barrage, no slashes here
-    }
+    
+        this.dash();//there will always be a dash
 
 }else{
     //only have 1 contact hit per dash
@@ -148,7 +147,7 @@ if(this.timer <= 0){
         
 
     }
-    if(this.attack == 3){
+    if(this.attack == 3 && this.enraged == false){
         if(this.timer > 15){
             if(enemyezmode()){
         this.aim = aim(findposition(this)[0], findposition(this)[1], findposition(this)[0] + random(-20, 20), findposition(this)[1] + random(-20, 20), 2);
@@ -226,7 +225,7 @@ if(this.speed + this.timer > 5){
 }else{
     if(this.enraged){
         this.timer = (enemyezmode())? 10: 5;//go even faster on hard mode
-            this.attack = random(1, 2, false);
+            this.attack = random(1, 3, false);
             this.aim = aim(findposition(this)[0], findposition(this)[1], canvhalfx, canvhalfy, 2);
 
     }else{
@@ -275,7 +274,7 @@ Windup_Machine.prototype.hit = function(damage, damagetype = ["true"], knockback
             dmg *= this.damagetypemod[i][1];
         }
     }
-    if(this.attack == 3 && damagetype.includes("interrupt") && this.timer > 0){
+    if(this.attack == 3 && damagetype.includes("interrupt") && this.timer > 0 && this.enraged == false){
         dmg*=5;
         this.hitstun = 45;
         this.knockback[0] * 10;
