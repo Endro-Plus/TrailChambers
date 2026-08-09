@@ -44,11 +44,13 @@ this.extendedbox = new hitbox(0, 0, 0, 99, 100)
 this.stance = "ATTACK"
 this.canstance = true;
 
-this.whipdefaultsize = 50;
+this.whipdefaultsize = 25;
 this.whip = new hitbox(canvhalfx, canvhalfy, 1, 7, this.whipdefaultsize)
 this.whip.disable();
 this.whip.immunityframes(12);
-this.whipframe = -6;
+
+this.whipcount = 12;
+this.whipframe = -1 * this.whipcount;
 this.whipattack = false;
 //for Tim
 this.Timstats = [canvhalfx + 200, canvhalfy + 200, this.size];
@@ -216,11 +218,27 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
                 this.whip.enable();
                 this.whip.move(canvhalfx + this.playershift[0], canvhalfy + this.playershift[1]);
                 this.whip.resize(this.whipdefaultsize)
-                for(let i = Math.abs(this.whipframe) ;  i < 6 ; i++){
+                for(let i = Math.abs(this.whipframe) ;  i < this.whipcount ; i++){
+                    //whip size
+                    this.whip.move(this.whip.x + this.whip.size * this.whipattack[0] * 1.3, this.whip.y + this.whip.size * this.whipattack[1] * 1.3);
+
+                    //whip sweep
+                    if(this.whipattack[0] == 0){
+                        this.whip.move(this.whip.x + this.whipframe * 5, this.whip.y);
+                    }else if(this.whipattack[1] == 0){
+                        
+                        this.whip.move(this.whip.x, this.whip.y + this.whipframe * 5);
+                    }else{
+                        this.whip.move(this.whip.x + this.whipattack[0] * (this.whipframe * 3), this.whip.y + this.whipattack[1]);
+                    }
                     
-                    this.whip.move(this.whip.x + this.whip.size * this.whipattack[0] * 1.2, this.whip.y + this.whip.size * this.whipattack[1] * 1.2);
-                    if(i == 5 && this.whipframe == 0){
+                    
+                    
+                    
+                    if(i > this.whipcount - 3 && Math.abs(this.whipframe) < 3){
+                        this.whip.move(this.whip.x + this.whipattack[0] * 15, this.whip.y + this.whipattack[1] * 15);
                         this.whip.showbox("#00ccff");//tip hitbox (crit)
+                        
 
                         //damage
                         for(let x = 0 ; x < enemies.length ; x++){
@@ -262,13 +280,13 @@ for(let i = 0 ; i < this.speedcause.length ; i++){
                         }
                     }
                     
-                    this.whip.resize(this.whip.size*.90);
+                    this.whip.resize(this.whip.size*.95);
                 }
                 this.whipframe++;
-                if(this.whipframe == 6){
-                    this.whipframe = -6;
+                if(this.whipframe == this.whipcount){
+                    this.whipframe = -1 * this.whipcount;
                     this.whipattack = false;
-                    this.cooldowns[0] = 10;
+                    this.cooldowns[0] = 4;
                 }
             }
             //hitstun

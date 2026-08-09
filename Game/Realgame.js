@@ -625,7 +625,7 @@ var player;
 var projectiles = [];
 var enemies = [];
 var others = [];//teleporters and the like
-var level = 8;
+var level = 0;
 var startlevel = level;//the level you start on
 var rest = 60;
 var resttimer = 0;
