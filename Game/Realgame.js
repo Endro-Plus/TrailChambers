@@ -465,7 +465,11 @@ function distance2(x1, y1, fp, abs = false) {
 }
 function findposition(enemyclass){
     //used to be for enemies, but this can be used for projectiles too. For the most part, it's the same formula
+    try{
     return [enemyclass.x + player.px - enemyclass.shift[0], enemyclass.y + player.py - enemyclass.shift[1]];
+    }catch(e){
+        return [0, 0];
+    }
 }
 function slopeintercept(x1, y1, x2, y2){
     // Calculate slope... because yeah, math is apparantly what I needed
